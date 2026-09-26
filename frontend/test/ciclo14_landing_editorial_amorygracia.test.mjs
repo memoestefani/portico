@@ -9,19 +9,20 @@ const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '../..');
 const docsDir = path.join(rootDir, 'docs');
 const indexPath = path.join(docsDir, 'index.html');
+const issueFormPath = path.join(rootDir, '.github/ISSUE_TEMPLATE/solicitud.yml');
 
-describe('Pórtico OS v3.6 - Ciclo 14: Página Personal Minimalista, Serena y Caso Amor y Gracia Durango', () => {
+describe('Pórtico — Portal en Desarrollo: Software Ligero para Organizar Grupos Pequeños en tu Ciudad', () => {
   const content = fs.readFileSync(indexPath, 'utf-8');
 
   // ==========================================================================
-  // Arquitectura Ultra-Simple y Monolito Vanilla (< 10 KB)
+  // Arquitectura Ultra-Simple y Monolito Vanilla (< 14 KB)
   // ==========================================================================
-  describe('Arquitectura Ultra-Simple y Monolito Vanilla Autónomo', () => {
-    it('docs/index.html debe existir, ser legible y medir menos de 10 KB', () => {
+  describe('Arquitectura Ultra-Simple y Documento Fundacional', () => {
+    it('docs/index.html debe existir, ser legible y medir menos de 14 KB', () => {
       assert.ok(fs.existsSync(indexPath), 'docs/index.html debe existir');
       const stat = fs.statSync(indexPath);
       assert.ok(stat.size > 1500, 'El archivo debe contener el marcado esencial');
-      assert.ok(stat.size < 10000, `El archivo pesa ${stat.size} bytes, debe ser ultra-ligero (< 10 KB)`);
+      assert.ok(stat.size < 14000, `El archivo pesa ${stat.size} bytes, debe ser ultra-ligero (< 14 KB)`);
     });
 
     it('debe estructurarse como una sola vista sin scripts externos ni trackers', () => {
@@ -30,27 +31,78 @@ describe('Pórtico OS v3.6 - Ciclo 14: Página Personal Minimalista, Serena y Ca
   });
 
   // ==========================================================================
-  // Tarjeta de Caso Vivo de Amor y Gracia Durango con Pastor Josh
+  // Purga Estricta: Cero Amor y Gracia, Cero Pastor Josh, Cero Durango
   // ==========================================================================
-  describe('Tarjeta de Caso Vivo Testimonial Real de Amor y Gracia', () => {
-    it('debe identificar a la congregación Amor y Gracia, Durango y al Pastor Josh', () => {
-      assert.match(content, /Amor y Gracia/i, 'Debe referenciar a la congregación Amor y Gracia');
-      assert.match(content, /Durango/i, 'Debe situarse en la ciudad de Durango');
-      assert.match(content, /Pastor Josh/i, 'Debe reconocer la cobertura pastoral de Josh');
+  describe('Purga de Referencias Locales y Cobertura Específica', () => {
+    it('no debe contener referencias a Amor y Gracia', () => {
+      assert.doesNotMatch(content, /Amor y Gracia/i, 'No debe referenciar a la congregación Amor y Gracia');
     });
 
-    it('debe enlazar directamente a la instancia comunitaria en vivo con Cloudflare Tunnels', () => {
-      assert.match(content, /habitat-cleaning-benz-syndication\.trycloudflare\.com/, 'Debe enlazar al portal en vivo');
-      assert.match(content, /target="_blank"/, 'Debe abrir en nueva pestaña');
-      assert.match(content, /rel="noopener noreferrer"/, 'Debe proteger la navegación externa');
-      assert.match(content, /Ver portal en vivo/i, 'Debe tener botón claro hacia el portal en vivo');
+    it('no debe contener referencias al Pastor Josh', () => {
+      assert.doesNotMatch(content, /Pastor Josh/i, 'No debe referenciar al Pastor Josh');
+      assert.doesNotMatch(content, /\bJosh\b/i, 'No debe contener ninguna mención a Josh');
+    });
+
+    it('no debe contener referencias a Durango', () => {
+      assert.doesNotMatch(content, /Durango/i, 'No debe situarse o mencionar Durango');
     });
   });
 
   // ==========================================================================
-  // Poda Absoluta de Jerga Teórica y Realidades Cotidianas
+  // "Portal en desarrollo" y Cero "Portal en vivo"
   // ==========================================================================
-  describe('Poda Absoluta de Jerga Teórica y Enfoque Humano', () => {
+  describe('Estado del Portal: "Portal en desarrollo" sin "Portal en vivo"', () => {
+    it('debe indicar claramente que es un portal en desarrollo', () => {
+      assert.match(content, /portal en desarrollo/i, 'Debe indicar que es un portal en desarrollo');
+    });
+
+    it('no debe decir "portal en vivo"', () => {
+      assert.doesNotMatch(content, /portal en vivo/i, 'No debe contener la frase "portal en vivo"');
+    });
+
+    it('debe enlazar al entorno de pruebas en Cloudflare Tunnels', () => {
+      assert.match(content, /habitat-cleaning-benz-syndication\.trycloudflare\.com/, 'Debe enlazar al entorno de pruebas');
+      assert.match(content, /target="_blank"/, 'Debe abrir en nueva pestaña');
+      assert.match(content, /rel="noopener noreferrer"/, 'Debe proteger la navegación externa');
+    });
+  });
+
+  // ==========================================================================
+  // Propuesta de Valor Oficial
+  // ==========================================================================
+  describe('Propuesta de Valor Oficial', () => {
+    it('debe titularse "Software ligero para organizar grupos pequeños en tu ciudad"', () => {
+      assert.match(content, /Software ligero para organizar grupos pequeños en tu ciudad/i, 'Debe incluir la propuesta exacta');
+    });
+
+    it('debe expresar las necesidades reales en lenguaje cotidiano', () => {
+      assert.match(content, /WhatsApp/i, 'Debe mencionar la coordinación sin saturar WhatsApp');
+      assert.match(content, /anfitrion/i, 'Debe mencionar el cuidado y descanso de las familias anfitrionas');
+      assert.match(content, /dueña de sus datos/i, 'Debe mencionar que la iglesia o comunidad es dueña de sus datos');
+    });
+  });
+
+  // ==========================================================================
+  // Formulario Oficial de GitHub para Recibir Información
+  // ==========================================================================
+  describe('Formulario Oficial de GitHub para Recibir Información', () => {
+    it('debe existir la plantilla oficial de Issue Form en .github/ISSUE_TEMPLATE/solicitud.yml', () => {
+      assert.ok(fs.existsSync(issueFormPath), '.github/ISSUE_TEMPLATE/solicitud.yml debe existir');
+      const formContent = fs.readFileSync(issueFormPath, 'utf-8');
+      assert.match(formContent, /name:\s*Solicitar información/i, 'Debe tener nombre descriptivo');
+      assert.match(formContent, /ciudad/i, 'Debe capturar la ciudad');
+      assert.match(formContent, /contacto/i, 'Debe capturar medio de contacto');
+    });
+
+    it('debe enlazar directamente al formulario oficial de GitHub en la landing', () => {
+      assert.match(content, /github\.com\/memoestefani\/portico\/issues\/new\?template=solicitud\.yml/, 'Debe enlazar al formulario oficial');
+    });
+  });
+
+  // ==========================================================================
+  // Poda Absoluta de Jerga Teórica, Palabrería y Ventas
+  // ==========================================================================
+  describe('Poda Absoluta de Jerga Teórica y Retórica Publicitaria', () => {
     it('no debe contener jerga de marketing ni principios teóricos densos', () => {
       assert.doesNotMatch(content, /Principio 01/i, 'Principio 01 debe ser purgado');
       assert.doesNotMatch(content, /Límites de Dunbar/i, 'Límites de Dunbar debe ser purgado de la portada');
@@ -59,10 +111,13 @@ describe('Pórtico OS v3.6 - Ciclo 14: Página Personal Minimalista, Serena y Ca
       assert.doesNotMatch(content, /Las 6 Superficies/i, 'Las 6 Superficies deben ser purgadas');
     });
 
-    it('debe expresar las necesidades reales en lenguaje cotidiano', () => {
-      assert.match(content, /WhatsApp/i, 'Debe mencionar la coordinación sin saturar WhatsApp');
-      assert.match(content, /anfitrion/i, 'Debe mencionar el cuidado y descanso de las familias anfitrionas');
-      assert.match(content, /dueña de sus datos/i, 'Debe mencionar la soberanía de datos');
+    it('no debe contener la palabrería de "soberano" ni "soberanía"', () => {
+      assert.doesNotMatch(content, /soberan/i, 'No debe usar palabrería confusa como soberano o soberanía');
+    });
+
+    it('no debe contener frases de venta comercial ni preguntas publicitarias', () => {
+      assert.doesNotMatch(content, /¿Te gustaría/i, 'Cero preguntas de venta comercial');
+      assert.doesNotMatch(content, /platicar con nosotros/i, 'Cero retórica de captación comercial');
     });
   });
 
@@ -80,32 +135,24 @@ describe('Pórtico OS v3.6 - Ciclo 14: Página Personal Minimalista, Serena y Ca
       assert.match(content, /family=Plus\+Jakarta\+Sans/i, 'Debe importar Plus Jakarta Sans');
     });
 
-    it('debe incrustar el isotipo SVG vectorial de Amor y Gracia / Pórtico', () => {
-      assert.match(content, /<svg.*viewBox="0 0 100 100"/s, 'Debe renderizar el SVG del corazón entrelazado');
-      assert.match(content, /fill="#93432F"/i, 'El SVG debe lucir el color terracota noble');
+    it('debe renderizar el isotipo SVG artesanal de Pórtico', () => {
+      assert.match(content, /<svg.*viewBox="0 0 100 100"/s, 'Debe renderizar el SVG del imagotipo de Pórtico');
     });
   });
 
   // ==========================================================================
-  // Canal Humano Directo y Discreto (WhatsApp + Email)
+  // Privacidad Absoluta: Cero Datos Personales Directos
   // ==========================================================================
-  describe('Canal Humano Directo y Discreto', () => {
-    it('debe ofrecer enlace directo de WhatsApp con mensaje precargado para Guillermo', () => {
-      assert.match(content, /https:\/\/wa\.me\/52/i, 'Debe usar deep-link wa.me');
-      assert.match(content, /Hola%20Guillermo/i, 'Debe contener saludo precargado');
+  describe('Privacidad Absoluta: Cero Datos Personales Directos', () => {
+    it('no debe exponer nombres personales ("Guillermo Estefani") ni correos personales', () => {
+      assert.doesNotMatch(content, /Guillermo/i, 'No debe exponer el nombre personal Guillermo');
+      assert.doesNotMatch(content, /Guillermo\s+Estefani/i, 'No debe exponer el nombre completo personal');
+      assert.doesNotMatch(content, /memoestefani@gmail\.com/i, 'No debe exponer correo personal');
     });
 
-    it('debe ofrecer enlace directo de correo electrónico a Guillermo', () => {
-      assert.match(content, /mailto:memoestefani@gmail\.com/i, 'Debe enlazar a memoestefani@gmail.com');
-    });
-  });
-
-  // ==========================================================================
-  // Silencio Absoluto de GitHub y Veracidad
-  // ==========================================================================
-  describe('Silencio Absoluto de GitHub y Cero Simulaciones', () => {
-    it('no debe exponer enlaces al repositorio de GitHub en el cuerpo', () => {
-      assert.doesNotMatch(content, /github\.com\/memoestefani\/portico/i, 'No debe exponer enlaces a GitHub');
+    it('no debe exponer enlaces a WhatsApp ni correos', () => {
+      assert.doesNotMatch(content, /wa\.me/i, 'No debe contener enlaces de WhatsApp');
+      assert.doesNotMatch(content, /mailto:/i, 'No debe contener enlaces mailto');
     });
 
     it('debe tener cero textos simulados o placeholders (Lorem Ipsum)', () => {

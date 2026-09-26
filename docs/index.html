@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pórtico — Grupos Pequeños en Hogares</title>
-  <meta name="description" content="Software sencillo y libre para coordinar grupos pequeños en hogares. En uso en Amor y Gracia Durango con el Pastor Josh.">
+  <title>Pórtico — Software ligero para organizar grupos pequeños en tu ciudad</title>
+  <meta name="description" content="Software ligero para organizar grupos pequeños en tu ciudad. En fase de pruebas y desarrollo. Sin saturar WhatsApp, sin cobros por miembro y cuidando el descanso de las familias anfitrionas.">
   <meta name="theme-color" content="#FAF8F5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -178,30 +178,27 @@
       color: var(--text-muted);
     }
 
-    .contact-links {
-      display: flex;
+    .contact-btn {
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .contact-link {
+      gap: 8px;
+      padding: 11px 20px;
+      background: var(--bg-card);
       color: var(--text-main);
-      text-decoration: none;
+      border: 1px solid var(--border);
+      border-radius: 10px;
       font-weight: 600;
-      border-bottom: 1px solid var(--border-hover);
-      padding-bottom: 2px;
-      transition: color 0.15s ease, border-color 0.15s ease;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
     }
 
-    .contact-link:hover {
-      color: var(--accent);
+    .contact-btn:hover {
+      background: #FFFFFF;
       border-color: var(--accent);
-    }
-
-    .sep {
-      color: var(--border-hover);
+      color: var(--accent);
+      transform: translateY(-1px);
     }
 
     .author-note {
@@ -223,7 +220,7 @@
 <body>
 
   <main class="container">
-    <!-- Logotipo Amor y Gracia -->
+    <!-- Logotipo Pórtico -->
     <div class="logo-mark">
       <svg width="44" height="44" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pórtico">
         <circle cx="50" cy="50" r="48" fill="#93432F"/>
@@ -236,20 +233,20 @@
 
     <!-- Título y Propósito -->
     <h1>Pórtico</h1>
-    <p class="tagline">Software sencillo y libre para coordinar grupos pequeños en hogares.</p>
+    <p class="tagline">Software ligero para organizar grupos pequeños en tu ciudad</p>
 
-    <!-- Tarjeta del caso vivo: Amor y Gracia Durango -->
+    <!-- Tarjeta: Portal en desarrollo -->
     <div class="card">
       <div class="status-pill">
         <span class="status-dot"></span>
-        <span>En uso con el Pastor Josh en Durango</span>
+        <span>Portal en desarrollo</span>
       </div>
-      <h2 class="card-title">Comunidad Amor y Gracia</h2>
+      <h2 class="card-title">Portal de Grupos en Hogares</h2>
       <p class="card-desc">
-        En Durango organizamos nuestras reuniones semanales en casas con esta plataforma. Puedes entrar a ver el catálogo público tal como lo usan nuestras familias.
+        Organizamos reuniones semanales en casas sin saturar grupos de chat. Accede para explorar el catálogo comunitario y la dinámica de coordinación.
       </p>
       <a href="https://habitat-cleaning-benz-syndication.trycloudflare.com" target="_blank" rel="noopener noreferrer" class="btn-portal">
-        <span>Ver portal en vivo →</span>
+        <span>Ver portal en desarrollo →</span>
       </a>
     </div>
 
@@ -269,15 +266,15 @@
       </li>
     </ul>
 
-    <!-- Contacto Directo y Tranquilo -->
+    <!-- Contacto Directo vía Formulario Oficial de GitHub -->
     <footer class="contact-block">
-      <p class="contact-prompt">¿Te gustaría usarlo en tu comunidad o platicar con nosotros?</p>
-      <div class="contact-links">
-        <a href="https://wa.me/526181234567?text=Hola%20Guillermo%2C%20vi%20el%20portal%20de%20Amor%20y%20Gracia%20en%20P%C3%B3rtico%20y%20me%20gustar%C3%ADa%20platicar%20sobre%20c%C3%B3mo%20usarlo%20en%20mi%20iglesia." target="_blank" rel="noopener noreferrer" class="contact-link">WhatsApp</a>
-        <span class="sep">•</span>
-        <a href="mailto:memoestefani@gmail.com?subject=Inter%C3%A9s%20en%20P%C3%B3rtico" class="contact-link">memoestefani@gmail.com</a>
+      <p class="contact-prompt">¿Deseas implementar Pórtico en tu comunidad o recibir información?</p>
+      <div>
+        <a href="https://github.com/memoestefani/portico/issues/new?template=solicitud.yml" target="_blank" rel="noopener noreferrer" class="contact-btn">
+          <span>Completar formulario oficial en GitHub →</span>
+        </a>
       </div>
-      <p class="author-note">Guillermo Estefani · Durango, México</p>
+      <p class="author-note">Pórtico · Código abierto para comunidades y hogares</p>
     </footer>
   </main>
 

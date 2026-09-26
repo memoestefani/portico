@@ -1,0 +1,64 @@
+name: Solicitar información o implementación
+description: Formulario oficial para recibir información sobre Pórtico y organizar grupos pequeños en tu ciudad.
+title: "[Información]: "
+labels:
+  - "información"
+  - "comunidad"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Formulario oficial de información — Pórtico
+        Gracias por tu interés en **Pórtico** — Software ligero para organizar grupos pequeños en tu ciudad.
+        Completa este formulario oficial para ponernos en contacto o coordinar la implementación en tu comunidad.
+  - type: input
+    id: nombre
+    attributes:
+      label: Nombre o comunidad
+      description: Tu nombre o el nombre de tu grupo o comunidad.
+      placeholder: Ej. Carlos Mendoza / Comunidad Familiar
+    validations:
+      required: true
+  - type: input
+    id: ciudad
+    attributes:
+      label: Ciudad y país
+      description: ¿En qué ciudad o región se ubican tus grupos pequeños?
+      placeholder: Ej. Guadalajara, México
+    validations:
+      required: true
+  - type: input
+    id: contacto
+    attributes:
+      label: Correo electrónico o medio de contacto
+      description: Medio por el que prefieres recibir respuesta directa.
+      placeholder: correo@ejemplo.com o @usuario
+    validations:
+      required: true
+  - type: dropdown
+    id: organizacion_actual
+    attributes:
+      label: ¿Cómo organizan actualmente sus grupos pequeños?
+      description: Selecciona el método principal utilizado actualmente.
+      options:
+        - Grupos de WhatsApp
+        - Hojas de cálculo (Excel / Google Sheets)
+        - Sin sistema estructurado (coordinación verbal informal)
+        - Otra plataforma digital
+    validations:
+      required: false
+  - type: textarea
+    id: detalles
+    attributes:
+      label: Cuéntanos sobre tu comunidad o tus necesidades
+      description: ¿Cuántos grupos u hogares participan aproximadamente? ¿Qué dificultades buscan solucionar?
+      placeholder: Breve descripción de lo que buscan resolver o preguntas sobre la plataforma...
+    validations:
+      required: false
+  - type: checkboxes
+    id: terminos
+    attributes:
+      label: Privacidad y respeto
+      options:
+        - label: Confirmo que esta información es para coordinar o implementar grupos pequeños sin fines comerciales invasivos.
+          required: true

@@ -1,4 +1,4 @@
-# Pórtico OS v3.3 — Plataforma Soberana para Grupos Pequeños & Redes Multi-Campus
+# Pórtico OS v3.5 — Plataforma Soberana para Grupos Pequeños & Redes Multi-Campus
 
 **Pórtico OS** es una plataforma de software eclesial soberano diseñada para gobernar la transición crítica de comunidades locales de 300 miembros hasta redes multi-campus de **25,000 miembros**, fundada sobre primeros principios eclesiológicos neotestamentarios, antropológicos (Límites de Dunbar, Sociología del Tercer Lugar de Oldenburg) y de estricta soberanía y privacidad legal (LFPDPPP México).
 
@@ -108,11 +108,16 @@ Adoptadas del universo de investigación de GitHub (`DOSSIER-068` al `DOSSIER-07
 72. **72-C (`GOLD-315`) — Privacidad Polimórfica en Backend Rust y Anti-Scraping:** Serializador de Rust que omite físicamente direcciones particulares y teléfonos de anfitriones en endpoints públicos + script `tools/clean_debris.ps1` que certifica la frontera hermética del proyecto.
 73. **73-C (`GOLD-316`) — Radar Pastoral In-App y Despacho wa.me Nativo a Costo $0:** Disparadores de acompañamiento diaconal y pastoral a través de enlaces directos `https://wa.me/` sin contratar APIs de pago de Meta o Twilio.
 
+### Ciclo 11 — Dossier Pastoral Ejecutivo Automatizado y Motor Nativo PDF (GOLD-317 a GOLD-319)
+74. **74-C (`GOLD-317`) — Dossier Pastoral Ejecutivo en PDF (Letter Landscape):** Documento de 7 páginas en formato horizontal (`docs/dossier_pastoral.html` -> `docs/Dossier_Pastoral_Portico_Amor_y_Gracia.pdf`) bajo el estándar W3C Paged Media (`@page { size: letter landscape; margin: 0; }`). Cada vista incluye la captura real en alta resolución y la Tríada Pastoral de 3 preguntas humanas: *¿Quién usa esta pantalla?*, *¿Qué dolor de cabeza de WhatsApp elimina?*, y *¿Qué cuidado pastoral brinda a las personas?*.
+75. **75-C (`GOLD-318`) — Motor Nativo en PowerShell con Edge Headless (`tools/generar_dossier.ps1`):** Compilador local a costo y peso $0. Utiliza el motor nativo de Microsoft Edge preinstalado en Windows (`--headless=new --disable-gpu --no-pdf-header-footer --print-to-pdf`), sincronizado con `Start-Process -Wait`, generando un PDF limpio de ~1.1 MB listo para compartir por WhatsApp sin instalar librerías de Node.js de 300 MB.
+76. **76-C (`GOLD-319`) — Pipeline Automatizado de Capturas Limpias (`tools/capturar_pantallas.ps1`):** Script que automatiza la captura secuencial de las 6 superficies locales en resolución fija de `1280x780` sin barras de sistema operativo ni desbordamientos de scroll, almacenadas en `docs/assets/dossier/`.
+
 ---
 
 ## 🧪 Verificación y Pruebas Automatizadas
 
-El proyecto cuenta con certificación automatizada continua del 100% en backend y frontend sin mockups ni placeholders (**186 pruebas verdes en total**):
+El proyecto cuenta con certificación automatizada continua del 100% en backend y frontend sin mockups ni placeholders (**195 pruebas verdes en total**):
 
 ### Backend (Rust Workspace)
 ```bash
@@ -127,7 +132,7 @@ cd frontend
 npm test
 npm run build
 ```
-* **139 pruebas pasando (0 fallas en 81 suites):** 
+* **148 pruebas pasando (0 fallas en 85 suites):** 
   * Ciclo 2 (Sobriedad y Rendimiento)
   * Ciclo 3 (Decisiones Canónicas)
   * Ciclo 4 (Gobernanza y Branding Noble)
@@ -137,7 +142,8 @@ npm run build
   * Ciclo 8 (Interfaz Invisible, Calma Pastoral y Gobernanza Distribuida)
   * Ciclo 9 (Simbiosis de Vida Real, Casos de Estrés y Protección Comunitaria)
   * Ciclo 10 (Despliegue Soberano, Cero Proveedores Extra y Salida Libre: GOLD-307 a GOLD-316)
-* **Build de producción:** 0 errores, 0 advertencias de compilación (`tsc -b && vite build` sobre 1,906 módulos en ~1.1s en `dist/`).
+  * Ciclo 11 (Dossier Pastoral Ejecutivo Automatizado y Motor Nativo PDF: GOLD-317 a GOLD-319)
+* **Build de producción:** 0 errores, 0 advertencias de compilación (`tsc -b && vite build` sobre 1,906 módulos en ~0.8s en `dist/`).
 
 ---
 

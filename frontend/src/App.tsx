@@ -12,7 +12,16 @@ import { InstitutionalModal } from './components/InstitutionalModal';
 import { fetchChurchConfig } from './api';
 
 export const App: React.FC = () => {
-  const [role, setRole] = useState<RoleMode>('public');
+  const [role, setRole] = useState<RoleMode>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const urlRole = params.get('role') as RoleMode;
+      if (['public', 'member', 'leader', 'deacon', 'elder', 'pastor', 'operator'].includes(urlRole)) {
+        return urlRole;
+      }
+    }
+    return 'public';
+  });
   const [showLegalModal, setShowLegalModal] = useState<boolean>(false);
   const [isOnline, setIsOnline] = useState<boolean>(() => typeof navigator !== 'undefined' ? navigator.onLine : true);
   const [churchConfig, setChurchConfig] = useState<ChurchConfiguration | null>(null);

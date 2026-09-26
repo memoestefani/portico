@@ -15,7 +15,7 @@
 | **Backend & Servidor Web (Rust Axum)** | 🟢 Live | `http://127.0.0.1:3000` | Motor HTTP de alto rendimiento sirviendo API y frontend embebido `dist/`. |
 | **Persistencia Database-per-Tenant** | 🟢 Live | `backend/data/tenants/1fb2fd67-6b35-425c-967c-5405af97b401.db` | Base física SQLite aislada de Amor y Gracia Durango. |
 | **Salida Soberana Dual (.db + CSV)** | 🟢 Live | `/api/pastor/export-sovereign-archive` | Botón táctil en `PastorHud` con descarga en 1-clic ("No Strings Attached"). |
-| **Pruebas Automatizadas** | 🟢 100% | **186 tests verdes** (139 frontend, 47 backend) | Certificación continua de cero regresiones y cero mockups. |
+| **Pruebas Automatizadas** | 🟢 100% | **195 tests verdes** (148 frontend, 47 backend) | Certificación continua de cero regresiones y cero mockups. |
 
 ---
 
@@ -93,7 +93,7 @@ git push origin main
 ### Iniciar el Backend Localmente:
 ```powershell
 cd C:\Users\52331\Documents\Proyectos\portico
-C:\Users\52331\Documents\Proyectos\2_portico\backend\target\debug\portico-server.exe --port 3000 --data-dir C:\Users\52331\Documents\Proyectos\portico\backend\data
+.\backend\target\debug\portico-server.exe --port 3000 --data-dir C:\Users\52331\Documents\Proyectos\portico\backend\data
 ```
 
 ### Iniciar el Cloudflare Quick Tunnel:
@@ -126,10 +126,32 @@ npm run dev
 
 ---
 
-## 🚀 5. Próxima Etapa: Transición de Quick Tunnel a Dominio Fijo
+## 📄 5. Protocolo de Comunicación Pastoral y Generación del Dossier en PDF
+
+Para líderes que no tienen por qué lidiar con enlaces web ni servidores (como el Pastor Josh), Pórtico OS incluye herramientas nativas para generar en 2 segundos un **Dossier Pastoral Ejecutivo en PDF** de 7 páginas en formato horizontal (`Letter Landscape`), listo para enviar por WhatsApp o imprimir en papel físico.
+
+### Generación en 2 Pasos (Cero Dependencias de Node.js):
+
+#### 1. Actualizar las 6 capturas de pantalla de la aplicación:
+```powershell
+cd C:\Users\52331\Documents\Proyectos\portico
+powershell -ExecutionPolicy Bypass -File .\tools\capturar_pantallas.ps1
+```
+*(Captura las 6 superficies locales en resolución fija de 1280x780 sin barras de navegador y las guarda en `docs/assets/dossier/`).*
+
+#### 2. Compilar el PDF editorial para Josh:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\generar_dossier.ps1
+```
+*(Utiliza el motor nativo de Microsoft Edge Headless preinstalado en Windows y genera `docs/Dossier_Pastoral_Portico_Amor_y_Gracia.pdf` de ~1.1 MB listo para compartir por WhatsApp).*
+
+---
+
+## 🚀 6. Próxima Etapa: Transición de Quick Tunnel a Dominio Fijo
 
 Cuando tú y Josh decidan dar el paso a una URL permanente (por ejemplo `ayg-grupos.com` o el dominio que Josh recupere):
 1. Se compra o agrega el dominio en tu cuenta de Cloudflare.
 2. En Zero Trust se crea el túnel con nombre (`portico-amorygracia`).
 3. Se copia el `TUNNEL_TOKEN` al archivo `.env`.
 4. Se ejecuta `docker compose up -d` y el sistema queda corriendo como servicio desatendido 24/7 sin ventanas de terminal abiertas.
+

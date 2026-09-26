@@ -10,12 +10,12 @@
 
 | Componente | Estatus | URL / Endpoint | Función |
 | :--- | :---: | :--- | :--- |
-| **Landing Page Pública (GitHub Pages)** | 🟢 Live | [`https://memoestefani.github.io/portico/`](https://memoestefani.github.io/portico/) | Presencia web sobria y contacto para comunidades interesadas. |
+| **Landing Page Pública (GitHub Pages)** | 🟢 Live | [`https://memoestefani.github.io/portico/`](https://memoestefani.github.io/portico/) | Carta Pastoral Editorial (<12 KB Vanilla Single-Fold) con caso vivo de Amor y Gracia Durango y Pastor Josh. |
 | **Aplicación Operativa (Cloudflare Tunnel)** | 🟢 Live | `https://habitat-cleaning-benz-syndication.trycloudflare.com` | Acceso completo para Pastor Josh, diáconos y miembros en sus teléfonos. |
 | **Backend & Servidor Web (Rust Axum)** | 🟢 Live | `http://127.0.0.1:3000` | Motor HTTP de alto rendimiento sirviendo API y frontend embebido `dist/`. |
 | **Persistencia Database-per-Tenant** | 🟢 Live | `backend/data/tenants/1fb2fd67-6b35-425c-967c-5405af97b401.db` | Base física SQLite aislada de Amor y Gracia Durango. |
 | **Salida Soberana Dual (.db + CSV)** | 🟢 Live | `/api/pastor/export-sovereign-archive` | Botón táctil en `PastorHud` y exportación pastoral en `ElderDesk` ("No Strings Attached"). |
-| **Pruebas Automatizadas** | 🟢 100% | **218+ tests verdes** (181 frontend, 37+ backend) | Certificación continua de cero regresiones, cero mockups y cero variables rotas. |
+| **Pruebas Automatizadas** | 🟢 100% | **235+ tests verdes** (198 frontend, 37 backend) | Certificación continua de cero regresiones, cero mockups y cero variables rotas. |
 
 ---
 

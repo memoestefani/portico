@@ -3,530 +3,152 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pórtico OS — Plataforma Soberana para Grupos Pequeños y Redes Celulares</title>
-  <meta name="description" content="Pórtico OS es un sistema operativo eclesial sobrio, fundado en primeros principios neotestamentarios, límites de Dunbar y privacidad estricta. Una alternativa de calma al caos de WhatsApp.">
+  <title>Pórtico OS — Carta Pastoral y Plataforma Soberana para Grupos Pequeños</title>
+  <meta name="description" content="Pórtico OS es un sistema sobrio y de código libre nacido en Durango, México. Cuidado pastoral genuino para grupos pequeños y células en hogares, sin la saturación de WhatsApp ni costos por miembro.">
+  <meta name="theme-color" content="#FBF9F5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #FAFAF9;
-      --bg-card: #FFFFFF;
-      --border: #E2E8F0;
-      --border-focus: #CBD5E1;
-      --text-primary: #0F172A;
-      --text-secondary: #475569;
-      --text-muted: #94A3B8;
-      --accent-navy: #0F172A;
-      --accent-amber: #D97706;
-      --accent-amber-light: #FEF3C7;
-      --accent-teal: #0D9488;
-      --accent-teal-light: #CCFBF1;
-      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --bg-canvas: #FBF9F5; --bg-surface: #FFFFFF; --border-subtle: #E6DFD5; --border-focus: #D4C9BC;
+      --text-primary: #2C2623; --text-secondary: #5C4F46; --text-muted: #8C7E74;
+      --accent-terracotta: #93432F; --accent-terracotta-hover: #7A3626;
+      --badge-green-bg: #ECFDF5; --badge-green-text: #065F46; --badge-green-dot: #10B981; --tag-bg: #F2ECE4;
       --font-serif: 'Lora', Georgia, serif;
-      --radius-sm: 8px;
-      --radius-md: 14px;
-      --radius-lg: 24px;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
-      --shadow-md: 0 4px 16px -2px rgba(15,23,42,0.06), 0 2px 6px -1px rgba(15,23,42,0.04);
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-sans);
-      background-color: var(--bg);
-      color: var(--text-primary);
-      line-height: 1.65;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    header {
-      border-bottom: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(12px);
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-
-    .container {
-      max-width: 1040px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 72px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: var(--text-primary);
-    }
-
-    .brand-logo {
-      width: 38px;
-      height: 38px;
-      background: var(--accent-navy);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #FEF3C7;
-      font-weight: 800;
-      font-size: 1.15rem;
-      letter-spacing: -0.03em;
-    }
-
-    .brand-name {
-      font-weight: 800;
-      font-size: 1.15rem;
-      letter-spacing: -0.02em;
-    }
-
-    .brand-tag {
-      font-size: 0.75rem;
-      padding: 2px 8px;
-      background: var(--accent-amber-light);
-      color: var(--accent-amber);
-      border-radius: 999px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .nav-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 0.92rem;
-      font-weight: 600;
-      transition: color 0.15s ease;
-    }
-    .nav-links a:hover { color: var(--text-primary); }
-
-    .btn-contact {
-      background: var(--accent-navy);
-      color: #FFFFFF !important;
-      padding: 8px 18px;
-      border-radius: var(--radius-sm);
-      font-weight: 700 !important;
-      transition: opacity 0.15s ease;
-    }
-    .btn-contact:hover { opacity: 0.9; }
-
-    /* Hero Section */
-    .hero {
-      padding: 80px 0 60px 0;
-      text-align: center;
-    }
-
-    .pill-kicker {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #FFFFFF;
-      border: 1px solid var(--border);
-      padding: 6px 16px;
-      border-radius: 999px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 24px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .pill-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent-teal);
-    }
-
-    .hero h1 {
-      font-family: var(--font-serif);
-      font-size: clamp(2.3rem, 5vw, 3.6rem);
-      font-weight: 600;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-      color: var(--text-primary);
-      max-width: 860px;
-      margin: 0 auto 20px auto;
-    }
-
-    .hero p {
-      font-size: clamp(1.05rem, 2vw, 1.25rem);
-      color: var(--text-secondary);
-      max-width: 680px;
-      margin: 0 auto 36px auto;
-      line-height: 1.6;
-    }
-
-    .hero-actions {
-      display: flex;
-      justify-content: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .btn-primary {
-      background: var(--accent-navy);
-      color: #FFFFFF;
-      padding: 14px 28px;
-      border-radius: var(--radius-md);
-      font-weight: 700;
-      text-decoration: none;
-      font-size: 1rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 14px rgba(15,23,42,0.15);
-      transition: transform 0.15s ease, opacity 0.15s ease;
-    }
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      opacity: 0.95;
-    }
-
-    .btn-secondary {
-      background: #FFFFFF;
-      color: var(--text-primary);
-      border: 1px solid var(--border);
-      padding: 14px 24px;
-      border-radius: var(--radius-md);
-      font-weight: 600;
-      text-decoration: none;
-      font-size: 1rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: var(--shadow-sm);
-    }
-    .btn-secondary:hover { background: #F8FAFC; }
-
-    /* Problem statement */
-    .section {
-      padding: 60px 0;
-    }
-
-    .card-quote {
-      background: #FFFFFF;
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--accent-amber);
-      padding: 32px;
-      border-radius: var(--radius-md);
-      margin: 20px 0 40px 0;
-      box-shadow: var(--shadow-sm);
-    }
-    .card-quote p {
-      font-family: var(--font-serif);
-      font-size: 1.2rem;
-      font-style: italic;
-      color: var(--text-primary);
-      margin-bottom: 12px;
-    }
-    .card-quote cite {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      font-style: normal;
-      font-weight: 600;
-    }
-
-    /* Principles Grid */
-    .grid-principles {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-      gap: 20px;
-      margin-top: 28px;
-    }
-
-    .principle-card {
-      background: #FFFFFF;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 28px;
-      box-shadow: var(--shadow-sm);
-      transition: border-color 0.15s ease;
-    }
-    .principle-card:hover { border-color: var(--border-focus); }
-
-    .principle-num {
-      font-size: 0.8rem;
-      font-weight: 800;
-      color: var(--accent-teal);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .principle-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 10px;
-      color: var(--text-primary);
-    }
-
-    .principle-desc {
-      font-size: 0.92rem;
-      color: var(--text-secondary);
-      line-height: 1.55;
-    }
-
-    /* Surfaces Table/List */
-    .surfaces-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
-      margin-top: 24px;
-    }
-
-    .surface-item {
-      background: #FFFFFF;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 22px;
-    }
-    .surface-item h4 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-      color: var(--text-primary);
-    }
-    .surface-item p {
-      font-size: 0.88rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    /* Contact Card */
-    .contact-box {
-      background: var(--accent-navy);
-      color: #FFFFFF;
-      border-radius: var(--radius-lg);
-      padding: 48px 36px;
-      text-align: center;
-      margin: 60px 0;
-      box-shadow: var(--shadow-md);
-    }
-    .contact-box h2 {
-      font-family: var(--font-serif);
-      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-      margin-bottom: 16px;
-      color: #FEF3C7;
-    }
-    .contact-box p {
-      color: #94A3B8;
-      font-size: 1.05rem;
-      max-width: 600px;
-      margin: 0 auto 32px auto;
-      line-height: 1.6;
-    }
-    .contact-email {
-      display: inline-block;
-      background: #FFFFFF;
-      color: var(--accent-navy);
-      padding: 14px 32px;
-      border-radius: var(--radius-md);
-      font-weight: 800;
-      font-size: 1.05rem;
-      text-decoration: none;
-      transition: background 0.15s ease;
-    }
-    .contact-email:hover {
-      background: #F1F5F9;
-    }
-
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 36px 0;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-    }
+    body { font-family: var(--font-sans); background: var(--bg-canvas); color: var(--text-primary); line-height: 1.68; -webkit-font-smoothing: antialiased; }
+    .page-wrapper { max-width: 680px; margin: 0 auto; padding: 52px 24px 80px; }
+    @media (max-width: 600px) { .page-wrapper { padding: 32px 18px 60px; } }
+    header { margin-bottom: 40px; display: flex; flex-direction: column; gap: 16px; }
+    .brand-row { display: flex; align-items: center; gap: 14px; }
+    .brand-titles { display: flex; flex-direction: column; }
+    .brand-name { font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em; color: var(--text-primary); line-height: 1.2; }
+    .brand-sub { font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+    .workshop-badge { display: inline-flex; align-items: center; align-self: flex-start; padding: 4px 12px; background: var(--tag-bg); color: var(--accent-terracotta); border-radius: 999px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.03em; }
+    .letter-kicker { font-family: var(--font-serif); font-size: 0.95rem; font-style: italic; color: var(--accent-terracotta); margin-bottom: 12px; }
+    h1 { font-family: var(--font-serif); font-size: clamp(2rem, 5vw, 2.75rem); font-weight: 600; line-height: 1.22; letter-spacing: -0.02em; color: var(--text-primary); margin-bottom: 24px; }
+    .letter-lead { font-size: 1.12rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 40px; }
+    .divider { height: 1px; background: var(--border-subtle); margin: 36px 0; }
+    .realities-section h2 { font-family: var(--font-serif); font-size: 1.55rem; font-weight: 600; color: var(--text-primary); margin-bottom: 24px; letter-spacing: -0.01em; }
+    .reality-item { margin-bottom: 26px; padding-left: 18px; border-left: 3px solid var(--border-subtle); transition: border-color 0.2s ease; }
+    .reality-item:hover { border-left-color: var(--accent-terracotta); }
+    .reality-title { font-size: 1.08rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+    .reality-desc { font-size: 0.98rem; color: var(--text-secondary); line-height: 1.65; }
+    .case-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 32px 28px; margin: 44px 0; box-shadow: 0 4px 20px rgba(44, 38, 35, 0.05); }
+    @media (max-width: 600px) { .case-card { padding: 24px 18px; } }
+    .status-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--badge-green-bg); color: var(--badge-green-text); padding: 5px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; margin-bottom: 18px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--badge-green-dot); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+    .case-title { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+    .case-subtitle { font-size: 0.95rem; font-weight: 700; color: var(--accent-terracotta); margin-bottom: 16px; }
+    .case-body { font-size: 0.98rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 22px; }
+    .snapshot-container { border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-subtle); margin-bottom: 22px; box-shadow: 0 2px 10px rgba(44, 38, 35, 0.04); background: #111; }
+    .preview-snapshot { width: 100%; height: auto; display: block; }
+    .btn-live-portal, .btn-whatsapp, .btn-email { display: inline-flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; border-radius: var(--radius-md); transition: background 0.15s ease, transform 0.15s ease; }
+    .btn-live-portal { background: var(--accent-terracotta); color: #FFF; padding: 14px 28px; font-weight: 700; font-size: 1rem; box-shadow: 0 3px 12px rgba(147, 67, 47, 0.25); width: 100%; }
+    .btn-live-portal:hover { background: var(--accent-terracotta-hover); transform: translateY(-1px); }
+    .resilience-note { font-size: 0.84rem; color: var(--text-muted); line-height: 1.55; margin-top: 18px; padding: 12px 16px; background: var(--bg-canvas); border-radius: var(--radius-sm); border-left: 3px solid var(--border-focus); }
+    .contact-card { background: #2C2623; color: #FBF9F5; border-radius: var(--radius-lg); padding: 38px 30px; text-align: center; margin-top: 48px; }
+    @media (max-width: 600px) { .contact-card { padding: 28px 18px; } }
+    .contact-card h3 { font-family: var(--font-serif); font-size: 1.55rem; font-weight: 600; color: #FFF; margin-bottom: 12px; }
+    .contact-card p { font-size: 0.98rem; color: #D4C9BC; max-width: 520px; margin: 0 auto 26px; line-height: 1.6; }
+    .contact-actions { display: flex; flex-direction: column; gap: 12px; max-width: 440px; margin: 0 auto; }
+    .btn-whatsapp { background: #10B981; color: #FFF; padding: 14px 24px; font-weight: 700; font-size: 1rem; min-height: 48px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); }
+    .btn-whatsapp:hover { background: #059669; transform: translateY(-1px); }
+    .btn-email { color: #E6DFD5; padding: 12px 20px; font-weight: 600; font-size: 0.92rem; min-height: 44px; border: 1px solid rgba(230, 223, 213, 0.25); }
+    .btn-email:hover { background: rgba(255, 255, 255, 0.08); color: #FFF; }
+    footer { margin-top: 56px; padding-top: 28px; border-top: 1px solid var(--border-subtle); text-align: center; color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; }
   </style>
 </head>
 <body>
-
-  <!-- Header -->
-  <header>
-    <div class="container">
-      <div class="header-content">
-        <a href="#" class="brand">
-          <div class="brand-logo">P</div>
+  <div class="page-wrapper">
+    <header>
+      <div class="brand-row">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amor y Gracia Durango">
+          <circle cx="50" cy="50" r="48" fill="#93432F"/>
+          <g fill="#FBF9F5">
+            <path d="M 33 21 L 48 36 L 36 48 L 26 38 L 26 49 L 20 49 L 20 37 L 33 21 Z M 33 30 L 27 36 L 35 44 L 41 38 Z" fill-rule="evenodd"/>
+            <path d="M 52 32 L 67 21 L 80 37 L 80 49 L 50 81 L 38 69 L 44 63 L 50 69 L 72 46 L 72 38 L 67 31 L 58 40 L 47 40 L 52 32 Z M 52 47 L 64 47 L 64 53 L 45 72 L 37 64 L 52 47 Z" fill-rule="evenodd"/>
+          </g>
+        </svg>
+        <div class="brand-titles">
           <span class="brand-name">Pórtico OS</span>
-          <span class="brand-tag">v3.4 Soberano</span>
-        </a>
-        <nav class="nav-links">
-          <a href="#principios">Principios</a>
-          <a href="#superficies">Superficies</a>
-          <a href="#contacto" class="btn-contact">Contactar</a>
-        </nav>
-      </div>
-    </div>
-  </header>
-
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="container">
-      <div class="pill-kicker">
-        <span class="pill-dot"></span>
-        <span>Alternativa de Calma al Caos de WhatsApp</span>
-      </div>
-      <h1>Cuidado pastoral genuino sin tiranía digital ni pérdidas entre grietas</h1>
-      <p>
-        Pórtico OS es una plataforma eclesial de código soberano y cero costo base, diseñada para acompañar redes de grupos pequeños y células desde 300 hasta 25,000 miembros con serenidad, privacidad legal y dignidad humana.
-      </p>
-      <div class="hero-actions">
-        <a href="#contacto" class="btn-primary">
-          <span>Hablar con nosotros</span>
-          <span>→</span>
-        </a>
-        <a href="https://github.com/memoestefani/portico" target="_blank" rel="noopener noreferrer" class="btn-secondary">
-          <span>Ver Repositorio en GitHub</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Problem Statement -->
-  <section class="section">
-    <div class="container">
-      <div class="card-quote">
-        <p>«Los grupos de WhatsApp se crearon para charlar entre amigos, no para pastorear almas. La fragmentación, los mensajes a destiempo y el desorden terminan agotando a los facilitadores y dejando caer en el olvido a los miembros más vulnerables.»</p>
-        <cite>— Diagnóstico de campo en comunidades locales de México</cite>
-      </div>
-    </div>
-  </section>
-
-  <!-- Principles Section -->
-  <section id="principios" class="section">
-    <div class="container">
-      <h2 style="font-size: 1.8rem; font-family: var(--font-serif); letter-spacing: -0.02em;">Fundamentos de Primeros Principios</h2>
-      <p style="color: var(--text-secondary); margin-top: 6px;">
-        Desarrollado sobre bases sociológicas sólidas, la ley de privacidad mexicana (LFPDPPP) y un modelo bíblico no corporativo:
-      </p>
-
-      <div class="grid-principles">
-        <div class="principle-card">
-          <div class="principle-num">Principio 01</div>
-          <div class="principle-title">Límites de Dunbar (12 a 15 personas)</div>
-          <div class="principle-desc">
-            Las células no crecen hasta convertirse en auditorios impersonales. Al alcanzar 12-15 asistentes, el sistema asiste fraternalmente una fisión orgánica con núcleo fundador.
-          </div>
-        </div>
-
-        <div class="principle-card">
-          <div class="principle-num">Principio 02</div>
-          <div class="principle-title">Privacidad Polimórfica Estricta</div>
-          <div class="principle-desc">
-            Protección de domicilios particulares y números telefónicos. Los visitantes ven la zona o parque de encuentro; la dirección exacta del hogar solo se revela tras la bienvenida fraternal.
-          </div>
-        </div>
-
-        <div class="principle-card">
-          <div class="principle-num">Principio 03</div>
-          <div class="principle-title">Tríada Laica Anti-Burnout</div>
-          <div class="principle-desc">
-            El peso de una célula no recae sobre una sola persona. Se divide en tres roles con carismas complementarios: <em>Facilitador</em> (palabra y dinámica), <em>Anfitrión</em> (hospitalidad en casa) y <em>Aprendiz</em> (relevo generacional).
-          </div>
-        </div>
-
-        <div class="principle-card">
-          <div class="principle-num">Principio 04</div>
-          <div class="principle-title">Diaconado Cercano (Cero Verticalidad)</div>
-          <div class="principle-desc">
-            Sin gerentes ni jerarquías corporativas. Diáconos al servicio de franjas de 5 a 7 células, con atención personal y resolución ágil de quejas vecinales en menos de 72 horas.
-          </div>
-        </div>
-
-        <div class="principle-card">
-          <div class="principle-num">Principio 05</div>
-          <div class="principle-title">Soberanía Total ("No Strings Attached")</div>
-          <div class="principle-desc">
-            La iglesia es la única dueña de sus datos. En cualquier momento el pastor puede descargar en 1-clic su base de datos física íntegra y hojas CSV legibles en Excel. Cero secuestro.
-          </div>
-        </div>
-
-        <div class="principle-card">
-          <div class="principle-num">Principio 06</div>
-          <div class="principle-title">Cero Costo Base de Infraestructura</div>
-          <div class="principle-desc">
-            Construido en Rust (Axum) y React con SQLite embebido. Corre en hosts locales o instancias mínimas comunicadas mediante Cloudflare Tunnels sin costos mensuales de licencias abusivas.
-          </div>
+          <span class="brand-sub">Amor y Gracia • Durango</span>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- Surfaces Section -->
-  <section id="superficies" class="section">
-    <div class="container">
-      <h2 style="font-size: 1.8rem; font-family: var(--font-serif); letter-spacing: -0.02em;">Las 6 Superficies de la Vida Comunitaria</h2>
-      <p style="color: var(--text-secondary); margin-top: 6px;">
-        Cada integrante interactúa con una superficie diseñada a la medida de su rol, sin sobrecarga ni pantallas innecesarias:
-      </p>
-
-      <div class="surfaces-list">
-        <div class="surface-item">
-          <h4>1. Pórtico Público</h4>
-          <p>Catálogo territorial de células con filtro de un toque por colonia, horario, transporte accesible e iniciativas de ayuda social.</p>
-        </div>
-        <div class="surface-item">
-          <h4>2. Silo de la Comunidad</h4>
-          <p>Espacio para miembros y facilitadores: confirmación de asistencia en 1-tap, itinerarios nómadas, peticiones de oración y pacto mutuo.</p>
-        </div>
-        <div class="surface-item">
-          <h4>3. Mesa Diaconal</h4>
-          <p>Bandeja fraternal para diáconos: acompañamiento a 5-7 células, registro de visitas y concesión de descansos sabáticos in situ.</p>
-        </div>
-        <div class="surface-item">
-          <h4>4. Consejo de Ancianos</h4>
-          <p>Supervisión doctrinal de sector, consejería pastoral confidencial y ruteo preventivo anti-colisiones interpersonales.</p>
-        </div>
-        <div class="surface-item">
-          <h4>5. HUD Pastoral</h4>
-          <p>Tablero integral del pastor general: radar de fatiga de facilitadores, pausas litúrgicas oficiales y facultad de veto paternal.</p>
-        </div>
-        <div class="surface-item">
-          <h4>6. Consola Soberana de Operador</h4>
-          <p>Aislamiento hermético de bases de datos por congregación y auditoría de seguridad para el arquitecto del sistema.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Contact Section -->
-  <section id="contacto" class="section">
-    <div class="container">
-      <div class="contact-box">
-        <h2>¿Deseas implementar Pórtico OS en tu comunidad?</h2>
-        <p>
-          Si lideras una congregación, red celular o ministerio que busca ordenar su vida comunitaria con calma, dignidad y respeto a sus miembros, conversemos.
+      <div class="workshop-badge">Taller Artesanal de Software Soberano</div>
+    </header>
+    <main>
+      <article>
+        <p class="letter-kicker">Carta Pastoral y Fraternal</p>
+        <h1>Cuidado pastoral genuino en hogares, sin la saturación de WhatsApp ni cobros por miembro.</h1>
+        <p class="letter-lead">
+          Pórtico OS nació en Durango, México, en una mesa de trabajo junto a pastores y familias que abrían su sala cada semana. No es un producto comercial ni una plataforma de Silicon Valley; es un taller de software libre y sobrio al servicio de las iglesias locales. La comunidad Amor y Gracia en Durango es nuestro hogar fundacional y testimonio vivo.
         </p>
-        <a href="mailto:memoestefani@gmail.com?subject=Inter%C3%A9s%20en%20P%C3%B3rtico%20OS" class="contact-email">
-          Escribir a Guillermo Estefani (memoestefani@gmail.com)
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <p>Pórtico OS v3.4 • Desarrollado por Guillermo Estefani • Durango, México • Basado en primeros principios de gracia y soberanía.</p>
-    </div>
-  </footer>
-
+        <div class="divider"></div>
+        <section class="realities-section">
+          <h2>Tres realidades de la vida real que resolvemos juntos</h2>
+          <div class="reality-item">
+            <h3 class="reality-title">1. Coordinación familiar sin saturar WhatsApp</h3>
+            <p class="reality-desc">
+              Saber quién asiste a cenar, quién llega con café o pan dulce y en qué hogar nos reunimos. Todo con una confirmación clara y serena de un solo toque, sin perder mensajes esenciales entre cadenas de oración, stickers o avisos vecinales.
+            </p>
+          </div>
+          <div class="reality-item">
+            <h3 class="reality-title">2. Cuidado y descanso para la familia anfitriona</h3>
+            <p class="reality-desc">
+              Abrir la sala de una casa semana a semana requiere amor y esfuerzo. Pórtico rota los hogares y visibiliza los descansos con ternura pastoral para que ningún anfitrión termine abrumado ni agotado en silencio.
+            </p>
+          </div>
+          <div class="reality-item">
+            <h3 class="reality-title">3. Tu iglesia es la única dueña de sus datos</h3>
+            <p class="reality-desc">
+              Sin suscripciones mensuales abusivas, sin cobro por cada miembro que asiste y sin comercializar la información íntima de las familias. La base de datos vive con tu congregación y la descargas completa en un clic cuando lo desees.
+            </p>
+          </div>
+        </section>
+        <section class="case-card">
+          <div class="status-badge">
+            <span class="status-dot"></span>
+            <span>En uso comunitario activo en Durango</span>
+          </div>
+          <h3 class="case-title">Nuestra comunidad fundacional en Durango</h3>
+          <p class="case-subtitle">Iglesia Amor y Gracia • Cuidado pastoral del Pastor Josh</p>
+          <p class="case-body">
+            En Amor y Gracia organizamos nuestras reuniones en hogares por toda la ciudad de Durango con esta misma plataforma. Puedes entrar a explorar la experiencia pública tal como la viven nuestros vecinos:
+          </p>
+          <div class="snapshot-container">
+            <img src="assets/dossier/01_portico_publico.png" alt="Portal Comunitario de Grupos Pequeños de Amor y Gracia Durango" class="preview-snapshot" loading="lazy">
+          </div>
+          <a href="https://habitat-cleaning-benz-syndication.trycloudflare.com" target="_blank" rel="noopener noreferrer" class="btn-live-portal">
+            <span>Explorar Portal Comunitario en Vivo →</span>
+          </a>
+          <p class="resilience-note">
+            <strong>Nota de cortesía:</strong> Este portal enlaza a una instancia comunitaria real servida desde nuestro host local protegido en Durango. Si en este instante se encuentra en ventana de mantenimiento o descanso de equipo, puedes apreciar la vista previa interactiva arriba o escribirnos directamente para mostrarte el sistema en funcionamiento.
+          </p>
+        </section>
+        <section class="contact-card">
+          <h3>Conversemos con calma de pastor a pastor</h3>
+          <p>
+            Si sirves en una congregación o red de células que busca acompañar a sus familias con orden y dignidad, con gusto te compartimos nuestra experiencia y te ayudamos a ponerlo en marcha.
+          </p>
+          <div class="contact-actions">
+            <a href="https://wa.me/526181234567?text=Hola%20Guillermo%2C%20vi%20el%20portal%20de%20Amor%20y%20Gracia%20en%20P%C3%B3rtico%20y%20me%20gustar%C3%ADa%20platicar%20contigo%20sobre%20c%C3%B3mo%20usarlo%20en%20mi%20comunidad." target="_blank" rel="noopener noreferrer" class="btn-whatsapp">
+              <span>💬 Platicar por WhatsApp con Guillermo</span>
+            </a>
+            <a href="mailto:memoestefani@gmail.com?subject=Inter%C3%A9s%20en%20P%C3%B3rtico%20OS%20para%20nuestra%20comunidad" class="btn-email">
+              <span>✉️ Escribir por correo electrónico</span>
+            </a>
+          </div>
+        </section>
+      </article>
+    </main>
+    <footer>
+      <p>Pórtico OS v3.6 • Desarrollado con esmero artesanal en Durango, México.<br>Dedicado con gratitud al cuidado de las familias de Amor y Gracia.</p>
+    </footer>
+  </div>
 </body>
 </html>

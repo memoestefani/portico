@@ -132,7 +132,7 @@ cd frontend
 npm test
 npm run build
 ```
-* **181 pruebas pasando (0 fallas en 108 suites):** 
+* **198 pruebas pasando (0 fallas en 118 suites):** 
   * Ciclo 2 (Sobriedad y Rendimiento)
   * Ciclo 3 (Decisiones Canónicas)
   * Ciclo 4 (Gobernanza y Branding Noble)
@@ -145,6 +145,7 @@ npm run build
   * Ciclo 11 (Dossier Pastoral Ejecutivo Automatizado y Motor Nativo PDF: GOLD-317 a GOLD-319)
   * Ciclo 12 (Ergonomía Grado Apple, Eliminación de Ruido y Filtro Elena Ramos: GOLD-320 a GOLD-329)
   * Ciclo 13 (Identidad Noble Amor y Gracia Durango, Conmutador Multi-Grupo y Silencio de Santuario: GOLD-330 a GOLD-339)
+  * Ciclo 14 (Landing Editorial Pastoral, Carta Fraternal y Caso Vivo de Amor y Gracia Durango: GOLD-340 a GOLD-349)
 * **Build de producción:** 0 errores, 0 advertencias de compilación (`tsc -b && vite build` sobre 1,906 módulos en ~1.2s en `dist/`).
 
 ---

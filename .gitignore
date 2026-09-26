@@ -28,3 +28,7 @@ desktop.ini
 *.swp
 *.log
 .gemini/
+
+# Binaries and data
+tools/*.exe
+data/

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import type { Campus, PublicConfig, PublicEdition } from '../types';
-import { fetchCampuses, fetchPublicCatalog, fetchPublicConfig, submitJoinRequest, submitNeighborhoodComplaint } from '../api';
+import type { PublicConfig, PublicEdition } from '../types';
+import { fetchPublicCatalog, fetchPublicConfig, submitJoinRequest, submitNeighborhoodComplaint } from '../api';
 import { InstitutionalModal } from './InstitutionalModal';
 import { MonogramAvatar } from './MonogramAvatar';
 import { ConnectionPassCard } from './ConnectionPassCard';
 import { CommunityInitiativesHub } from './CommunityInitiativesHub';
-import { CellHarmonizer } from './CellHarmonizer';
+import { ChurchBrandLogo } from './ChurchBrandLogo';
 import {
   MapPin,
   Clock,
@@ -14,7 +14,6 @@ import {
   ExternalLink,
   CheckCircle2,
   AlertCircle,
-  Filter,
   X,
   MessageCircle,
   Users,
@@ -22,13 +21,25 @@ import {
   Building,
   Home,
   Sparkles,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { formatDayOfWeek } from '../utils';
+
+export const DURANGO_COLONIAS = [
+  'Centro',
+  'Lomas del Parque',
+  'Las Rosas',
+  'Fidel Velázquez',
+  'Valle del Sur',
+  'Jardines de Durango',
+  'Huizache',
+  'Ciénega',
+  'Domingo Arrieta',
+];
 
 export const PublicPortal: React.FC = () => {
   const [config, setConfig] = useState<PublicConfig | null>(null);
   const [groups, setGroups] = useState<PublicEdition[]>([]);
-  const [campuses, setCampuses] = useState<Campus[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [intentTrack, setIntentTrack] = useState<'both' | 'temple' | 'home'>('both');
   const [selectedCampus, setSelectedCampus] = useState<string>('');
@@ -39,6 +50,21 @@ export const PublicPortal: React.FC = () => {
   const [selectedFocusType, setSelectedFocusType] = useState<string>('all');
   const [filterKids, setFilterKids] = useState<boolean | null>(null);
   const [showLegalModal, setShowLegalModal] = useState<boolean>(false);
+
+  // Proximidad Primero, Escala Masiva y Descongestión de Filtros (GOLD-324, GOLD-335)
+  const [selectedColonia, setSelectedColonia] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
+  const [visibleLimit, setVisibleLimit] = useState<number>(6);
+  const [showAdvancedFiltersModal, setShowAdvancedFiltersModal] = useState<boolean>(false);
+
+  // Triple blindaje de rendimiento: debounce 150ms para 60fps en Android de $1,800 MXN (GOLD-338)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Modal Buena Vecindad (GOLD-278)
   const [showComplaintModal, setShowComplaintModal] = useState<boolean>(false);
@@ -59,10 +85,51 @@ export const PublicPortal: React.FC = () => {
   // Pase Comunitario Autónomo Modal state
   const [passModalGroup, setPassModalGroup] = useState<PublicEdition | null>(null);
 
+  // Privacidad Escalonada: Público General vs Usuario con Cuenta vs Miembro Admitido (Solicitud de Usuario)
+  const [hasAccount, setHasAccount] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('portico_session_token') || localStorage.getItem('portico_token');
+      const urlHasAccount = new URLSearchParams(window.location.search).get('has_account');
+      return !!token || urlHasAccount === 'true';
+    }
+    return false;
+  });
+
+  /**
+   * Formatea un nombre según el nivel de privacidad:
+   * - Público general (sin cuenta): ÚNICAMENTE el primer nombre (ej. "Mariana", "Roberto", "Carlos")
+   * - Con cuenta (miembro): Nombre completo (ej. "Mariana Torres", "Roberto Gómez")
+   */
+  const formatVisibleName = React.useCallback((fullName?: string | null): string => {
+    if (!fullName) return '';
+    const clean = fullName.trim();
+    if (hasAccount) return clean;
+    // Solo primer nombre para público general
+    return clean.split(/\s+/)[0];
+  }, [hasAccount]);
+
+  /**
+   * Sanitiza el resumen de ubicación eliminando cualquier nota privada:
+   * - Notas como (Estacionamiento disponible...) o (Timbre blanco...) son EXCLUSIVAS
+   *   para miembros ya admitidos en el grupo (visibles en MemberSilo.tsx).
+   * - Quien tiene cuenta puede ver la dirección, pero NO las notas.
+   * - El público general ve únicamente la zona / colonia general.
+   */
+  const sanitizeLocationSummary = React.useCallback((rawLocation: string): string => {
+    if (!rawLocation) return '';
+    let clean = rawLocation.replace(/\s*\([^)]*(estacionamiento|timbre|portón|puerta|privad|nota|parque infantil)[^)]*\)/gi, '').trim();
+    clean = clean.replace(/\s*\(\s*\)/g, '').trim();
+    return clean;
+  }, []);
+
   const loadData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const [cfg, data, cmps] = await Promise.all([
+      const token = hasAccount
+        ? (localStorage.getItem('portico_session_token') || localStorage.getItem('portico_token') || undefined)
+        : undefined;
+
+      const [cfg, data] = await Promise.all([
         fetchPublicConfig(),
         fetchPublicCatalog({
           campus_slug: selectedCampus || undefined,
@@ -71,18 +138,17 @@ export const PublicPortal: React.FC = () => {
           kids_welcome: filterKids !== null ? filterKids : undefined,
           macro_zone: selectedMacroZone !== 'all' ? selectedMacroZone : undefined,
           transit_only: filterTransitOnly ? true : undefined,
+          token,
         }),
-        fetchCampuses().catch(() => []),
       ]);
       setConfig(cfg);
       setGroups(data);
-      setCampuses(cmps);
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
-  }, [selectedCampus, selectedAffinity, selectedZone, filterKids, selectedMacroZone, filterTransitOnly]);
+  }, [selectedCampus, selectedAffinity, selectedZone, filterKids, selectedMacroZone, filterTransitOnly, hasAccount]);
 
   useEffect(() => {
     loadData();
@@ -139,19 +205,44 @@ export const PublicPortal: React.FC = () => {
   };
 
   const displayedGroups = groups.filter((g) => {
-    if (selectedFocusType === 'all') return true;
-    const focus = g.focus_type || '';
-    const aff = (g.affinity_name || '').toLowerCase();
-    const name = (g.nombre_publico || '').toLowerCase();
-    if (selectedFocusType === 'common_interest') {
-      return focus === 'common_interest' || aff.includes('viajer') || aff.includes('café') || aff.includes('taco') || aff.includes('interés') || name.includes('viajer') || name.includes('café');
+    // 1. Proximidad Primero en Durango (GOLD-324)
+    if (selectedColonia !== 'all') {
+      const loc = (g.location_summary || '').toLowerCase();
+      const zone = (g.zone_label || '').toLowerCase();
+      const macro = (g.macro_zone || '').toLowerCase();
+      const target = selectedColonia.toLowerCase();
+      if (!loc.includes(target) && !zone.includes(target) && !macro.includes(target)) {
+        return false;
+      }
     }
-    if (selectedFocusType === 'foundational') {
-      return focus === 'foundational' || aff.includes('alfa') || aff.includes('mayordom') || aff.includes('fundam') || aff.includes('nuevo') || name.includes('alfa') || name.includes('mayordom');
+
+    // 2. Buscador Instantáneo con Blindaje de Rendimiento Debounced (<10ms / GOLD-338)
+    if (debouncedSearchQuery.trim()) {
+      const q = debouncedSearchQuery.toLowerCase().trim();
+      const matchName = (g.nombre_publico || '').toLowerCase().includes(q);
+      const matchLoc = (g.location_summary || '').toLowerCase().includes(q);
+      const matchLeader = (g.leader_name || '').toLowerCase().includes(q);
+      const matchDay = formatDayOfWeek(g.dia_habitual).toLowerCase().includes(q);
+      const matchAff = (g.affinity_name || '').toLowerCase().includes(q);
+      if (!matchName && !matchLoc && !matchLeader && !matchDay && !matchAff) {
+        return false;
+      }
     }
-    if (selectedFocusType === 'life_stage') {
-      return focus === 'life_stage' || (!aff.includes('viajer') && !aff.includes('café') && !aff.includes('alfa') && !aff.includes('mayordom'));
+
+    // 3. Enfoque / Afinidad
+    if (selectedFocusType !== 'all') {
+      const focus = g.focus_type || '';
+      const aff = (g.affinity_name || '').toLowerCase();
+      const name = (g.nombre_publico || '').toLowerCase();
+      if (selectedFocusType === 'common_interest') {
+        if (!(focus === 'common_interest' || aff.includes('viajer') || aff.includes('café') || aff.includes('taco') || aff.includes('interés') || name.includes('viajer') || name.includes('café'))) return false;
+      } else if (selectedFocusType === 'foundational') {
+        if (!(focus === 'foundational' || aff.includes('alfa') || aff.includes('mayordom') || aff.includes('fundam') || aff.includes('nuevo') || name.includes('alfa') || name.includes('mayordom'))) return false;
+      } else if (selectedFocusType === 'life_stage') {
+        if (!(focus === 'life_stage' || (!aff.includes('viajer') && !aff.includes('café') && !aff.includes('alfa') && !aff.includes('mayordom')))) return false;
+      }
     }
+
     return true;
   });
 
@@ -159,6 +250,16 @@ export const PublicPortal: React.FC = () => {
     <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 20px 80px 20px' }}>
       {/* Hero Section con Tipografía Transitional (Charter / Georgia) y Lenguaje Sobrio */}
       <section style={{ marginBottom: '32px', textAlign: 'center' }}>
+        <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+          <ChurchBrandLogo
+            size={36}
+            variant="full"
+            tenantName="Amor y Gracia"
+            locality="Durango, Dgo."
+            color="var(--accent-terracotta)"
+          />
+        </div>
+
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -194,6 +295,48 @@ export const PublicPortal: React.FC = () => {
         }}>
           Reuniones semanales en hogares para conversar, estudiar la Biblia y apoyarse mutuamente. Explora los grupos en tu zona y asiste con libertad.
         </p>
+
+        {/* Indicador de Privacidad Escalonada (Público General vs Con Cuenta vs Admitido) */}
+        <div style={{
+          marginTop: '20px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '8px 18px',
+          borderRadius: 'var(--radius-full)',
+          backgroundColor: hasAccount ? 'rgba(79, 70, 229, 0.08)' : 'var(--bg-surface)',
+          border: hasAccount ? '1px solid var(--accent-indigo)' : '1px solid var(--border-subtle)',
+          fontSize: '0.84rem',
+          color: 'var(--text-secondary)',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+        }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <Lock size={14} style={{ color: hasAccount ? 'var(--accent-indigo)' : 'var(--accent-emerald)' }} />
+            {hasAccount ? (
+              <span><strong>Modo Miembro con Cuenta:</strong> Direcciones completas habilitadas · Notas de acceso reservadas para admitidos.</span>
+            ) : (
+              <span><strong>Modo Público General:</strong> Nombres protegidos a primer nombre · Direcciones aproximadas por zona.</span>
+            )}
+          </span>
+          <button
+            type="button"
+            id="btn-toggle-account-view"
+            onClick={() => setHasAccount(!hasAccount)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--accent-terracotta)',
+              fontWeight: 700,
+              fontSize: '0.84rem',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+              padding: '2px 4px',
+            }}
+          >
+            {hasAccount ? 'Cambiar a vista pública' : 'Ingresar con cuenta / Ver como miembro'}
+          </button>
+        </div>
       </section>
 
       {/* Compuerta de Intención Dual (Dual-Track Intent Gate - GOLD-283 / Decisión 4-B) */}
@@ -248,13 +391,13 @@ export const PublicPortal: React.FC = () => {
               Tenemos 5 sedes en la ciudad de Durango con reuniones alegres, música en vivo, enseñanza bíblica y espacio seguro para tus hijos.
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-canvas)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                 5 Sedes en Durango
               </span>
-              <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-canvas)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                 Área Infantil Segura
               </span>
-              <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-canvas)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                 Punto de Conexión en Atrio
               </span>
             </div>
@@ -304,13 +447,13 @@ export const PublicPortal: React.FC = () => {
               Grupos pequeños de 8 a 12 vecinos para cenar, platicar y orar juntos con tranquilidad en la sala de un hogar de tu colonia.
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-canvas)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                 Grupos en Toda la Ciudad
               </span>
-              <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-canvas)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                 Cena y Café Fraterno
               </span>
-              <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-canvas)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                 Ambiente Íntimo y Confiable
               </span>
             </div>
@@ -329,7 +472,7 @@ export const PublicPortal: React.FC = () => {
               fontSize: '0.85rem',
               fontWeight: 600,
               backgroundColor: intentTrack === 'both' ? 'var(--text-primary)' : 'var(--bg-surface)',
-              color: intentTrack === 'both' ? 'var(--bg-canvas)' : 'var(--text-secondary)',
+              color: intentTrack === 'both' ? 'var(--bg-primary)' : 'var(--text-secondary)',
               border: '1px solid var(--border-subtle)',
               cursor: 'pointer',
               display: 'inline-flex',
@@ -438,287 +581,544 @@ export const PublicPortal: React.FC = () => {
         </div>
       )}
 
-      {/* Selector de Campus y Aviso Legal (GOLD-208 / GOLD-239) */}
+      {/* Proximidad Primero en 2 Pasos y Descongestión del Acantilado Móvil (GOLD-324 / GOLD-335) */}
       <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '16px',
-        marginBottom: '24px',
-        paddingBottom: '16px',
-        borderBottom: '1px solid var(--border-subtle)',
+        backgroundColor: 'var(--bg-surface)',
+        borderRadius: 'var(--radius-lg)',
+        padding: '20px 24px',
+        marginBottom: '28px',
+        border: '1px solid var(--border-subtle)',
+        boxShadow: 'var(--shadow-sm)',
       }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <Building size={16} style={{ color: 'var(--accent-amber)' }} />
-              <span>Sede Macro-Campus:</span>
-            </span>
-            <div className="hide-scrollbar" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                onClick={() => setSelectedCampus('')}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px', marginBottom: '16px' }}>
+          <div>
+            <h3 style={{ fontSize: '1.08rem', fontWeight: 800, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
+              Proximidad en Durango: Encuentra una familia cerca de ti
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              Selecciona tu colonia en 1 toque o escribe tu colonia, anfitrión o día.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', flex: '1 1 300px', justifyContent: 'flex-end' }}>
+            <div style={{ flex: '1 1 200px', maxWidth: '340px' }}>
+              <input
+                type="text"
+                id="input-quick-search-colonia"
+                data-testid="input-proximity-search"
+                placeholder="Buscar colonia, anfitrión o día..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setVisibleLimit(6);
+                }}
+                className="tap-target-48"
                 style={{
-                  minHeight: '38px',
-                  padding: '6px 14px',
+                  width: '100%',
+                  padding: '10px 18px',
                   borderRadius: 'var(--radius-full)',
-                  fontSize: '0.82rem',
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border-strong)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.88rem',
+                }}
+              />
+            </div>
+
+            {/* Botón de Filtros Específicos (Drawer Deslizable) */}
+            <button
+              type="button"
+              id="btn-open-advanced-filters"
+              onClick={() => setShowAdvancedFiltersModal(true)}
+              className="btn-secondary tap-target-48"
+              style={{
+                padding: '8px 16px',
+                borderRadius: 'var(--radius-full)',
+                fontSize: '0.84rem',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+              }}
+              title="Abrir filtros específicos de sede, etapa y afinidad"
+            >
+              <SlidersHorizontal size={15} style={{ color: 'var(--accent-terracotta)' }} />
+              <span>Filtros Específicos</span>
+              {([
+                selectedCampus !== '',
+                selectedAffinity !== '',
+                selectedFocusType !== 'all',
+                filterKids !== null,
+                filterTransitOnly === true,
+              ].filter(Boolean).length > 0) && (
+                <span style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 800,
+                  backgroundColor: 'var(--accent-terracotta)',
+                  color: '#FFFFFF',
+                  padding: '1px 6px',
+                  borderRadius: 'var(--radius-full)',
+                }}>
+                  {[
+                    selectedCampus !== '',
+                    selectedAffinity !== '',
+                    selectedFocusType !== 'all',
+                    filterKids !== null,
+                    filterTransitOnly === true,
+                  ].filter(Boolean).length}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowLegalModal(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-muted)',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                padding: '6px 10px',
+                borderRadius: 'var(--radius-sm)',
+                fontWeight: 600,
+              }}
+              title="Protección de Datos & Confesión de Fe"
+            >
+              <Lock size={13} />
+              <span>Privacidad & Fe</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Franja Horizontal de Colonias en 1 Toque */}
+        <div className="hide-scrollbar" style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+          <button
+            type="button"
+            id="colonia-pill-all"
+            onClick={() => {
+              setSelectedColonia('all');
+              setVisibleLimit(6);
+            }}
+            className="tap-target-48"
+            style={{
+              padding: '8px 18px',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              backgroundColor: selectedColonia === 'all' ? 'var(--text-primary)' : 'var(--bg-primary)',
+              color: selectedColonia === 'all' ? 'var(--bg-primary)' : 'var(--text-secondary)',
+              border: '1px solid var(--border-subtle)',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Todas las Colonias
+          </button>
+          {DURANGO_COLONIAS.map((colonia) => {
+            const isSel = selectedColonia === colonia;
+            return (
+              <button
+                key={colonia}
+                type="button"
+                id={`colonia-pill-${colonia.toLowerCase().replace(/\s+/g, '-')}`}
+                onClick={() => {
+                  setSelectedColonia(colonia);
+                  setVisibleLimit(6);
+                }}
+                className="tap-target-48"
+                style={{
+                  padding: '8px 18px',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: '0.84rem',
                   fontWeight: 600,
-                  backgroundColor: selectedCampus === '' ? 'var(--text-primary)' : 'var(--bg-surface)',
-                  color: selectedCampus === '' ? 'var(--bg-primary)' : 'var(--text-secondary)',
-                  border: '1px solid var(--border-subtle)',
+                  backgroundColor: isSel ? 'var(--accent-terracotta)' : 'var(--bg-primary)',
+                  color: isSel ? '#FFFFFF' : 'var(--text-secondary)',
+                  border: isSel ? '1px solid var(--accent-terracotta)' : '1px solid var(--border-subtle)',
                   cursor: 'pointer',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                Todos los Macro-Campuses ({campuses.length > 0 ? campuses.length : (config?.campuses?.length || 5)})
+                {colonia}
               </button>
-              {(campuses.length > 0 ? campuses : (config?.campuses || [])).map((c: any) => {
-                const slug = c.slug || c.id;
-                const label = c.name || c.nombre_publico;
-                const isSel = selectedCampus === slug;
-                return (
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Modal de Filtros Avanzados (GOLD-335: Descongestión del Acantilado Móvil) */}
+      {showAdvancedFiltersModal && (
+        <div
+          id="modal-advanced-filters"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 17, 21, 0.75)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            padding: 0,
+          }}
+          onClick={() => setShowAdvancedFiltersModal(false)}
+        >
+          <div
+            className="surface-card animate-fade-in"
+            style={{
+              width: '100%',
+              maxWidth: '600px',
+              maxHeight: '85vh',
+              overflowY: 'auto',
+              borderTopLeftRadius: 'var(--radius-xl, 24px)',
+              borderTopRightRadius: 'var(--radius-xl, 24px)',
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+              padding: '24px 20px',
+              backgroundColor: 'var(--bg-surface)',
+              borderTop: '1px solid var(--border-subtle)',
+              boxShadow: 'var(--shadow-lg)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <SlidersHorizontal size={20} style={{ color: 'var(--accent-terracotta)' }} />
+                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                  Filtros Avanzados
+                </h3>
+              </div>
+              <button
+                type="button"
+                id="btn-close-advanced-filters"
+                onClick={() => setShowAdvancedFiltersModal(false)}
+                className="tap-target-48"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                aria-label="Cerrar filtros"
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            {/* Selector de Campus Eclesial (si aplica) */}
+            {config?.campuses && config.campuses.length > 1 && (
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                  Campus Eclesial:
+                </label>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <button
-                    key={c.id}
                     type="button"
-                    onClick={() => setSelectedCampus(slug)}
+                    onClick={() => { setSelectedCampus(''); setVisibleLimit(6); }}
                     style={{
                       minHeight: '38px',
                       padding: '6px 14px',
                       borderRadius: 'var(--radius-full)',
-                      fontSize: '0.82rem',
+                      fontSize: '0.84rem',
                       fontWeight: 600,
-                      backgroundColor: isSel ? 'var(--accent-emerald)' : 'var(--bg-surface)',
-                      color: isSel ? '#FFFFFF' : 'var(--text-secondary)',
-                      border: isSel ? '1px solid var(--accent-emerald)' : '1px solid var(--border-subtle)',
+                      backgroundColor: selectedCampus === '' ? 'var(--text-primary)' : 'var(--bg-primary)',
+                      color: selectedCampus === '' ? 'var(--bg-primary)' : 'var(--text-secondary)',
+                      border: '1px solid var(--border-subtle)',
                       cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
                     }}
-                    title={c.address ? `${label} - ${c.address} (Capacidad: ${c.capacity} personas)` : label}
                   >
-                    <span>{label}</span>
-                    {c.macro_zone && (
-                      <span style={{ fontSize: '0.7rem', opacity: 0.85, textTransform: 'uppercase' }}>
-                        ({c.macro_zone})
-                      </span>
-                    )}
+                    Todos los Campus
                   </button>
-                );
-              })}
+                  {config.campuses.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => { setSelectedCampus(c.slug); setVisibleLimit(6); }}
+                      style={{
+                        minHeight: '38px',
+                        padding: '6px 14px',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: '0.84rem',
+                        fontWeight: 600,
+                        backgroundColor: selectedCampus === c.slug ? 'var(--accent-terracotta)' : 'var(--bg-primary)',
+                        color: selectedCampus === c.slug ? '#FFFFFF' : 'var(--text-secondary)',
+                        border: '1px solid var(--border-subtle)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {c.nombre_publico}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Selector de Enfoque */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                Enfoque de Comunidad:
+              </label>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedFocusType('all'); setVisibleLimit(6); }}
+                  style={{
+                    minHeight: '38px',
+                    padding: '6px 14px',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: '0.84rem',
+                    fontWeight: 600,
+                    backgroundColor: selectedFocusType === 'all' ? 'var(--text-primary)' : 'var(--bg-primary)',
+                    color: selectedFocusType === 'all' ? 'var(--bg-primary)' : 'var(--text-secondary)',
+                    border: '1px solid var(--border-subtle)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Todos los Enfoques
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedFocusType('life_stage'); setVisibleLimit(6); }}
+                  style={{
+                    minHeight: '38px',
+                    padding: '6px 14px',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: '0.84rem',
+                    fontWeight: 600,
+                    backgroundColor: selectedFocusType === 'life_stage' ? 'var(--accent-indigo)' : 'var(--bg-primary)',
+                    color: selectedFocusType === 'life_stage' ? '#FFFFFF' : 'var(--text-secondary)',
+                    border: '1px solid var(--border-subtle)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Etapas de Vida
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedFocusType('common_interest'); setVisibleLimit(6); }}
+                  style={{
+                    minHeight: '38px',
+                    padding: '6px 14px',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: '0.84rem',
+                    fontWeight: 600,
+                    backgroundColor: selectedFocusType === 'common_interest' ? 'var(--accent-amber)' : 'var(--bg-primary)',
+                    color: selectedFocusType === 'common_interest' ? '#FFFFFF' : 'var(--text-secondary)',
+                    border: '1px solid var(--border-subtle)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Interés Común
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedFocusType('foundational'); setVisibleLimit(6); }}
+                  style={{
+                    minHeight: '38px',
+                    padding: '6px 14px',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: '0.84rem',
+                    fontWeight: 600,
+                    backgroundColor: selectedFocusType === 'foundational' ? 'var(--accent-emerald)' : 'var(--bg-primary)',
+                    color: selectedFocusType === 'foundational' ? '#FFFFFF' : 'var(--text-secondary)',
+                    border: '1px solid var(--border-subtle)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Discipulado y Fundamentos
+                </button>
+              </div>
+            </div>
+
+            {/* Selector de Afinidad / Tema */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                Afinidad o Tema:
+              </label>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className={`affinity-chip ${selectedAffinity === '' ? 'active' : ''}`}
+                  onClick={() => { setSelectedAffinity(''); setVisibleLimit(6); }}
+                  style={{
+                    minHeight: '38px',
+                    padding: '6px 14px',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: '0.84rem',
+                    fontWeight: 600,
+                    backgroundColor: selectedAffinity === '' ? 'var(--text-primary)' : 'var(--bg-primary)',
+                    color: selectedAffinity === '' ? 'var(--bg-primary)' : 'var(--text-secondary)',
+                    border: '1px solid var(--border-subtle)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Todos los Temas
+                </button>
+                {config?.affinities.map((aff) => (
+                  <button
+                    key={aff.id}
+                    type="button"
+                    className={`affinity-chip ${selectedAffinity === aff.id ? 'active' : ''}`}
+                    onClick={() => { setSelectedAffinity(aff.id); setVisibleLimit(6); }}
+                    style={{
+                      minHeight: '38px',
+                      padding: '6px 14px',
+                      borderRadius: 'var(--radius-full)',
+                      fontSize: '0.84rem',
+                      fontWeight: 600,
+                      backgroundColor: selectedAffinity === aff.id ? 'var(--accent-terracotta)' : 'var(--bg-primary)',
+                      color: selectedAffinity === aff.id ? '#FFFFFF' : 'var(--text-secondary)',
+                      border: '1px solid var(--border-subtle)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {aff.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Selector Territorial Único (GOLD-291) */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                Selector Territorial Único (Sector de la Ciudad):
+              </label>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {['all', 'Norte', 'Sur', 'Centro', 'Oriente', 'Poniente'].map((mz) => (
+                  <button
+                    key={mz}
+                    type="button"
+                    onClick={() => {
+                      setSelectedMacroZone(mz);
+                      setSelectedZone('');
+                      setVisibleLimit(6);
+                    }}
+                    style={{
+                      minHeight: '38px',
+                      padding: '6px 14px',
+                      borderRadius: 'var(--radius-full)',
+                      fontSize: '0.84rem',
+                      fontWeight: 600,
+                      backgroundColor: selectedMacroZone === mz ? 'var(--accent-amber)' : 'var(--bg-primary)',
+                      color: selectedMacroZone === mz ? '#FFFFFF' : 'var(--text-secondary)',
+                      border: '1px solid var(--border-subtle)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {mz === 'all' ? 'Todos los Sectores' : `Sector ${mz}`}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Opciones Especiales: Espacio infantil & Transporte */}
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '24px' }}>
+              <button
+                type="button"
+                id="filter-kids-welcome"
+                onClick={() => setFilterKids((prev) => (prev === true ? null : true))}
+                style={{
+                  minHeight: '40px',
+                  padding: '8px 16px',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: '0.84rem',
+                  fontWeight: 700,
+                  backgroundColor: filterKids === true ? 'var(--accent-emerald)' : 'var(--bg-primary)',
+                  color: filterKids === true ? '#FFFFFF' : 'var(--text-secondary)',
+                  border: filterKids === true ? '1px solid var(--accent-emerald)' : '1px solid var(--border-subtle)',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span>Espacio Infantil / Niños</span>
+                {filterKids === true && <CheckCircle2 size={14} />}
+              </button>
+
+              <button
+                type="button"
+                id="filter-transit-only"
+                onClick={() => setFilterTransitOnly((prev) => !prev)}
+                style={{
+                  minHeight: '40px',
+                  padding: '8px 16px',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: '0.84rem',
+                  fontWeight: 700,
+                  backgroundColor: filterTransitOnly ? 'var(--accent-indigo)' : 'var(--bg-primary)',
+                  color: filterTransitOnly ? '#FFFFFF' : 'var(--text-secondary)',
+                  border: filterTransitOnly ? '1px solid var(--accent-indigo)' : '1px solid var(--border-subtle)',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span>Transporte Accesible / Carpool</span>
+                {filterTransitOnly && <CheckCircle2 size={14} />}
+              </button>
+            </div>
+
+            {/* Botones de Acción del Modal */}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)' }}>
+              <button
+                type="button"
+                id="btn-reset-filters"
+                onClick={() => {
+                  setSelectedCampus('');
+                  setSelectedFocusType('all');
+                  setSelectedAffinity('');
+                  setSelectedMacroZone('all');
+                  setFilterKids(null);
+                  setFilterTransitOnly(false);
+                  setVisibleLimit(6);
+                }}
+                className="tap-target-48"
+                style={{
+                  padding: '10px 18px',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'transparent',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text-muted)',
+                  fontSize: '0.88rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Restablecer
+              </button>
+              <button
+                type="button"
+                id="btn-apply-filters"
+                onClick={() => setShowAdvancedFiltersModal(false)}
+                className="tap-target-48"
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'var(--accent-terracotta)',
+                  border: 'none',
+                  color: '#FFFFFF',
+                  fontSize: '0.88rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                Aplicar y Ver Grupos
+              </button>
             </div>
           </div>
         </div>
-
-        <button
-          onClick={() => setShowLegalModal(true)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--text-muted)',
-            fontSize: '0.84rem',
-            cursor: 'pointer',
-            padding: '8px 12px',
-            borderRadius: 'var(--radius-sm)',
-            fontWeight: 600,
-            transition: 'color var(--transition-fast)',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent-warm)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
-        >
-          <Lock size={14} />
-          <span>Protección de Datos & Confesión de Fe</span>
-        </button>
-      </div>
-
-      {/* Toolbar Táctil Horizontal de Afinidades sin Emojis Infantiles (GOLD-218 / GOLD-235) */}
-      <div className="surface-card" style={{ padding: '16px 20px', marginBottom: '32px' }}>
-        {/* Selector de Enfoque de Grupo (No sólo por etapa de vida) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-            Enfoque:
-          </span>
-          <button
-            type="button"
-            onClick={() => setSelectedFocusType('all')}
-            style={{
-              minHeight: '34px',
-              padding: '5px 14px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              backgroundColor: selectedFocusType === 'all' ? 'var(--text-primary)' : 'var(--bg-primary)',
-              color: selectedFocusType === 'all' ? 'var(--bg-primary)' : 'var(--text-secondary)',
-              border: '1px solid var(--border-subtle)',
-              cursor: 'pointer',
-            }}
-          >
-            Todos los Enfoques
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedFocusType('life_stage')}
-            style={{
-              minHeight: '34px',
-              padding: '5px 14px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              backgroundColor: selectedFocusType === 'life_stage' ? 'var(--accent-indigo)' : 'var(--bg-primary)',
-              color: selectedFocusType === 'life_stage' ? '#FFFFFF' : 'var(--text-secondary)',
-              border: '1px solid var(--border-subtle)',
-              cursor: 'pointer',
-            }}
-          >
-            Etapas de Vida
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedFocusType('common_interest')}
-            style={{
-              minHeight: '34px',
-              padding: '5px 14px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              backgroundColor: selectedFocusType === 'common_interest' ? 'var(--accent-amber)' : 'var(--bg-primary)',
-              color: selectedFocusType === 'common_interest' ? '#FFFFFF' : 'var(--text-secondary)',
-              border: '1px solid var(--border-subtle)',
-              cursor: 'pointer',
-            }}
-          >
-            Interés Común (Viajeros, Lectura, Charlas)
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedFocusType('foundational')}
-            style={{
-              minHeight: '34px',
-              padding: '5px 14px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              backgroundColor: selectedFocusType === 'foundational' ? 'var(--accent-emerald)' : 'var(--bg-primary)',
-              color: selectedFocusType === 'foundational' ? '#FFFFFF' : 'var(--text-secondary)',
-              border: '1px solid var(--border-subtle)',
-              cursor: 'pointer',
-            }}
-          >
-            Discipulado y Fundamentos
-          </button>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-muted)', fontSize: '0.88rem', fontWeight: 700 }}>
-          <Filter size={16} style={{ color: 'var(--accent-amber)' }} />
-          <span>Filtro por Afinidad o Tema:</span>
-        </div>
-
-        {/* Fila Táctil Deslizable de 48px con Snap y role="toolbar" */}
-        <div className="affinity-scroller hide-scrollbar" role="toolbar" aria-label="Filtro de grupos">
-          <button
-            type="button"
-            className={`affinity-chip ${selectedAffinity === '' ? 'active' : ''}`}
-            aria-pressed={selectedAffinity === ''}
-            onClick={() => setSelectedAffinity('')}
-          >
-            <span>Todos los Grupos</span>
-          </button>
-          {config?.affinities.map((aff) => (
-            <button
-              key={aff.id}
-              type="button"
-              className={`affinity-chip ${selectedAffinity === aff.id ? 'active' : ''}`}
-              aria-pressed={selectedAffinity === aff.id}
-              onClick={() => setSelectedAffinity(aff.id)}
-            >
-              <span>{aff.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Selector Territorial Único (Decisión 5-B / GOLD-291) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', flexWrap: 'wrap', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
-          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-            Sector:
-          </span>
-          {['all', 'Norte', 'Sur', 'Centro', 'Oriente', 'Poniente'].map((mz) => (
-            <button
-              key={mz}
-              type="button"
-              onClick={() => {
-                setSelectedMacroZone(mz);
-                setSelectedZone('');
-              }}
-              style={{
-                minHeight: '34px',
-                padding: '4px 14px',
-                borderRadius: 'var(--radius-full)',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                backgroundColor: selectedMacroZone === mz ? 'var(--accent-amber)' : 'var(--bg-primary)',
-                color: selectedMacroZone === mz ? '#FFFFFF' : 'var(--text-secondary)',
-                border: '1px solid var(--border-subtle)',
-                cursor: 'pointer',
-              }}
-            >
-              {mz === 'all' ? 'Todos los Sectores' : `Sector ${mz}`}
-            </button>
-          ))}
-
-          {/* Filtro Espacio Infantil */}
-          <button
-            type="button"
-            id="filter-kids-welcome"
-            onClick={() => setFilterKids((prev) => (prev === true ? null : true))}
-            style={{
-              minHeight: '34px',
-              padding: '4px 14px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              backgroundColor: filterKids === true ? 'var(--accent-emerald)' : 'var(--bg-surface)',
-              color: filterKids === true ? '#FFFFFF' : 'var(--text-secondary)',
-              border: filterKids === true ? '1px solid var(--accent-emerald)' : '1px solid var(--border-subtle)',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              marginLeft: 'auto',
-            }}
-          >
-            <span>Espacio Infantil / Niños</span>
-            {filterKids === true && <CheckCircle2 size={12} />}
-          </button>
-
-          {/* Filtro Transporte Accesible / Carpool */}
-          <button
-            type="button"
-            id="filter-transit-only"
-            onClick={() => setFilterTransitOnly((prev) => !prev)}
-            style={{
-              minHeight: '34px',
-              padding: '4px 14px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              backgroundColor: filterTransitOnly ? 'var(--accent-indigo)' : 'var(--bg-surface)',
-              color: filterTransitOnly ? '#FFFFFF' : 'var(--text-secondary)',
-              border: filterTransitOnly ? '1px solid var(--accent-indigo)' : '1px solid var(--border-subtle)',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-          >
-            <span>Transporte Accesible / Carpool</span>
-            {filterTransitOnly && <CheckCircle2 size={12} />}
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Grid del Catálogo de Grupos Pequeños */}
       {loading ? (
@@ -737,7 +1137,7 @@ export const PublicPortal: React.FC = () => {
           gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
           gap: '24px',
         }}>
-          {displayedGroups.map((group) => {
+          {displayedGroups.slice(0, visibleLimit).map((group) => {
             const isCommonInterest =
               group.focus_type === 'common_interest' ||
               group.affinity_name.toLowerCase().includes('viajer') ||
@@ -881,20 +1281,26 @@ export const PublicPortal: React.FC = () => {
                 }}>
                   <div>
                     <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 700 }}>Facilitador</span>
-                    <strong style={{ color: 'var(--text-primary)' }}>{group.facilitator_name || group.leader_name || 'Designado'}</strong>
+                    <strong style={{ color: 'var(--text-primary)' }}>
+                      {formatVisibleName(group.facilitator_name || group.leader_name) || 'Designado'}
+                    </strong>
                   </div>
                   <div>
                     <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 700 }}>
                       {group.venue_type === 'institucional' ? 'Contacto / Enlace' : 'Anfitrión'}
                     </span>
                     <strong style={{ color: 'var(--text-primary)' }}>
-                      {group.venue_type === 'institucional' ? (group.liaison_name || group.host_reference || 'Enlace Institucional') : (group.host_reference || 'Hogar sede')}
+                      {group.venue_type === 'institucional'
+                        ? (group.liaison_name || group.host_reference || 'Enlace Institucional')
+                        : (group.host_reference && group.host_reference !== 'Hogar sede'
+                            ? formatVisibleName(group.host_reference)
+                            : (group.host_reference || 'Hogar sede'))}
                     </strong>
                   </div>
                   {group.apprentice_name && (
                     <div>
                       <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 700 }}>Aprendiz</span>
-                      <strong style={{ color: 'var(--text-primary)' }}>{group.apprentice_name}</strong>
+                      <strong style={{ color: 'var(--text-primary)' }}>{formatVisibleName(group.apprentice_name)}</strong>
                     </div>
                   )}
                 </div>
@@ -939,12 +1345,12 @@ export const PublicPortal: React.FC = () => {
                             borderRadius: '4px',
                             fontWeight: 700,
                           }}>
-                            <Lock size={10} /> Privacidad Sellada
+                            <Lock size={10} /> La dirección de este hogar está cuidada
                           </span>
                         )}
                       </div>
                       <div style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', marginTop: '2px' }}>
-                        {group.location_summary}
+                        {sanitizeLocationSummary(group.location_summary)}
                       </div>
                       {group.map_url && (
                         <a
@@ -986,95 +1392,113 @@ export const PublicPortal: React.FC = () => {
                   )}
                 </div>
 
-                {/* Pie de Tarjeta: Líder con MonogramAvatar y Botones Pase + Visita */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  paddingTop: '14px',
-                  borderTop: '1px solid var(--border-subtle)',
-                  gap: '8px',
-                  flexWrap: 'wrap',
-                }}>
-                  {group.leader_name ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <MonogramAvatar name={group.leader_name} size="sm" />
-                      <span style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
-                        Líder: <strong>{group.leader_name}</strong>
-                      </span>
+                {/* Pie de Tarjeta: Líder con MonogramAvatar y Botón de Puerta Única (GOLD-321 & GOLD-325) */}
+                {(() => {
+                  const visibleLeaderName = formatVisibleName(group.leader_name);
+                  return (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      paddingTop: '14px',
+                      borderTop: '1px solid var(--border-subtle)',
+                      gap: '8px',
+                      flexWrap: 'wrap',
+                    }}>
+                      {visibleLeaderName ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <MonogramAvatar name={visibleLeaderName} size="sm" />
+                          <span style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+                            {group.venue_type === 'institucional' ? 'Contacto / Enlace' : 'Anfitrión'}: <strong>{visibleLeaderName}</strong>
+                          </span>
+                        </div>
+                      ) : (
+                        <div />
+                      )}
+
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        {visibleLeaderName && (
+                          <a
+                            href={`https://wa.me/526181000001?text=${encodeURIComponent(`Hola ${visibleLeaderName}, vi tu grupo pequeño '${group.nombre_publico}' en el portal de Amor y Gracia Durango y me gustaría conocerlos.`)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn-secondary tap-target-48 btn-wa-safe"
+                            style={{
+                              minHeight: '44px',
+                              padding: '6px 14px',
+                              fontSize: '0.82rem',
+                              fontWeight: 600,
+                              borderRadius: 'var(--radius-full)',
+                              textDecoration: 'none',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                            }}
+                            title={`Saludar a ${visibleLeaderName} por WhatsApp`}
+                          >
+                            <MessageCircle size={15} style={{ color: 'var(--accent-emerald)' }} />
+                            <span>Saludar por WhatsApp</span>
+                          </a>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => setActiveModalGroup(group)}
+                          className="btn-primary tap-target-48"
+                          style={{
+                            minHeight: '44px',
+                            padding: '8px 18px',
+                            fontSize: '0.88rem',
+                            fontWeight: 700,
+                            borderRadius: 'var(--radius-full)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                          }}
+                        >
+                          <MessageCircle size={15} />
+                          <span>Quiero Conocer Este Grupo</span>
+                        </button>
+                      </div>
                     </div>
-                  ) : (
-                    <div />
-                  )}
-
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <button
-                      type="button"
-                      onClick={() => setPassModalGroup(group)}
-                      className="btn-secondary"
-                      style={{
-                        minHeight: '42px',
-                        padding: '6px 12px',
-                        fontSize: '0.82rem',
-                        fontWeight: 600,
-                      }}
-                      title="Ver Pase Comunitario y sincronización de calendario"
-                    >
-                      <span>Pase / QR</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setActiveModalGroup(group)}
-                      className="btn-primary"
-                      style={{
-                        minHeight: '42px',
-                        padding: '8px 14px',
-                        fontSize: '0.86rem',
-                      }}
-                    >
-                      <MessageCircle size={15} />
-                      <span>Quiero Visitar</span>
-                    </button>
-                  </div>
-                </div>
+                  );
+                })()}
               </article>
             );
           })}
         </div>
       )}
 
-      {/* Sección: Iniciativas Comunitarias y Coloquios Abiertos (GOLD-303) */}
+      {/* Botón de Carga Progresiva / Revelación Suave para 15k Miembros (GOLD-324) */}
+      {!loading && displayedGroups.length > visibleLimit && (
+        <div style={{ textAlign: 'center', marginTop: '36px' }}>
+          <button
+            type="button"
+            id="btn-load-more-groups"
+            onClick={() => setVisibleLimit((prev) => prev + 6)}
+            className="btn-secondary tap-target-48"
+            style={{
+              padding: '12px 28px',
+              fontSize: '0.92rem',
+              fontWeight: 700,
+              borderRadius: 'var(--radius-full)',
+              border: '1.5px solid var(--accent-terracotta)',
+              color: 'var(--accent-terracotta)',
+              backgroundColor: 'var(--bg-surface)',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-sm)',
+            }}
+          >
+            Ver más grupos en esta zona ({displayedGroups.length - visibleLimit} restantes)
+          </button>
+        </div>
+      )}
+
+      {/* Sección: Iniciativas Comunitarias y Coloquios Abiertos (Vitrina Inspiracional Pública / GOLD-320) */}
       <section style={{ marginTop: '48px', marginBottom: '36px' }}>
-        <CommunityInitiativesHub />
+        <CommunityInitiativesHub publicShowcaseOnly={true} />
       </section>
 
-      {/* Sección: Sincronización Litúrgica y Armonización Celular (GOLD-297) */}
-      <section style={{ marginBottom: '36px' }}>
-        <CellHarmonizer
-          cellName="Comunidades y Familias"
-          cellDay="Jueves"
-          cellTime="19:30"
-          upcomingGeneralEvents={[
-            {
-              id: 'event-lit-1',
-              title: 'Congreso de Jóvenes y Familias 2026',
-              date: '2026-10-15',
-              time: '19:00',
-              location: 'Sede Central Durango (Auditorio)',
-              category: 'magno',
-            },
-            {
-              id: 'event-lit-2',
-              title: 'Retiro Fraternal Femenino (Tito 2)',
-              date: '2026-11-06',
-              time: '18:00',
-              location: 'Campamento El Saltito',
-              category: 'segmentado_mujeres',
-            },
-          ]}
-        />
-      </section>
 
       {/* Modal de Solicitud de Visita con Dual-Channel WhatsApp Inmediato (GOLD-234) */}
       {activeModalGroup && (
@@ -1129,7 +1553,7 @@ export const PublicPortal: React.FC = () => {
                 {/* Botón de Despacho Inmediato a WhatsApp con Protocolo de Banqueta (GOLD-247 / Decisión 8-C) */}
                 <a
                   href={`https://wa.me/526181234567?text=${encodeURIComponent(
-                    `Hola ${activeModalGroup.leader_name || 'Líder'}, soy ${joinName}. Vi el grupo '${activeModalGroup.nombre_publico}' en el directorio de la iglesia y me gustaría visitarlos este ${formatDayOfWeek(activeModalGroup.dia_habitual)} a las ${activeModalGroup.hora_habitual} hrs. ¿Podrías salir a recibirme a la banqueta al llegar para ubicar la casa? ¡Muchas gracias!`
+                    `Hola ${formatVisibleName(activeModalGroup.leader_name) || 'Líder'}, soy ${joinName}. Vi el grupo '${activeModalGroup.nombre_publico}' en el directorio de la iglesia y me gustaría visitarlos este ${formatDayOfWeek(activeModalGroup.dia_habitual)} a las ${activeModalGroup.hora_habitual} hrs. ¿Podrías salir a recibirme a la banqueta al llegar para ubicar la casa? ¡Muchas gracias!`
                   )}`}
                   target="_blank"
                   rel="noreferrer"
@@ -1283,16 +1707,16 @@ export const PublicPortal: React.FC = () => {
                   </div>
 
                   <div style={{
-                    padding: '12px',
+                    padding: '12px 14px',
                     borderRadius: 'var(--radius-md)',
                     backgroundColor: 'var(--accent-emerald-light)',
                     border: '1px solid var(--accent-emerald-border)',
-                    fontSize: '0.82rem',
+                    fontSize: '0.84rem',
                     color: 'var(--accent-emerald)',
-                    lineHeight: 1.4,
+                    lineHeight: 1.45,
                   }}>
-                    <Lock size={12} style={{ display: 'inline', marginRight: '4px' }} />
-                    <strong>Privacidad de Datos:</strong> Tu número sólo será visible para el líder del grupo para saludarte y coordinar la logística.
+                    <Lock size={13} style={{ display: 'inline', marginRight: '6px' }} />
+                    <strong>Un espacio seguro:</strong> Tu número solo lo recibe el anfitrión para darte la bienvenida personal. Jamás compartiremos tus datos con nadie más ni te enviaremos publicidad.
                   </div>
 
                   <button
@@ -1332,68 +1756,31 @@ export const PublicPortal: React.FC = () => {
         />
       )}
 
-      {/* SECCIÓN DE ATENCIÓN A VECINOS Y CONVIVENCIA EN DURANGO */}
-      <footer style={{ marginTop: '54px', paddingTop: '28px', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div
-          className="surface-card"
-          style={{
-            padding: '24px 28px',
-            borderRadius: 'var(--radius-lg)',
-            border: '1.5px solid var(--accent-emerald-border)',
-            backgroundColor: 'rgba(16, 185, 129, 0.03)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '20px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div
-              style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: 'var(--radius-full)',
-                backgroundColor: 'var(--accent-emerald-light)',
-                border: '1px solid var(--accent-emerald-border)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#10B981',
-                flexShrink: 0,
-              }}
-            >
-              <HeartHandshake size={24} />
-            </div>
-            <div>
-              <h4 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-primary)', fontWeight: 800 }}>
-                Atención a Vecinos y Convivencia en Durango
-              </h4>
-              <p style={{ margin: '6px 0 0 0', fontSize: '0.86rem', color: 'var(--text-secondary)', maxWidth: '720px', lineHeight: 1.45 }}>
-                ¿Vives en una colonia donde opera uno de nuestros grupos y tienes alguna inquietud sobre estacionamiento, ruido o libre tránsito? 
-                En Amor y Gracia nos comprometemos a ser los vecinos más respetuosos y pacíficos de Durango. Escríbenos y con gusto dialogaremos en menos de 3 días para resolverlo juntos.
-              </p>
-            </div>
-          </div>
-
+      {/* Enlace de Cortesía Cívica Vecinal en Pie de Página Institucional (GOLD-322) */}
+      <footer style={{ marginTop: '54px', paddingTop: '28px', borderTop: '1px solid var(--border-subtle)', textAlign: 'center' }}>
+        <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          ¿Eres vecino de alguna de nuestras reuniones en casa? Queremos ser una bendición y los vecinos más respetuosos para tu colonia.{' '}
           <button
             type="button"
+            id="btn-open-civic-care"
             onClick={() => {
               setShowComplaintModal(true);
               setComplaintSuccessMessage(null);
             }}
-            className="btn-secondary"
             style={{
-              borderColor: 'var(--accent-emerald)',
+              background: 'none',
+              border: 'none',
               color: 'var(--accent-emerald)',
               fontWeight: 700,
+              textDecoration: 'underline',
+              cursor: 'pointer',
+              padding: '0 4px',
               fontSize: '0.88rem',
-              padding: '12px 20px',
             }}
           >
-            Reportar Inquietud Vecinal
+            Escríbenos con confianza aquí
           </button>
-        </div>
+        </p>
       </footer>
 
       {/* Modal Institucional (Qué Sostenemos • Qué No • LFPDPPP) */}

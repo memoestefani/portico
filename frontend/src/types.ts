@@ -452,6 +452,7 @@ export interface ElderAssignment {
   elder_id: string;
   elder_name: string;
   deacon_id: string;
+  deacon_name?: string;
   created_at: string;
 }
 

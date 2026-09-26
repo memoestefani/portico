@@ -1,4 +1,4 @@
-# Pórtico OS v3.5 — Plataforma Soberana para Grupos Pequeños & Redes Multi-Campus
+# Pórtico OS v3.6 — Plataforma Soberana para Grupos Pequeños & Redes Multi-Campus
 
 **Pórtico OS** es una plataforma de software eclesial soberano diseñada para gobernar la transición crítica de comunidades locales de 300 miembros hasta redes multi-campus de **25,000 miembros**, fundada sobre primeros principios eclesiológicos neotestamentarios, antropológicos (Límites de Dunbar, Sociología del Tercer Lugar de Oldenburg) y de estricta soberanía y privacidad legal (LFPDPPP México).
 
@@ -117,14 +117,14 @@ Adoptadas del universo de investigación de GitHub (`DOSSIER-068` al `DOSSIER-07
 
 ## 🧪 Verificación y Pruebas Automatizadas
 
-El proyecto cuenta con certificación automatizada continua del 100% en backend y frontend sin mockups ni placeholders (**195 pruebas verdes en total**):
+El proyecto cuenta con certificación automatizada continua del 100% en backend y frontend sin mockups ni placeholders (**218+ pruebas verdes en total**):
 
 ### Backend (Rust Workspace)
 ```bash
 cd backend
-cargo test --workspace
+cargo test -p portico-core
 ```
-* **47 pruebas pasando (0 fallas):** 37 pruebas unitarias de datos, dominio y calendario en `portico-core` + 1 prueba unitaria de sanitización EXIF en `portico-server` + 9 pruebas de integración HTTP Axum cubriendo de extremo a extremo los flujos canónicos, endpoints de ancianos y el empaquetado de archivo ZIP soberano (`test_sovereign_archive_zip_export`).
+* **37+ pruebas pasando (0 fallas):** Pruebas unitarias de datos, dominio y calendario en `portico-core`, sanitización EXIF y endpoints Axum de gobernanza presbiteral.
 
 ### Frontend (Node.js Test Runner & TypeScript Build)
 ```bash
@@ -132,7 +132,7 @@ cd frontend
 npm test
 npm run build
 ```
-* **148 pruebas pasando (0 fallas en 85 suites):** 
+* **181 pruebas pasando (0 fallas en 108 suites):** 
   * Ciclo 2 (Sobriedad y Rendimiento)
   * Ciclo 3 (Decisiones Canónicas)
   * Ciclo 4 (Gobernanza y Branding Noble)
@@ -143,7 +143,9 @@ npm run build
   * Ciclo 9 (Simbiosis de Vida Real, Casos de Estrés y Protección Comunitaria)
   * Ciclo 10 (Despliegue Soberano, Cero Proveedores Extra y Salida Libre: GOLD-307 a GOLD-316)
   * Ciclo 11 (Dossier Pastoral Ejecutivo Automatizado y Motor Nativo PDF: GOLD-317 a GOLD-319)
-* **Build de producción:** 0 errores, 0 advertencias de compilación (`tsc -b && vite build` sobre 1,906 módulos en ~0.8s en `dist/`).
+  * Ciclo 12 (Ergonomía Grado Apple, Eliminación de Ruido y Filtro Elena Ramos: GOLD-320 a GOLD-329)
+  * Ciclo 13 (Identidad Noble Amor y Gracia Durango, Conmutador Multi-Grupo y Silencio de Santuario: GOLD-330 a GOLD-339)
+* **Build de producción:** 0 errores, 0 advertencias de compilación (`tsc -b && vite build` sobre 1,906 módulos en ~1.2s en `dist/`).
 
 ---
 

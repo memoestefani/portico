@@ -62,7 +62,13 @@ const INITIAL_INITIATIVES: CommunityInitiative[] = [
   },
 ];
 
-export const CommunityInitiativesHub: React.FC = () => {
+interface CommunityInitiativesHubProps {
+  publicShowcaseOnly?: boolean;
+}
+
+export const CommunityInitiativesHub: React.FC<CommunityInitiativesHubProps> = ({
+  publicShowcaseOnly = false,
+}) => {
   const [initiatives, setInitiatives] = useState<CommunityInitiative[]>(INITIAL_INITIATIVES);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [showPledgeModal, setShowPledgeModal] = useState<string | null>(null);
@@ -140,7 +146,7 @@ export const CommunityInitiativesHub: React.FC = () => {
               fontWeight: 600,
               cursor: 'pointer',
               background: activeCategory === cat.id ? 'var(--text-primary)' : 'rgba(255,255,255,0.06)',
-              color: activeCategory === cat.id ? 'var(--bg-main, #0f172a)' : 'var(--text-secondary)',
+              color: activeCategory === cat.id ? 'var(--bg-primary)' : 'var(--text-secondary)',
               border: '1px solid var(--border-subtle, rgba(255,255,255,0.1))',
               whiteSpace: 'nowrap',
               transition: 'all 0.15s ease',
@@ -157,8 +163,8 @@ export const CommunityInitiativesHub: React.FC = () => {
           <div
             key={init.id}
             style={{
-              background: 'var(--card-bg, #1e293b)',
-              border: '1px solid var(--border-subtle, #334155)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '16px',
               padding: '20px',
               display: 'flex',
@@ -181,7 +187,7 @@ export const CommunityInitiativesHub: React.FC = () => {
                 >
                   {init.category === 'servicio' ? 'Servicio Hospitalario' : init.category === 'lectura_cultura' ? 'Coloquio Cultural' : 'Convivencia'}
                 </span>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted, #94a3b8)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                   <Users size={13} /> {init.volunteers.length} voluntarios
                 </span>
               </div>
@@ -201,55 +207,68 @@ export const CommunityInitiativesHub: React.FC = () => {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Phone size={14} className="text-indigo-400" />
-                  <span>Coordinación: {init.coordinator_name} ({init.coordinator_phone})</span>
+                  <span>Coordinación: {init.coordinator_name}{!publicShowcaseOnly ? ` (${init.coordinator_phone})` : ''}</span>
                 </div>
               </div>
 
-              {/* Pledges List */}
-              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
-                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Insumos Comprometidos por la Comunidad:
+              {/* Pledges List (Solo en Silo del Miembro / GOLD-320) */}
+              {!publicShowcaseOnly ? (
+                <div style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Insumos Comprometidos por la Comunidad:
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {init.pledges.map((p, idx) => (
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                        <span style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <CheckCircle size={13} style={{ color: 'var(--accent-emerald)' }} />
+                          {p.item} ({p.quantity})
+                        </span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{p.committed_by}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {init.pledges.map((p, idx) => (
-                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
-                      <span style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <CheckCircle size={13} style={{ color: '#10b981' }} />
-                        {p.item} ({p.quantity})
-                      </span>
-                      <span style={{ color: 'var(--text-muted, #64748b)', fontSize: '0.75rem' }}>{p.committed_by}</span>
-                    </div>
-                  ))}
+              ) : (
+                <div style={{ padding: '12px 14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-subtle)', marginBottom: '16px', fontSize: '0.84rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                  <strong style={{ display: 'block', color: 'var(--text-primary)', marginBottom: '4px' }}>Amor y Acompañamiento Ciudadano</strong>
+                  Actividad de servicio abierta a toda la comunidad de Durango. Los discípulos y miembros coordinan insumos en sus reuniones de hogar.
                 </div>
-              </div>
+              )}
             </div>
 
-            {/* Action Buttons */}
+            {/* Action Buttons (Solo miembros activos pueden comprometer insumos / GOLD-320) */}
             <div>
-              <button
-                type="button"
-                id={`btn-volunteer-${init.id}`}
-                className="btn-volunteer"
-                onClick={() => setShowPledgeModal(init.id)}
-                style={{
-                  width: '100%',
-                  padding: '10px',
-                  borderRadius: '10px',
-                  background: 'var(--primary, #4f46e5)',
-                  color: '#ffffff',
-                  border: 'none',
-                  fontSize: '0.86rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                }}
-              >
-                <Plus size={16} />
-                <span>Sumarme como Voluntario o Llevar Insumo</span>
-              </button>
+              {!publicShowcaseOnly ? (
+                <button
+                  type="button"
+                  id={`btn-volunteer-${init.id}`}
+                  className="btn-volunteer"
+                  onClick={() => setShowPledgeModal(init.id)}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '10px',
+                    background: 'var(--accent-terracotta, #93432F)',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontSize: '0.86rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <Plus size={16} />
+                  <span>Sumarme como Voluntario o Llevar Insumo</span>
+                </button>
+              ) : (
+                <div style={{ fontSize: '0.84rem', color: 'var(--accent-emerald)', fontWeight: 600, textAlign: 'center', padding: '8px' }}>
+                  ✓ Actividad abierta a la comunidad de Durango
+                </div>
+              )}
             </div>
 
             {/* Modal for Pledging */}
@@ -271,66 +290,66 @@ export const CommunityInitiativesHub: React.FC = () => {
               >
                 <div
                   style={{
-                    background: '#1e293b',
-                    border: '1px solid #334155',
+                    background: 'var(--bg-surface-elevated, var(--bg-surface))',
+                    border: '1px solid var(--border-strong)',
                     borderRadius: '16px',
                     padding: '24px',
                     maxWidth: '440px',
                     width: '100%',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+                    boxShadow: 'var(--shadow-elevated)',
                   }}
                 >
-                  <h3 style={{ margin: '0 0 6px 0', fontSize: '1.15rem', color: '#f8fafc' }}>
+                  <h3 style={{ margin: '0 0 6px 0', fontSize: '1.15rem', color: 'var(--text-primary)' }}>
                     Sumarte a: {init.title}
                   </h3>
-                  <p style={{ margin: '0 0 16px 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+                  <p style={{ margin: '0 0 16px 0', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                     Registra tu contacto para coordinar con {init.coordinator_name}.
                   </p>
 
                   <form onSubmit={(e) => handlePledgeSubmit(e, init.id)}>
                     <div style={{ marginBottom: '12px' }}>
-                      <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '4px' }}>Tu Nombre:</label>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Tu Nombre:</label>
                       <input
                         type="text"
                         required
                         value={volunteerName}
                         onChange={(e) => setVolunteerName(e.target.value)}
                         placeholder="Ej. Juan Pérez"
-                        style={{ width: '100%', padding: '8px 12px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.88rem', boxSizing: 'border-box' }}
+                        style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-primary)', border: '1px solid var(--border-strong)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '0.88rem', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ marginBottom: '12px' }}>
-                      <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '4px' }}>Teléfono / WhatsApp:</label>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Teléfono / WhatsApp:</label>
                       <input
                         type="tel"
                         required
                         value={volunteerPhone}
                         onChange={(e) => setVolunteerPhone(e.target.value)}
                         placeholder="Ej. +52 618 123 4567"
-                        style={{ width: '100%', padding: '8px 12px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.88rem', boxSizing: 'border-box' }}
+                        style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-primary)', border: '1px solid var(--border-strong)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '0.88rem', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ marginBottom: '12px' }}>
-                      <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '4px' }}>Insumo que deseas aportar (Opcional):</label>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Insumo que deseas aportar (Opcional):</label>
                       <input
                         type="text"
                         value={pledgeItem}
                         onChange={(e) => setPledgeItem(e.target.value)}
                         placeholder="Ej. 1 termo de café de olla / 10 tortas"
-                        style={{ width: '100%', padding: '8px 12px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.88rem', boxSizing: 'border-box' }}
+                        style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-primary)', border: '1px solid var(--border-strong)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '0.88rem', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ marginBottom: '20px' }}>
-                      <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '4px' }}>Cantidad de insumo:</label>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Cantidad de insumo:</label>
                       <input
                         type="number"
                         min="1"
                         value={pledgeQty}
                         onChange={(e) => setPledgeQty(Number(e.target.value) || 1)}
-                        style={{ width: '100%', padding: '8px 12px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.88rem', boxSizing: 'border-box' }}
+                        style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-primary)', border: '1px solid var(--border-strong)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '0.88rem', boxSizing: 'border-box' }}
                       />
                     </div>
 
@@ -338,13 +357,13 @@ export const CommunityInitiativesHub: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setShowPledgeModal(null)}
-                        style={{ padding: '8px 16px', background: 'transparent', border: '1px solid #475569', borderRadius: '8px', color: '#cbd5e1', cursor: 'pointer', fontSize: '0.85rem' }}
+                        style={{ padding: '8px 16px', background: 'transparent', border: '1px solid var(--border-strong)', borderRadius: '8px', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.85rem' }}
                       >
                         Cancelar
                       </button>
                       <button
                         type="submit"
-                        style={{ padding: '8px 18px', background: '#10b981', border: 'none', borderRadius: '8px', color: '#ffffff', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem' }}
+                        style={{ padding: '8px 18px', background: 'var(--accent-emerald)', border: 'none', borderRadius: '8px', color: '#ffffff', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem' }}
                       >
                         Confirmar Participación
                       </button>

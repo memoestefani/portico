@@ -264,6 +264,13 @@ pub async fn get_catalog_handler(
     let mut cards = Vec::new();
     let today = Utc::now().date_naive();
 
+    let is_authenticated_user = headers
+        .get("Authorization")
+        .and_then(|h| h.to_str().ok())
+        .and_then(|h| h.strip_prefix("Bearer "))
+        .map(|t| crate::auth::validate_session(&tenant_conn, t.trim()).is_ok())
+        .unwrap_or(false);
+
     for (ed, tmpl) in editions_with_templates {
         // Filter by affinity
         if let Some(ref aff_filter) = query.affinity_id {
@@ -297,11 +304,18 @@ pub async fn get_catalog_handler(
             continue;
         }
 
-        // Fetch apprentice name if present
+        // Fetch apprentice name if present (Público general: solo primer nombre)
         let apprentice_name: Option<String> = tmpl.apprentice_id.as_ref().and_then(|aid| {
             tenant_conn
-                .query_row("SELECT nombre_visible FROM member WHERE id = ?1", params![aid], |r| r.get(0))
+                .query_row("SELECT nombre_visible FROM member WHERE id = ?1", params![aid], |r| r.get::<_, String>(0))
                 .ok()
+                .map(|name| {
+                    if is_authenticated_user {
+                        name
+                    } else {
+                        name.split_whitespace().next().unwrap_or("").to_string()
+                    }
+                })
         });
 
         // Fetch affinity name
@@ -320,42 +334,74 @@ pub async fn get_catalog_handler(
                 .ok()
         }).unwrap_or_else(|| "Zona General".to_string());
 
-        // Leader name (only if public_responsible_visibility is true)
+        // Leader name (Público general: solo primer nombre)
         let leader_name = if ed.public_responsible_visibility {
             tenant_conn
                 .query_row(
                     "SELECT nombre_visible FROM member WHERE id = ?1",
                     params![ed.responsible_member_id],
-                    |r| r.get(0),
+                    |r| r.get::<_, String>(0),
                 )
                 .ok()
+                .map(|name| {
+                    if is_authenticated_user {
+                        name
+                    } else {
+                        name.split_whitespace().next().unwrap_or("").to_string()
+                    }
+                })
         } else {
             None
         };
 
+        // Host name (Público general: solo primer nombre o Hogar sede)
+        let host_name = tmpl.host_reference.clone().map(|h| {
+            if is_authenticated_user || h == "Hogar sede" {
+                h
+            } else {
+                h.split_whitespace().next().unwrap_or(&h).to_string()
+            }
+        });
+
         // Polymorphic Venue Privacy & Formatting Rules:
+        // Público general: zona general aproximada, cero notas.
+        // Con cuenta: dirección visible, cero notas (estacionamiento/timbres reservados para admitidos).
         let (venue_category, location_summary, map_url) = match tmpl.venue_type {
             VenueType::PrivateHome => {
-                // R11: Private home address and exact coordinates are sealed in member silo!
-                // Unauthenticated visitors see only the neighborhood/zone and general cross streets.
-                let loc = match (&tmpl.private_reference, &tmpl.public_location_name) {
-                    (Some(notes), Some(zone)) => format!("{}, Durango ({})", zone, notes),
-                    (None, Some(zone)) => format!("{}, Durango", zone),
-                    _ => format!("{}, Durango (Domicilio particular)", zone_label),
+                let loc = if is_authenticated_user {
+                    if let Some(ref addr) = tmpl.private_address {
+                        format!("{}, Durango", addr)
+                    } else if let Some(ref zone) = tmpl.public_location_name {
+                        format!("{}, Durango", zone)
+                    } else {
+                        format!("Zona {}, Durango", zone_label)
+                    }
+                } else {
+                    if let Some(ref zone) = tmpl.public_location_name {
+                        if zone.to_lowercase().starts_with("zona ") {
+                            format!("{}, Durango", zone)
+                        } else {
+                            format!("Zona {}, Durango", zone)
+                        }
+                    } else {
+                        format!("Zona {}, Durango", zone_label)
+                    }
                 };
                 ("Casa particular".to_string(), loc, None)
             }
             VenueType::PublicVenue => {
-                // Public venues: fully open and visible with Google Maps link
                 let loc = tmpl.public_location_name.clone().unwrap_or_else(|| "Lugar Público".to_string());
-                let full_loc = match &tmpl.private_address {
-                    Some(addr) => format!("{} - {}", loc, addr),
-                    None => loc,
+                let full_loc = if is_authenticated_user {
+                    match &tmpl.private_address {
+                        Some(addr) => format!("{} - {}", loc, addr),
+                        None => loc,
+                    }
+                } else {
+                    format!("{}, Durango", loc)
                 };
                 ("Lugar público".to_string(), full_loc, tmpl.public_location_url.clone())
             }
             VenueType::OnlineSession => {
-                // Online: link is sealed for members
                 ("En línea".to_string(), "Reunión virtual en tiempo real (enlace al inscribirse)".to_string(), None)
             }
             VenueType::Other => ("Punto de encuentro".to_string(), zone_label.clone(), None),
@@ -384,7 +430,7 @@ pub async fn get_catalog_handler(
             location_summary,
             map_url,
             leader_name,
-            host_name: tmpl.host_reference.clone(),
+            host_name,
             apprentice_name,
             kids_welcome: tmpl.kids_welcome,
             kids_space_type: tmpl.kids_space_type.clone(),

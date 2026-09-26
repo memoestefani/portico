@@ -49,6 +49,7 @@ export async function fetchPublicCatalog(params?: {
   kids_welcome?: boolean;
   macro_zone?: string;
   transit_only?: boolean;
+  token?: string;
 }): Promise<PublicEdition[]> {
   const query = new URLSearchParams();
   if (params?.campus_slug) query.set('campus_slug', params.campus_slug);
@@ -58,7 +59,12 @@ export async function fetchPublicCatalog(params?: {
   if (params?.macro_zone) query.set('macro_zone', params.macro_zone);
   if (params?.transit_only !== undefined) query.set('transit_only', String(params.transit_only));
 
-  const res = await fetch(`${BASE_URL}/catalog?${query.toString()}`);
+  const headers: Record<string, string> = {};
+  if (params?.token) {
+    headers['Authorization'] = `Bearer ${params.token}`;
+  }
+
+  const res = await fetch(`${BASE_URL}/catalog?${query.toString()}`, { headers });
   if (!res.ok) throw new Error('Error al cargar catálogo de grupos');
   return res.json();
 }

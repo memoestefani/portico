@@ -1,158 +1,153 @@
 import React from 'react';
-import { NOBLE_PALETTES } from './MonogramAvatar';
 
-/**
- * Pórtico OS v3.1 - Monograma Vectorial Amor y Gracia (GOLD-257)
- * Emblema heráldico noble: 'A' y 'G' entrelazadas formando una cruz y corazón sutil.
- * 100% SVG vectorial, escalable, sin dependencias de fuentes externas ni artefactos rasterizados.
- */
-
-interface ChurchBrandLogoProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-  variant?: 'icon' | 'horizontal' | 'stacked';
-  paletteId?: string;
+export interface ChurchBrandLogoProps {
+  /** Tamaño del isotipo en píxeles o alias ('sm', 'md', 'lg') (default: 32) */
+  size?: number | 'sm' | 'md' | 'lg';
+  /** Clases CSS adicionales */
   className?: string;
+  /** Variante: 'icon' (solo isotipo), 'full' o 'horizontal' (con tipografía noble) */
+  variant?: 'icon' | 'full' | 'horizontal';
+  /** Color principal del logo (default: currentColor) */
+  color?: string;
+  /** Color del isotipo interior (default: fondo noble) */
+  glyphColor?: string;
+  /** Nombre de la congregación tenant (default: Amor y Gracia) */
+  tenantName?: string;
+  /** Subtítulo o localidad */
+  locality?: string;
+  /** Subtítulo secundario (alias de localidad) */
   subtitle?: string;
+  /** Paleta de color opcional para integración conciliar */
+  paletteId?: string;
 }
 
+/**
+ * ChurchBrandLogo (GOLD-330 / Decisión 1-B)
+ * Isotipo vectorial SVG nativo del corazón isométrico A+G de Amor y Gracia Durango.
+ * Cero layout shifts, compatible con tema noble y multi-tenant.
+ */
 export const ChurchBrandLogo: React.FC<ChurchBrandLogoProps> = ({
-  size = 'md',
-  variant = 'horizontal',
-  paletteId = 'navy',
+  size = 32,
   className = '',
-  subtitle = 'Comunidades de Fe y Mesa',
+  variant = 'icon',
+  color = 'currentColor',
+  glyphColor = 'var(--bg-primary, #FBF9F5)',
+  tenantName = 'Amor y Gracia',
+  locality = 'Durango',
+  subtitle,
 }) => {
-  const palette = NOBLE_PALETTES.find(p => p.id === paletteId) || NOBLE_PALETTES[0];
+  const numericSize =
+    typeof size === 'number'
+      ? size
+      : size === 'sm'
+      ? 24
+      : size === 'lg'
+      ? 44
+      : 32;
 
-  const iconSizes = {
-    sm: 28,
-    md: 40,
-    lg: 56,
-    xl: 72,
-  };
+  const isFullOrHorizontal = variant === 'full' || variant === 'horizontal';
+  const displaySubtitle = subtitle || locality;
 
-  const currentIconSize = iconSizes[size] || 40;
-
-  // Emblema Vectorial: Escudo con arco románico, entrelace de 'A' (Amor) y 'G' (Gracia) y cruz superior
-  const MonogramSvg = (
-    <svg
-      width={currentIconSize}
-      height={currentIconSize}
-      viewBox="0 0 100 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0 transition-transform duration-300 hover:rotate-2"
-      aria-label="Monograma Institucional Amor y Gracia"
-    >
-      <defs>
-        <linearGradient id="nobleGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#F59E0B" />
-          <stop offset="50%" stopColor="#D97706" />
-          <stop offset="100%" stopColor="#B45309" />
-        </linearGradient>
-        <linearGradient id="nobleShieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={palette.bg} />
-          <stop offset="100%" stopColor="#1E293B" />
-        </linearGradient>
-      </defs>
-
-      {/* Escudo de arco románico */}
-      <rect
-        x="6"
-        y="6"
-        width="88"
-        height="88"
-        rx="22"
-        fill="url(#nobleShieldGrad)"
-        stroke={palette.border}
-        strokeWidth="3"
-      />
-
-      {/* Trazo de Cruz Alta */}
-      <path
-        d="M50 18V32M43 24H57"
-        stroke="url(#nobleGoldGrad)"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* Trazo 'A' (Amor) - Pierna izquierda y ápice */}
-      <path
-        d="M32 74L49 35C49.5 33.8 50.5 33.8 51 35L68 74"
-        stroke="#FFFFFF"
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* Barra transversal de la 'A' que enlaza la 'G' */}
-      <path
-        d="M39 58H61"
-        stroke="url(#nobleGoldGrad)"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-      />
-
-      {/* Curva noble de la 'G' (Gracia) envolviendo con corazón sutil */}
-      <path
-        d="M62 48C59 42 52 38 45 41C38 44 34 52 35 60C36 68 43 74 52 74C60 74 66 69 66 61H51"
-        stroke="url(#nobleGoldGrad)"
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* Dintel arquitectónico basal */}
-      <circle cx="50" cy="80" r="2.5" fill="#D97706" />
-    </svg>
-  );
-
-  if (variant === 'icon') {
-    return <div className={`inline-block ${className}`}>{MonogramSvg}</div>;
-  }
-
-  const textSizes = {
-    sm: { title: 'text-sm', sub: 'text-[10px]' },
-    md: { title: 'text-base font-bold', sub: 'text-xs' },
-    lg: { title: 'text-xl font-bold tracking-tight', sub: 'text-sm' },
-    xl: { title: 'text-2xl font-black tracking-tight', sub: 'text-base' },
-  };
-
-  const currentTextSize = textSizes[size];
-
-  if (variant === 'stacked') {
-    return (
-      <div className={`flex flex-col items-center text-center gap-2 ${className}`}>
-        {MonogramSvg}
-        <div>
-          <div
-            className={`font-serif tracking-wider uppercase text-slate-900 dark:text-slate-100 ${currentTextSize.title}`}
-          >
-            Amor y Gracia
-          </div>
-          <div className={`text-slate-500 dark:text-slate-400 font-sans ${currentTextSize.sub}`}>
-            {subtitle}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Variant: horizontal
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      {MonogramSvg}
-      <div className="flex flex-col text-left">
-        <span
-          className={`font-serif tracking-wide uppercase text-slate-900 dark:text-slate-100 leading-none ${currentTextSize.title}`}
-        >
-          Amor y Gracia
-        </span>
-        <span className={`text-slate-500 dark:text-slate-400 font-sans mt-1 leading-none ${currentTextSize.sub}`}>
-          {subtitle}
-        </span>
-      </div>
+    <div
+      className={`church-brand-logo ${className}`}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: isFullOrHorizontal ? '10px' : '0',
+        lineHeight: 1,
+        userSelect: 'none',
+      }}
+    >
+      <svg
+        width={numericSize}
+        height={numericSize}
+        viewBox="0 0 100 100"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label={`${tenantName} Logo`}
+        style={{ flexShrink: 0 }}
+      >
+        {/* Círculo contenedor noble exterior */}
+        <circle cx="50" cy="50" r="48" fill={color} />
+
+        {/* 
+          Monograma Isométrico A + G (Amor y Gracia)
+          Corazón rotado a 45 grados formado por dos lazos geométricos entrelazados.
+        */}
+        <g fill={glyphColor}>
+          {/* Lazo Izquierdo: Letra "A" isométrica con contraforma cuadrada */}
+          <path
+            d="M 33 21 
+               L 48 36 
+               L 36 48 
+               L 26 38 
+               L 26 49 
+               L 20 49 
+               L 20 37 
+               L 33 21 Z
+               M 33 30 
+               L 27 36 
+               L 35 44 
+               L 41 38 
+               Z"
+            fillRule="evenodd"
+          />
+
+          {/* Lazo Derecho y Base: Letra "G" entrelazada que completa el corazón y lazo inferior */}
+          <path
+            d="M 52 32 
+               L 67 21 
+               L 80 37 
+               L 80 49 
+               L 50 81 
+               L 38 69 
+               L 44 63 
+               L 50 69 
+               L 72 46 
+               L 72 38 
+               L 67 31 
+               L 58 40 
+               L 47 40 
+               L 52 32 Z
+               M 52 47 
+               L 64 47 
+               L 64 53 
+               L 45 72 
+               L 37 64 
+               L 52 47 Z"
+            fillRule="evenodd"
+          />
+        </g>
+      </svg>
+
+      {isFullOrHorizontal && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
+          <span
+            style={{
+              fontSize: `${Math.max(13, Math.round(numericSize * 0.44))}px`,
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              color: 'var(--text-primary)',
+              fontFamily: 'inherit',
+            }}
+          >
+            {tenantName}
+          </span>
+          <span
+            style={{
+              fontSize: `${Math.max(10, Math.round(numericSize * 0.3))}px`,
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              color: 'var(--text-muted)',
+            }}
+          >
+            {displaySubtitle}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

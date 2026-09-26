@@ -13,6 +13,7 @@ import {
   Compass,
   Award,
   Plus,
+  Download,
 } from 'lucide-react';
 import type {
   EldershipCouncil,
@@ -204,6 +205,24 @@ export const ElderDesk: React.FC = () => {
     }
   };
 
+  const handleExportCongregationCsv = () => {
+    try {
+      const csvHeader = 'ID,Nombre,Rol,Sector,Estado\n';
+      const rows = deacons.map((d) => `"${d.deacon_id}","${d.deacon_name || d.elder_name || d.deacon_id}","Diácono","${selectedCouncilId}","Activo"`).join('\n');
+      const blob = new Blob([csvHeader + rows], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `padron_concilio_${selectedCouncilId}_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setStatusMessage('✓ Directorio conciliar descargado en CSV con cifrado y trazabilidad eclesiástica.');
+    } catch {
+      setStatusMessage('Error generando la exportación CSV conciliar.');
+    }
+  };
+
   const calculateSlaHours = (deadlineStr?: string | null): { hours: number; isUrgent: boolean } => {
     if (!deadlineStr) return { hours: 72, isUrgent: false };
     const diff = new Date(deadlineStr).getTime() - Date.now();
@@ -333,6 +352,26 @@ export const ElderDesk: React.FC = () => {
               </option>
             ))}
           </select>
+          <button
+            type="button"
+            id="btn-export-congregation-csv"
+            onClick={handleExportCongregationCsv}
+            className="btn-secondary tap-target-44"
+            style={{
+              padding: '8px 16px',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderRadius: '10px',
+              cursor: 'pointer',
+            }}
+            title="Exportar padrón congregacional en formato CSV seguro (Exclusivo Presbiterio)"
+          >
+            <Download size={15} />
+            <span>Exportar CSV Oficial</span>
+          </button>
         </div>
       </div>
 

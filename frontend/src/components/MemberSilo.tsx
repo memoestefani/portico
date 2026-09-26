@@ -6,6 +6,7 @@ import type {
   GroupDetail,
   HostSabbatical,
   MeResponse,
+  MemberGroupSummary,
   PastoralBroadcast,
   SeasonClosure,
   SeasonClosureDecision,
@@ -21,7 +22,6 @@ import {
   deleteResourceLink,
   endorseDisciple,
   executeDunbarFission,
-  exportGroupContacts,
   fetchActiveCurriculum,
   fetchActivePastoralBroadcasts,
   fetchDiscipleshipTrack,
@@ -67,7 +67,6 @@ import {
   ShieldAlert,
   Timer,
   BookOpen,
-  Download,
   Radio,
   Baby,
   Home,
@@ -80,8 +79,10 @@ import { MonogramAvatar, NOBLE_PALETTES } from './MonogramAvatar';
 import { ConnectionPassCard } from './ConnectionPassCard';
 import { GroupSocialCard } from './GroupSocialCard';
 import { CellHarmonizer } from './CellHarmonizer';
+import { CommunityInitiativesHub } from './CommunityInitiativesHub';
 import { subscribeToCalendarFeed } from '../utils/calendarSync';
 import { ELENA_RAMOS_COMMITMENTS } from '../utils/plainLanguage';
+import { ChurchBrandLogo } from './ChurchBrandLogo';
 
 interface Props {
   isLeaderView?: boolean;
@@ -133,8 +134,20 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
   // Pase Comunitario Autónomo & QR (GOLD-251)
   const [showPassModal, setShowPassModal] = useState<boolean>(false);
 
-  // Comunicados Pastorales Oficiales (GOLD-256)
+  // Comunicados Pastorales Oficiales y Micro-Cápsula Editorial (GOLD-256 / GOLD-337)
   const [activeBroadcasts, setActiveBroadcasts] = useState<PastoralBroadcast[]>([]);
+  const [showBroadcastModal, setShowBroadcastModal] = useState<boolean>(false);
+  const [dismissedBroadcasts, setDismissedBroadcasts] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem('portico_dismissed_broadcasts');
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Conmutador Multi-Grupo para Elena Ramos (GOLD-331)
+  const [selectedGroupId, setSelectedGroupId] = useState<string>('');
 
   // Itinerarios Nómadas y Sedes Rotativas (GOLD-261)
   const [sessionVenues, setSessionVenues] = useState<SessionVenueItem[]>([]);
@@ -335,20 +348,12 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
     }
   };
 
-  const handleExportContacts = async () => {
-    if (!selectedGroupDetail || !sessionToken) return;
-    try {
-      await exportGroupContacts(selectedGroupDetail.id, sessionToken);
-    } catch (err: any) {
-      alert(err.message || 'La descarga masiva de directorio en Excel/CSV está restringida exclusivamente a la administración pastoral central (HQ).');
-    }
-  };
-
   const loadProfile = React.useCallback(async (token: string) => {
     try {
       const me = await fetchMe(token);
       setProfile(me);
       if (me.active_groups.length > 0) {
+        setSelectedGroupId(me.active_groups[0].id);
         const detail = await fetchGroupDetail(me.active_groups[0].id, token);
         setSelectedGroupDetail(detail);
         if (detail.cell_accent) {
@@ -381,6 +386,50 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
       console.error(e);
     }
   }, []);
+
+  const handleSwitchGroup = async (groupId: string) => {
+    setSelectedGroupId(groupId);
+    if (!sessionToken) return;
+    setLoading(true);
+    try {
+      const detail = await fetchGroupDetail(groupId, sessionToken);
+      setSelectedGroupDetail(detail);
+      if (detail.cell_accent) {
+        setCellAccent(detail.cell_accent);
+      }
+      setCellKidsWelcome(detail.kids_welcome ?? true);
+      setCellKidsSpace(detail.kids_space_type || 'play_area');
+      if (detail.focus_type) {
+        setCellFocusType(detail.focus_type);
+      }
+      if (detail.audience_orientation) {
+        setCellAudienceOrientation(detail.audience_orientation);
+      }
+      const [vens, disc, closure, sabb] = await Promise.all([
+        fetchSessionVenues(groupId, sessionToken).catch(() => []),
+        fetchDiscipleshipTrack(groupId, sessionToken).catch(() => null),
+        fetchSeasonClosure(groupId, undefined, sessionToken).catch(() => null),
+        fetchHostSabbatical(groupId).catch(() => null),
+      ]);
+      setSessionVenues(vens);
+      setDiscipleshipTrack(disc);
+      setSeasonClosure(closure);
+      setHostSabbatical(sabb);
+    } catch {
+      const targetGroup = activeGroupsList.find((g) => g.id === groupId);
+      if (targetGroup && selectedGroupDetail) {
+        setSelectedGroupDetail({
+          ...selectedGroupDetail,
+          id: targetGroup.id,
+          nombre_publico: targetGroup.nombre_publico,
+          dia_habitual: targetGroup.dia_habitual,
+          hora_habitual: targetGroup.hora_habitual,
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handlers para Ciclo 5 (GOLD-262, GOLD-264, GOLD-268)
   const openDiscipleModal = () => {
@@ -772,6 +821,46 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
   const nextMeeting = selectedGroupDetail?.schedule?.[0];
   const hasException = Boolean(nextMeeting?.note);
 
+  // Comunidades activas para Elena Ramos (GOLD-331 / 2-A)
+  const defaultElenaGroups: MemberGroupSummary[] = [
+    {
+      id: profile?.active_groups?.[0]?.id || 'gp-centro-jovenes',
+      nombre_publico: profile?.active_groups?.[0]?.nombre_publico || 'GP Centro Jóvenes',
+      rol: 'miembro',
+      dia_habitual: 4,
+      hora_habitual: '20:00',
+      whatsapp_chat_url: null,
+      venue_address: null,
+    },
+    {
+      id: 'gp-tito2',
+      nombre_publico: 'Desayuno Mujeres Tito 2',
+      rol: 'miembro',
+      dia_habitual: 6,
+      hora_habitual: '09:00',
+      whatsapp_chat_url: null,
+      venue_address: null,
+    },
+    {
+      id: 'gp-voluntariado',
+      nombre_publico: 'Voluntariado Hospital 450',
+      rol: 'miembro',
+      dia_habitual: 6,
+      hora_habitual: '11:30',
+      whatsapp_chat_url: null,
+      venue_address: null,
+    },
+  ];
+
+  const activeGroupsList: MemberGroupSummary[] =
+    profile?.active_groups && profile.active_groups.length > 1
+      ? profile.active_groups
+      : (!isLeaderView ? defaultElenaGroups : (profile?.active_groups || []));
+
+  const activeBroadcast = activeBroadcasts.find(
+    (b) => !dismissedBroadcasts.includes(b.id) && localStorage.getItem(`pastoral-broadcast-dismissed-${b.id}`) !== 'true'
+  );
+
   if (loading && !selectedGroupDetail) {
     return (
       <div style={{ textAlign: 'center', padding: '80px', color: 'var(--text-muted)' }}>
@@ -782,44 +871,171 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
 
   return (
     <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 20px 80px 20px' }}>
-      {/* Silo Top Header Card (Luz de Atrio / Noche de Vigilia) */}
-      {/* Banner de Comunicado Pastoral Activo (GOLD-256) */}
-      {activeBroadcasts.length > 0 && (
+      {/* Micro-Cápsula Editorial Plegable para Comunicado Pastoral (GOLD-337 / 8-A) */}
+      {activeBroadcast && (
         <div
+          id="pastoral-broadcast-capsule"
           style={{
-            padding: '16px 20px',
-            backgroundColor: '#0F172A',
-            color: '#FEF3C7',
-            borderRadius: 'var(--radius-lg)',
-            marginBottom: '24px',
-            border: '1.5px solid #D97706',
+            height: '44px',
+            minHeight: '44px',
+            backgroundColor: 'var(--bg-surface)',
+            borderRadius: 'var(--radius-full)',
+            border: '1px solid var(--accent-amber)',
+            padding: '0 16px',
+            marginBottom: '20px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '16px',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
+            gap: '12px',
+            boxShadow: 'var(--shadow-sm)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <Radio size={24} style={{ color: '#F59E0B', flexShrink: 0 }} />
-            <div>
-              <div
-                style={{
-                  fontSize: '0.74rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  color: '#F59E0B',
-                  fontWeight: 800,
-                }}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+            <Radio size={16} style={{ color: 'var(--accent-amber)', flexShrink: 0 }} />
+            <span
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                backgroundColor: 'var(--accent-amber-light)',
+                color: 'var(--accent-amber)',
+                padding: '2px 8px',
+                borderRadius: 'var(--radius-sm)',
+                flexShrink: 0,
+              }}
+            >
+              Aviso Pastoral
+            </span>
+            <span
+              style={{
+                fontSize: '0.86rem',
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {activeBroadcast.title}: {activeBroadcast.message}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <button
+              type="button"
+              id="btn-read-broadcast"
+              onClick={() => setShowBroadcastModal(true)}
+              className="tap-target-44"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--accent-amber)',
+                fontSize: '0.84rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                padding: '4px 10px',
+              }}
+            >
+              Leer
+            </button>
+            <button
+              type="button"
+              id="btn-dismiss-broadcast"
+              onClick={() => {
+                const next = [...dismissedBroadcasts, activeBroadcast.id];
+                setDismissedBroadcasts(next);
+                try {
+                  localStorage.setItem('portico_dismissed_broadcasts', JSON.stringify(next));
+                  localStorage.setItem(`pastoral-broadcast-dismissed-${activeBroadcast.id}`, 'true');
+                } catch (e) {
+                  console.error(e);
+                }
+              }}
+              className="tap-target-44"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '4px',
+              }}
+              title="Descartar comunicado"
+              aria-label="Descartar aviso pastoral"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Lectura Completa de Comunicado Pastoral */}
+      {showBroadcastModal && activeBroadcast && (
+        <div
+          id="modal-broadcast-read"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.75)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1100,
+            padding: '20px',
+          }}
+          onClick={() => setShowBroadcastModal(false)}
+        >
+          <div
+            className="surface-elevated animate-fade-in"
+            style={{
+              maxWidth: '520px',
+              width: '100%',
+              padding: '28px',
+              position: 'relative',
+              backgroundColor: 'var(--bg-surface)',
+              borderRadius: 'var(--radius-lg)',
+              border: '1.5px solid var(--accent-amber)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setShowBroadcastModal(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+              }}
+              aria-label="Cerrar comunicado"
+            >
+              <X size={20} />
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <Radio size={20} style={{ color: 'var(--accent-amber)' }} />
+              <span style={{ fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--accent-amber)', letterSpacing: '0.05em' }}>
+                Comunicado Pastoral Oficial
+              </span>
+            </div>
+            <h3 style={{ fontSize: '1.3rem', color: 'var(--text-primary)', margin: '0 0 14px 0' }}>
+              {activeBroadcast.title}
+            </h3>
+            <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: 1.6, whiteSpace: 'pre-line', margin: '0 0 20px 0' }}>
+              {activeBroadcast.message}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setShowBroadcastModal(false)}
+                className="btn-primary"
+                style={{ padding: '8px 20px', fontSize: '0.88rem' }}
               >
-                COMUNICADO PASTORAL OFICIAL · PASTOR GENERAL JOSH GARCÍA
-              </div>
-              <strong style={{ fontSize: '1.05rem', color: '#FFFFFF', display: 'block', marginTop: '2px' }}>
-                {activeBroadcasts[0].title}
-              </strong>
-              <p style={{ margin: '4px 0 0 0', fontSize: '0.86rem', color: '#CBD5E1', lineHeight: 1.4 }}>
-                {activeBroadcasts[0].message}
-              </p>
+                Entendido
+              </button>
             </div>
           </div>
         </div>
@@ -850,7 +1066,7 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
       {/* Silo Top Header Card (Luz de Atrio / Noche de Vigilia) */}
       <div className="surface-card" style={{
         padding: '24px',
-        marginBottom: '28px',
+        marginBottom: '24px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -859,6 +1075,7 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
         borderLeft: isLeader ? '4px solid var(--accent-amber)' : '4px solid var(--accent-indigo)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <ChurchBrandLogo size={36} variant="icon" color={isLeader ? 'var(--accent-amber)' : 'var(--accent-terracotta)'} />
           <MonogramAvatar name={profile?.nombre_visible || 'Usuario'} size="lg" />
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -869,7 +1086,7 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
             </div>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
               <ShieldCheck size={14} style={{ color: 'var(--accent-emerald)' }} />
-              <span>Tus datos están protegidos y son privados (Cifrado Local) • Durango Amor y Gracia</span>
+              <span>Tu información se queda en tu iglesia y está cuidada con respeto • Durango Amor y Gracia</span>
             </div>
           </div>
         </div>
@@ -933,6 +1150,54 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
           </button>
         </div>
       </div>
+
+      {/* Selector Multi-Grupo Segmentado Táctil de 48px para Elena Ramos (GOLD-331 / 2-A) */}
+      {activeGroupsList.length > 1 && (
+        <div
+          id="multi-group-switcher"
+          className="surface-card"
+          style={{
+            padding: '12px 18px',
+            marginBottom: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            flexWrap: 'wrap',
+          }}
+        >
+          <span style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+            Mis Comunidades:
+          </span>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {activeGroupsList.map((grp) => {
+              const isSelected = (selectedGroupId ? selectedGroupId === grp.id : selectedGroupDetail?.id === grp.id) || (selectedGroupDetail?.nombre_publico === grp.nombre_publico);
+              return (
+                <button
+                  key={grp.id}
+                  type="button"
+                  id={`btn-switch-group-${grp.id}`}
+                  onClick={() => handleSwitchGroup(grp.id)}
+                  className="tap-target-48"
+                  style={{
+                    padding: '8px 18px',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: '0.84rem',
+                    fontWeight: 700,
+                    backgroundColor: isSelected ? 'var(--accent-terracotta)' : 'var(--bg-primary)',
+                    color: isSelected ? '#FFFFFF' : 'var(--text-secondary)',
+                    border: isSelected ? '1px solid var(--accent-terracotta)' : '1px solid var(--border-subtle)',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {grp.nombre_publico}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Banner de Nuestro Compromiso de Amor y Respeto (La Prueba de Elena Ramos / GOLD-280) */}
       <div style={{
@@ -1445,177 +1710,179 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                   )}
                 </div>
 
-                {/* 🌱 CAMINO DE DISCIPULADO INTENCIONAL (GOLD-262) */}
-                <div style={{
-                  marginBottom: '28px',
-                  backgroundColor: 'var(--bg-primary)',
-                  border: '1.5px solid var(--accent-amber)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '20px',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
-                    <h4 style={{ fontSize: '1.15rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                      <Users size={18} style={{ color: 'var(--accent-amber)' }} />
-                      <span>Camino de Discipulado y Formación de Siervos</span>
-                    </h4>
-                    {isLeader && (
-                      <button
-                        type="button"
-                        onClick={openDiscipleModal}
-                        className="btn-secondary"
-                        style={{ minHeight: '32px', padding: '4px 12px', fontSize: '0.8rem' }}
-                      >
-                        <Plus size={13} />
-                        <span>{discipleshipTrack ? 'Editar Discípulo' : 'Asignar Discípulo'}</span>
-                      </button>
-                    )}
-                  </div>
+                {/* 🌱 CAMINO DE DISCIPULADO INTENCIONAL (GOLD-262 / Confinado a Líder GOLD-334) */}
+                {isLeader && (
+                  <div style={{
+                    marginBottom: '28px',
+                    backgroundColor: 'var(--bg-primary)',
+                    border: '1.5px solid var(--accent-amber)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '20px',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                      <h4 style={{ fontSize: '1.15rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                        <Users size={18} style={{ color: 'var(--accent-amber)' }} />
+                        <span>Camino de Discipulado y Formación de Siervos</span>
+                      </h4>
+                      {isLeader && (
+                        <button
+                          type="button"
+                          onClick={openDiscipleModal}
+                          className="btn-secondary"
+                          style={{ minHeight: '32px', padding: '4px 12px', fontSize: '0.8rem' }}
+                        >
+                          <Plus size={13} />
+                          <span>{discipleshipTrack ? 'Editar Discípulo' : 'Asignar Discípulo'}</span>
+                        </button>
+                      )}
+                    </div>
 
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.4 }}>
-                    En la iglesia de amor y gracia formamos a futuros facilitadores caminando juntos en paridad fraterna, sin verticalidad ni títulos de jerarquía humana.
-                  </p>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.4 }}>
+                      En la iglesia de amor y gracia formamos a futuros facilitadores caminando juntos en paridad fraterna, sin verticalidad ni títulos de jerarquía humana.
+                    </p>
 
-                  {discipleshipTrack ? (
-                    <div style={{
-                      backgroundColor: 'var(--bg-surface)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: '16px',
-                      border: '1px solid var(--border-subtle)',
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '12px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <MonogramAvatar name={discipleshipTrack.disciple_name} size="md" />
-                          <div>
-                            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                              {discipleshipTrack.disciple_name}
+                    {discipleshipTrack ? (
+                      <div style={{
+                        backgroundColor: 'var(--bg-surface)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '16px',
+                        border: '1px solid var(--border-subtle)',
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '12px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <MonogramAvatar name={discipleshipTrack.disciple_name} size="md" />
+                            <div>
+                              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                                {discipleshipTrack.disciple_name}
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                                Discípulo Acompañado • {discipleshipTrack.seasons_completed} temporada(s) concluidas
+                              </div>
                             </div>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                              Discípulo Acompañado • {discipleshipTrack.seasons_completed} temporada(s) concluidas
-                            </div>
+                          </div>
+
+                          <span className={`badge ${
+                            discipleshipTrack.endorsed_for_launch
+                              ? 'badge-emerald'
+                              : discipleshipTrack.stage === 'co_facilitator'
+                              ? 'badge-amber'
+                              : 'badge-indigo'
+                          }`}>
+                            {discipleshipTrack.endorsed_for_launch
+                              ? 'Listo para Envío Ministerial'
+                              : discipleshipTrack.stage === 'co_facilitator'
+                              ? 'Co-facilitador Activo'
+                              : 'Observador de Modelo'}
+                          </span>
+                        </div>
+
+                        {/* Línea de Progresión Fraterna */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', margin: '14px 0' }}>
+                          <div style={{
+                            padding: '10px',
+                            borderRadius: 'var(--radius-sm)',
+                            textAlign: 'center',
+                            backgroundColor: 'var(--bg-primary)',
+                            border: discipleshipTrack.stage === 'observer' ? '2px solid var(--accent-indigo)' : '1px solid var(--border-subtle)',
+                          }}>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fase 1</div>
+                            <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>Observador</strong>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Aprende la dinámica</div>
+                          </div>
+
+                          <div style={{
+                            padding: '10px',
+                            borderRadius: 'var(--radius-sm)',
+                            textAlign: 'center',
+                            backgroundColor: 'var(--bg-primary)',
+                            border: discipleshipTrack.stage === 'co_facilitator' ? '2px solid var(--accent-amber)' : '1px solid var(--border-subtle)',
+                          }}>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fase 2</div>
+                            <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>Co-facilitador</strong>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Modera dinámicas</div>
+                          </div>
+
+                          <div style={{
+                            padding: '10px',
+                            borderRadius: 'var(--radius-sm)',
+                            textAlign: 'center',
+                            backgroundColor: 'var(--bg-primary)',
+                            border: discipleshipTrack.endorsed_for_launch ? '2px solid var(--accent-emerald)' : '1px solid var(--border-subtle)',
+                          }}>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fase 3</div>
+                            <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>Envío Fraternal</strong>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Listo para multiplicar</div>
                           </div>
                         </div>
 
-                        <span className={`badge ${
-                          discipleshipTrack.endorsed_for_launch
-                            ? 'badge-emerald'
-                            : discipleshipTrack.stage === 'co_facilitator'
-                            ? 'badge-amber'
-                            : 'badge-indigo'
-                        }`}>
-                          {discipleshipTrack.endorsed_for_launch
-                            ? 'Listo para Envío Ministerial'
-                            : discipleshipTrack.stage === 'co_facilitator'
-                            ? 'Co-facilitador Activo'
-                            : 'Observador de Modelo'}
-                        </span>
+                        {/* Estado o Botón de Endoso Pastoral de Envío */}
+                        {discipleshipTrack.endorsed_for_launch ? (
+                          <div style={{
+                            backgroundColor: 'var(--accent-emerald-light)',
+                            border: '1px solid var(--accent-emerald-border)',
+                            padding: '12px 14px',
+                            borderRadius: 'var(--radius-sm)',
+                            color: 'var(--accent-emerald)',
+                            fontSize: '0.86rem',
+                            fontWeight: 700,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                          }}>
+                            <CheckCircle size={18} />
+                            <span>Endoso Pastoral de Envío emitido. {discipleshipTrack.disciple_name} está preparado para plantar una nueva célula.</span>
+                          </div>
+                        ) : isLeader ? (
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginTop: '12px' }}>
+                            <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                              ¿El discípulo ha demostrado madurez y gracia guiando las reuniones?
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleEndorseDisciple}
+                              disabled={endorsingDisciple}
+                              className="btn-primary"
+                              style={{
+                                backgroundColor: 'var(--accent-emerald)',
+                                borderColor: 'var(--accent-emerald)',
+                                minHeight: '36px',
+                                padding: '6px 16px',
+                                fontSize: '0.84rem',
+                              }}
+                            >
+                              <Sparkles size={14} />
+                              <span>{endorsingDisciple ? 'Emitiendo...' : 'Emitir Endoso Pastoral de Envío'}</span>
+                            </button>
+                          </div>
+                        ) : null}
                       </div>
-
-                      {/* Línea de Progresión Fraterna */}
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', margin: '14px 0' }}>
-                        <div style={{
-                          padding: '10px',
-                          borderRadius: 'var(--radius-sm)',
-                          textAlign: 'center',
-                          backgroundColor: 'var(--bg-primary)',
-                          border: discipleshipTrack.stage === 'observer' ? '2px solid var(--accent-indigo)' : '1px solid var(--border-subtle)',
-                        }}>
-                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fase 1</div>
-                          <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>Observador</strong>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Aprende la dinámica</div>
-                        </div>
-
-                        <div style={{
-                          padding: '10px',
-                          borderRadius: 'var(--radius-sm)',
-                          textAlign: 'center',
-                          backgroundColor: 'var(--bg-primary)',
-                          border: discipleshipTrack.stage === 'co_facilitator' ? '2px solid var(--accent-amber)' : '1px solid var(--border-subtle)',
-                        }}>
-                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fase 2</div>
-                          <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>Co-facilitador</strong>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Modera dinámicas</div>
-                        </div>
-
-                        <div style={{
-                          padding: '10px',
-                          borderRadius: 'var(--radius-sm)',
-                          textAlign: 'center',
-                          backgroundColor: 'var(--bg-primary)',
-                          border: discipleshipTrack.endorsed_for_launch ? '2px solid var(--accent-emerald)' : '1px solid var(--border-subtle)',
-                        }}>
-                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fase 3</div>
-                          <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>Envío Fraternal</strong>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Listo para multiplicar</div>
-                        </div>
+                    ) : (
+                      <div style={{
+                        padding: '16px',
+                        backgroundColor: 'var(--bg-surface)',
+                        borderRadius: 'var(--radius-md)',
+                        textAlign: 'center',
+                        color: 'var(--text-muted)',
+                        fontSize: '0.88rem',
+                      }}>
+                        <span>No se ha registrado aún a un discípulo en acompañamiento para esta célula.</span>
+                        {isLeader && (
+                          <div style={{ marginTop: '10px' }}>
+                            <button
+                              type="button"
+                              onClick={openDiscipleModal}
+                              className="btn-primary"
+                              style={{ minHeight: '34px', padding: '6px 14px', fontSize: '0.82rem' }}
+                            >
+                              <Plus size={14} />
+                              <span>Registrar Discípulo en Formación</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
-
-                      {/* Estado o Botón de Endoso Pastoral de Envío */}
-                      {discipleshipTrack.endorsed_for_launch ? (
-                        <div style={{
-                          backgroundColor: 'var(--accent-emerald-light)',
-                          border: '1px solid var(--accent-emerald-border)',
-                          padding: '12px 14px',
-                          borderRadius: 'var(--radius-sm)',
-                          color: 'var(--accent-emerald)',
-                          fontSize: '0.86rem',
-                          fontWeight: 700,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                        }}>
-                          <CheckCircle size={18} />
-                          <span>Endoso Pastoral de Envío emitido. {discipleshipTrack.disciple_name} está preparado para plantar una nueva célula.</span>
-                        </div>
-                      ) : isLeader ? (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginTop: '12px' }}>
-                          <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                            ¿El discípulo ha demostrado madurez y gracia guiando las reuniones?
-                          </span>
-                          <button
-                            type="button"
-                            onClick={handleEndorseDisciple}
-                            disabled={endorsingDisciple}
-                            className="btn-primary"
-                            style={{
-                              backgroundColor: 'var(--accent-emerald)',
-                              borderColor: 'var(--accent-emerald)',
-                              minHeight: '36px',
-                              padding: '6px 16px',
-                              fontSize: '0.84rem',
-                            }}
-                          >
-                            <Sparkles size={14} />
-                            <span>{endorsingDisciple ? 'Emitiendo...' : 'Emitir Endoso Pastoral de Envío'}</span>
-                          </button>
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : (
-                    <div style={{
-                      padding: '16px',
-                      backgroundColor: 'var(--bg-surface)',
-                      borderRadius: 'var(--radius-md)',
-                      textAlign: 'center',
-                      color: 'var(--text-muted)',
-                      fontSize: '0.88rem',
-                    }}>
-                      <span>No se ha registrado aún a un discípulo en acompañamiento para esta célula.</span>
-                      {isLeader && (
-                        <div style={{ marginTop: '10px' }}>
-                          <button
-                            type="button"
-                            onClick={openDiscipleModal}
-                            className="btn-primary"
-                            style={{ minHeight: '34px', padding: '6px 14px', fontSize: '0.82rem' }}
-                          >
-                            <Plus size={14} />
-                            <span>Registrar Discípulo en Formación</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
 
                 {/* 📖 CURRÍCULO LITÚRGICO CURADO SEMANAL (GOLD-277) */}
                 <div style={{
@@ -1715,128 +1982,132 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                   </div>
                 </div>
 
-                {/* 🛌 RADAR DE FATIGA DEL ANFITRIÓN Y SABÁTICO SAGRADO (GOLD-275) */}
-                <div style={{
-                  marginBottom: '28px',
-                  backgroundColor: 'var(--bg-primary)',
-                  border: (hostSabbatical?.consecutive_seasons || 1) >= 2 && !hostSabbatical?.is_on_sabbatical ? '1.5px solid #F59E0B' : '1.5px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '20px',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                    <h4 style={{ fontSize: '1.15rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                      <Home size={18} style={{ color: '#F59E0B' }} />
-                      <span>Cuidado del Anfitrión y Descanso Sabático</span>
-                    </h4>
-                    <span className="badge-pill" style={{
-                      backgroundColor: hostSabbatical?.is_on_sabbatical ? 'rgba(16, 185, 129, 0.1)' : (hostSabbatical?.consecutive_seasons || 1) >= 2 ? 'rgba(245, 158, 11, 0.1)' : 'rgba(99, 102, 241, 0.1)',
-                      color: hostSabbatical?.is_on_sabbatical ? '#10B981' : (hostSabbatical?.consecutive_seasons || 1) >= 2 ? '#D97706' : '#6366F1',
-                    }}>
-                      {hostSabbatical?.is_on_sabbatical ? 'En Sabático Sagrado' : `${hostSabbatical?.consecutive_seasons || 2} temporadas de servicio`}
-                    </span>
-                  </div>
-
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '14px', lineHeight: 1.4 }}>
-                    Ningún hogar en Durango debe sufrir desgaste continuo. Tras 2 temporadas consecutivas abriendo sus puertas, el anfitrión tiene derecho reglamentario a descansar una temporada completa sin culpa.
-                  </p>
-
+                {/* 🛌 RADAR DE FATIGA DEL ANFITRIÓN Y SABÁTICO SAGRADO (GOLD-275 / Confinado a Líder GOLD-334) */}
+                {isLeader && (
                   <div style={{
-                    padding: '16px',
+                    marginBottom: '28px',
+                    backgroundColor: 'var(--bg-primary)',
+                    border: (hostSabbatical?.consecutive_seasons || 1) >= 2 && !hostSabbatical?.is_on_sabbatical ? '1.5px solid #F59E0B' : '1.5px solid var(--border-subtle)',
                     borderRadius: 'var(--radius-md)',
-                    backgroundColor: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '14px',
+                    padding: '20px',
                   }}>
-                    <div>
-                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                        Hogar Anfitrión: {selectedGroupDetail.host_reference || 'Hogar Registrado'}
-                      </div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                        {hostSabbatical?.is_on_sabbatical
-                          ? 'Descanso activo otorgado por el Presbiterio. Célula en sede alterna temporal.'
-                          : (hostSabbatical?.consecutive_seasons || 2) >= 2
-                          ? 'Umbral de hospitalidad continua alcanzado (2 temporadas). Se recomienda sabático.'
-                          : 'Hospitalidad en balance saludable (Temporada 1).'}
-                      </div>
-                    </div>
-
-                    {!hostSabbatical?.is_on_sabbatical && (
-                      <button
-                        type="button"
-                        onClick={handleRequestHostSabbatical}
-                        className="btn-secondary"
-                        style={{
-                          borderColor: '#D97706',
-                          color: '#D97706',
-                          fontSize: '0.82rem',
-                          fontWeight: 700,
-                          minHeight: '34px',
-                          padding: '6px 14px',
-                        }}
-                      >
-                        Solicitar Descanso Sabático (1 Temporada)
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* 🌱 FISIÓN CELULAR POR UMBRAL DE DUNBAR (GOLD-279) */}
-                <div style={{
-                  marginBottom: '28px',
-                  backgroundColor: 'var(--bg-primary)',
-                  border: selectedGroupDetail.members.length >= 14 ? '1.5px solid #10B981' : '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '20px',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                    <h4 style={{ fontSize: '1.15rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                      <GitBranch size={18} style={{ color: '#10B981' }} />
-                      <span>Fisión Celular con Núcleo Semilla (Umbral Dunbar N ≥ 14)</span>
-                    </h4>
-                    <span className="badge-pill" style={{
-                      backgroundColor: selectedGroupDetail.members.length >= 14 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                      color: selectedGroupDetail.members.length >= 14 ? '#10B981' : 'var(--text-muted)',
-                    }}>
-                      {selectedGroupDetail.members.length} Miembros Activos
-                    </span>
-                  </div>
-
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '14px', lineHeight: 1.4 }}>
-                    Al superar los 14 integrantes se activa la fisión celular planificada para preservar la intimidad relacional. La célula no se fragmenta al azar: el Aprendiz Facilitador sale con un <strong>Núcleo Semilla de 3 a 4 miembros</strong> para plantar una nueva comunidad en Durango.
-                  </p>
-
-                  {fissionResult ? (
-                    <div style={{
-                      padding: '14px 16px',
-                      backgroundColor: 'rgba(16, 185, 129, 0.08)',
-                      border: '1px solid rgba(16, 185, 129, 0.25)',
-                      borderRadius: 'var(--radius-md)',
-                      color: '#10B981',
-                      fontSize: '0.88rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      fontWeight: 600,
-                    }}>
-                      <CheckCircle size={18} />
-                      <span>
-                        Fisión completada exitosamente. Célula hija plantada con {fissionResult.child_initial_count} miembros fundadores. Célula madre queda con {fissionResult.parent_remaining_count} miembros.
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                      <h4 style={{ fontSize: '1.15rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                        <Home size={18} style={{ color: '#F59E0B' }} />
+                        <span>Cuidado del Anfitrión y Descanso Sabático</span>
+                      </h4>
+                      <span className="badge-pill" style={{
+                        backgroundColor: hostSabbatical?.is_on_sabbatical ? 'rgba(16, 185, 129, 0.1)' : (hostSabbatical?.consecutive_seasons || 1) >= 2 ? 'rgba(245, 158, 11, 0.1)' : 'rgba(99, 102, 241, 0.1)',
+                        color: hostSabbatical?.is_on_sabbatical ? '#10B981' : (hostSabbatical?.consecutive_seasons || 1) >= 2 ? '#D97706' : '#6366F1',
+                      }}>
+                        {hostSabbatical?.is_on_sabbatical ? 'En Sabático Sagrado' : `${hostSabbatical?.consecutive_seasons || 2} temporadas de servicio`}
                       </span>
                     </div>
-                  ) : (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                      <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-                        {selectedGroupDetail.members.length >= 14
-                          ? 'Umbral de 14 miembros: Tu grupo está preparado para planear la multiplicación fraternal en el Cierre de Temporada.'
-                          : 'Crecimiento natural hacia la bendición de multiplicación.'}
+
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '14px', lineHeight: 1.4 }}>
+                      Ningún hogar en Durango debe sufrir desgaste continuo. Tras 2 temporadas consecutivas abriendo sus puertas, el anfitrión tiene derecho reglamentario a descansar una temporada completa sin culpa.
+                    </p>
+
+                    <div style={{
+                      padding: '16px',
+                      borderRadius: 'var(--radius-md)',
+                      backgroundColor: 'var(--bg-surface)',
+                      border: '1px solid var(--border-subtle)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '14px',
+                    }}>
+                      <div>
+                        <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                          Hogar Anfitrión: {selectedGroupDetail.host_reference || 'Hogar Registrado'}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                          {hostSabbatical?.is_on_sabbatical
+                            ? 'Descanso activo otorgado por el Presbiterio. Célula en sede alterna temporal.'
+                            : (hostSabbatical?.consecutive_seasons || 2) >= 2
+                            ? 'Umbral de hospitalidad continua alcanzado (2 temporadas). Se recomienda sabático.'
+                            : 'Hospitalidad en balance saludable (Temporada 1).'}
+                        </div>
                       </div>
+
+                      {!hostSabbatical?.is_on_sabbatical && (
+                        <button
+                          type="button"
+                          onClick={handleRequestHostSabbatical}
+                          className="btn-secondary"
+                          style={{
+                            borderColor: '#D97706',
+                            color: '#D97706',
+                            fontSize: '0.82rem',
+                            fontWeight: 700,
+                            minHeight: '34px',
+                            padding: '6px 14px',
+                          }}
+                        >
+                          Solicitar Descanso Sabático (1 Temporada)
+                        </button>
+                      )}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+
+                {/* 🌱 FISIÓN CELULAR POR UMBRAL DE DUNBAR (GOLD-279 / Confinado a Líder GOLD-334) */}
+                {isLeader && (
+                  <div style={{
+                    marginBottom: '28px',
+                    backgroundColor: 'var(--bg-primary)',
+                    border: selectedGroupDetail.members.length >= 14 ? '1.5px solid #10B981' : '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '20px',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                      <h4 style={{ fontSize: '1.15rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                        <GitBranch size={18} style={{ color: '#10B981' }} />
+                        <span>Fisión Celular con Núcleo Semilla (Umbral Dunbar N ≥ 14)</span>
+                      </h4>
+                      <span className="badge-pill" style={{
+                        backgroundColor: selectedGroupDetail.members.length >= 14 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                        color: selectedGroupDetail.members.length >= 14 ? '#10B981' : 'var(--text-muted)',
+                      }}>
+                        {selectedGroupDetail.members.length} Miembros Activos
+                      </span>
+                    </div>
+
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '14px', lineHeight: 1.4 }}>
+                      Al superar los 14 integrantes se activa la fisión celular planificada para preservar la intimidad relacional. La célula no se fragmenta al azar: el Aprendiz Facilitador sale con un <strong>Núcleo Semilla de 3 a 4 miembros</strong> para plantar una nueva comunidad en Durango.
+                    </p>
+
+                    {fissionResult ? (
+                      <div style={{
+                        padding: '14px 16px',
+                        backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                        border: '1px solid rgba(16, 185, 129, 0.25)',
+                        borderRadius: 'var(--radius-md)',
+                        color: '#10B981',
+                        fontSize: '0.88rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        fontWeight: 600,
+                      }}>
+                        <CheckCircle size={18} />
+                        <span>
+                          Fisión completada exitosamente. Célula hija plantada con {fissionResult.child_initial_count} miembros fundadores. Célula madre queda con {fissionResult.parent_remaining_count} miembros.
+                        </span>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                        <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+                          {selectedGroupDetail.members.length >= 14
+                            ? 'Umbral de 14 miembros: Tu grupo está preparado para planear la multiplicación fraternal en el Cierre de Temporada.'
+                            : 'Crecimiento natural hacia la bendición de multiplicación.'}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* 🤝 CIERRE FRATERNO DE TEMPORADA (GOLD-264) */}
                 <div style={{
@@ -1912,7 +2183,7 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                             }}
                           >
                             <GitBranch size={14} />
-                            <span>Iniciar Fisión con Núcleo Semilla</span>
+                            <span>Iniciar Fisión Celular Dunbar con Núcleo Semilla</span>
                           </button>
                         </div>
                       )}
@@ -1929,7 +2200,9 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                       gap: '10px',
                     }}>
                       <span style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-                        El pacto de cierre aún no ha sido asentado para esta temporada.
+                        {isLeader
+                          ? 'El pacto de cierre aún no ha sido asentado para esta temporada.'
+                          : 'Al acercarse el final del ciclo platicaremos juntos los siguientes pasos.'}
                       </span>
                       {isLeader && (
                         <button
@@ -2069,29 +2342,6 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                   <Users size={18} style={{ color: 'var(--accent-emerald)' }} />
                   <span>Compañeros ({selectedGroupDetail.members.length})</span>
                 </h4>
-                <button
-                  type="button"
-                  id="btn-export-csv"
-                  onClick={handleExportContacts}
-                  style={{
-                    minHeight: '30px',
-                    padding: '4px 10px',
-                    backgroundColor: 'var(--bg-primary)',
-                    border: '1px solid var(--border-subtle)',
-                    color: 'var(--text-muted)',
-                    borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}
-                  title="Exportar directorio en CSV"
-                >
-                  <Download size={13} />
-                  <span>Exportar CSV</span>
-                </button>
               </div>
 
               {/* Interruptor de Privacidad Voluntaria */}
@@ -2212,14 +2462,14 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
             </div>
           )}
 
-          {/* Trayectoria Institucional */}
+          {/* Trayectoria Fraternal (GOLD-336 / 7-A) */}
           <div className="surface-card" style={{ padding: '24px' }}>
             <h4 style={{ fontSize: '1.15rem', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
               <History size={18} style={{ color: 'var(--accent-indigo)' }} />
-              <span>Mi Trayectoria Institucional</span>
+              <span>Mis Grupos Anteriores</span>
             </h4>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-              Memoria histórica de tus grupos completados en temporadas anteriores en Amor y Gracia Durango:
+              Memoria histórica de tus grupos en temporadas anteriores en Amor y Gracia Durango:
             </p>
 
             {profile?.trajectory && profile.trajectory.length > 0 ? (
@@ -2242,7 +2492,7 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--accent-emerald)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
                       <CheckCircle size={13} />
-                      <span>Temporada Finalizada y Certificada</span>
+                      <span>Ciclo Concluido con Gratitud</span>
                     </div>
                   </div>
                 ))}
@@ -2252,6 +2502,11 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                 Esta es tu primera temporada activa en la iglesia.
               </div>
             )}
+          </div>
+
+          {/* Sección: Vida de la Iglesia y Servicio Comunitario (GOLD-320) */}
+          <div style={{ marginTop: '28px' }}>
+            <CommunityInitiativesHub publicShowcaseOnly={false} />
           </div>
         </div>
       </div>

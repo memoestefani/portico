@@ -517,47 +517,75 @@ export const DeaconDesk: React.FC<DeaconDeskProps> = ({
                         {group.proposito}
                       </p>
 
-                      <div style={{ background: '#0f172a', padding: '10px 12px', borderRadius: '10px', fontSize: '0.82rem', marginBottom: '16px' }}>
+                      <div style={{ background: '#0f172a', padding: '10px 12px', borderRadius: '10px', fontSize: '0.82rem', marginBottom: '12px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                           <span style={{ color: '#64748b' }}>Reunión:</span>
                           <span style={{ color: '#e2e8f0', fontWeight: 600 }}>{dayName} • {group.hora_habitual}</span>
                         </div>
                         {group.host_reference && (
                           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ color: '#64748b' }}>Anfitrión:</span>
-                            <span style={{ color: '#e2e8f0' }}>{group.host_reference}</span>
+                            <span style={{ color: '#64748b' }}>Familia Anfitriona:</span>
+                            <span style={{ color: '#e2e8f0', fontWeight: 600 }}>{group.host_reference}</span>
                           </div>
                         )}
                       </div>
+
+                      {/* Indicador Fraternal de Última Visita Presencial (GOLD-329) */}
+                      {(() => {
+                        const groupVisits = visits.filter(v => v.group_id === group.id);
+                        const lastVst = groupVisits.length > 0 ? groupVisits[groupVisits.length - 1] : null;
+                        const daysAgo = lastVst ? Math.floor((Date.now() - new Date(lastVst.visited_at).getTime()) / (1000 * 60 * 60 * 24)) : null;
+
+                        return (
+                          <div style={{
+                            marginBottom: '14px',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            backgroundColor: daysAgo !== null && daysAgo <= 42 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+                            border: daysAgo !== null && daysAgo <= 42 ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(245, 158, 11, 0.3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            fontSize: '0.8rem',
+                          }}>
+                            <span style={{ color: daysAgo !== null && daysAgo <= 42 ? '#10b981' : '#fbbf24', fontWeight: 600 }}>
+                              {daysAgo !== null ? `✓ Visitado hace ${daysAgo} días` : '⚠️ Visita presencial sugerida'}
+                            </span>
+                            <span style={{ color: '#94a3b8', fontSize: '0.72rem' }}>Cadencia: 6 sem</span>
+                          </div>
+                        );
+                      })()}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                    <div style={{ display: 'flex', gap: '6px', marginTop: '10px', flexWrap: 'wrap' }}>
                       <button
                         onClick={() => {
                           setSelectedGroupId(group.id);
                           setShowLogModal(true);
                         }}
+                        className="tap-target-48"
                         style={{
                           flex: 1,
+                          minWidth: '120px',
                           background: 'rgba(79, 70, 229, 0.15)',
                           color: '#a5b4fc',
                           border: '1px solid rgba(99, 102, 241, 0.3)',
                           borderRadius: '10px',
-                          padding: '10px',
-                          fontSize: '0.85rem',
+                          padding: '10px 12px',
+                          fontSize: '0.82rem',
                           fontWeight: 600,
                           cursor: 'pointer',
                           textAlign: 'center',
                         }}
                       >
-                        Registrar Contacto
+                        Anotar Contacto
                       </button>
 
                       <a
                         href={`https://wa.me/526181234567?text=${encodeURIComponent(`Hola hermano facilitador de ${group.nombre_publico}, te saludo con afecto diaconal de Amor y Gracia Durango. ¿Cómo va la comunidad esta semana?`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="tap-target-44"
+                        className="tap-target-48"
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -575,6 +603,28 @@ export const DeaconDesk: React.FC<DeaconDeskProps> = ({
                       >
                         <span>WhatsApp</span>
                       </a>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSabbaticalGroupId(group.id);
+                          setShowDirectSabbaticalModal(true);
+                        }}
+                        className="tap-target-48"
+                        style={{
+                          background: 'rgba(245, 158, 11, 0.15)',
+                          color: '#fbbf24',
+                          border: '1px solid rgba(245, 158, 11, 0.35)',
+                          borderRadius: '10px',
+                          padding: '10px 12px',
+                          fontSize: '0.8rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                        title="Conceder descanso sabático de 1 a 4 semanas"
+                      >
+                        Dar Sabático
+                      </button>
                     </div>
                   </div>
                 );

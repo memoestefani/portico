@@ -3,6 +3,8 @@
 # Rust build artifacts
 target/
 **/target/
+target_test/
+**/target_test/
 
 # Node dependencies and builds
 node_modules/

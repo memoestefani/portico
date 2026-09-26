@@ -1,4 +1,4 @@
-# 🚀 Guía de Despliegue y Protocolo de Actualizaciones — Pórtico OS v3.4
+# 🚀 Guía de Despliegue y Protocolo de Actualizaciones — Pórtico OS v3.6
 
 > **Repositorio de Producción:** [`https://github.com/memoestefani/portico`](https://github.com/memoestefani/portico)  
 > **Identidad de Operador:** Guillermo (`memoestefani@gmail.com`)  
@@ -14,8 +14,8 @@
 | **Aplicación Operativa (Cloudflare Tunnel)** | 🟢 Live | `https://habitat-cleaning-benz-syndication.trycloudflare.com` | Acceso completo para Pastor Josh, diáconos y miembros en sus teléfonos. |
 | **Backend & Servidor Web (Rust Axum)** | 🟢 Live | `http://127.0.0.1:3000` | Motor HTTP de alto rendimiento sirviendo API y frontend embebido `dist/`. |
 | **Persistencia Database-per-Tenant** | 🟢 Live | `backend/data/tenants/1fb2fd67-6b35-425c-967c-5405af97b401.db` | Base física SQLite aislada de Amor y Gracia Durango. |
-| **Salida Soberana Dual (.db + CSV)** | 🟢 Live | `/api/pastor/export-sovereign-archive` | Botón táctil en `PastorHud` con descarga en 1-clic ("No Strings Attached"). |
-| **Pruebas Automatizadas** | 🟢 100% | **195 tests verdes** (148 frontend, 47 backend) | Certificación continua de cero regresiones y cero mockups. |
+| **Salida Soberana Dual (.db + CSV)** | 🟢 Live | `/api/pastor/export-sovereign-archive` | Botón táctil en `PastorHud` y exportación pastoral en `ElderDesk` ("No Strings Attached"). |
+| **Pruebas Automatizadas** | 🟢 100% | **218+ tests verdes** (181 frontend, 37+ backend) | Certificación continua de cero regresiones, cero mockups y cero variables rotas. |
 
 ---
 
@@ -49,7 +49,7 @@ graph LR
 Antes de publicar cualquier cambio, verificamos que el sistema mantenga su integridad:
 
 ```powershell
-# A. Validar pruebas del frontend (139 tests)
+# A. Validar pruebas del frontend (181 tests)
 cd C:\Users\52331\Documents\Proyectos\portico\frontend
 npm test
 

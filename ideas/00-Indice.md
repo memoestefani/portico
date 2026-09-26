@@ -23,6 +23,8 @@
 | `17-portico-plan-accion-checklist-despliegue-soberano-cloudflare-v3.4.md` | Plan táctico y checklist para despliegue soberano a costo $0, ecosistema unificado Cloudflare, Docker Compose, WebAuthn Passkeys y salida libre (GOLD-307 a GOLD-316) | Redefinir reglas de negocio |
 | `18-portico-plan-accion-quicktunnel-github-pages-v3.4.md` | Despliegue inmediato Quick Tunnel a costo $0 y landing pública en GitHub Pages (memoestefani.github.io/portico) | Redefinir reglas de negocio |
 | `19-portico-plan-accion-checklist-dossier-pastoral-automatizado-v3.5.md` | Plan táctico y checklist para Dossier Pastoral Ejecutivo Automatizado, motor nativo Edge Headless en Windows, capturas limpias y W3C Paged Media (GOLD-317 a GOLD-319) | Redefinir reglas de negocio |
+| `20-portico-plan-accion-checklist-ergonomia-apple-elena-v3.5.md` | Plan táctico y checklist para Ergonomía Apple, Filtro Elena Ramos, Doble Capa de Iniciativas, Escala 15k Proximidad y Santuario de Confianza (GOLD-320 a GOLD-329) | Redefinir reglas de negocio |
+| `21-portico-plan-accion-checklist-identidad-amorygracia-elena-v3.6.md` | Plan táctico y checklist para Identidad Vectorial Amor y Gracia, Conmutador Multi-Grupo Elena Ramos, Poda de Debris y Silencio de Santuario (GOLD-330 a GOLD-339) | Redefinir reglas de negocio |
 | `DOSSIER-064` (`research`) | Benchmarks del universo de GitHub para las 10 decisiones de backend/dominio (GOLD-201 a GOLD-210) | Reemplazar arquitectura local |
 | `DOSSIER-066` (`research`) | Benchmarks del universo de GitHub para las 15 decisiones de UI/UX, ergonomía Apple y Triada (GOLD-215 a GOLD-229) | Reemplazar arquitectura local |
 | `DOSSIER-067` (`research`) | Benchmarks del universo de GitHub para sobriedad, sin jargon y calendario cristiano (GOLD-230 a GOLD-239) | Reemplazar arquitectura local |
@@ -33,6 +35,8 @@
 | `DOSSIER-072` (`research`) | Benchmarks del universo de GitHub para interfaz invisible, sedes sin emojis, barra pulgar 48px y calma pastoral (GOLD-287 a GOLD-296) | Reemplazar arquitectura local |
 | `DOSSIER-073` (`research`) | Benchmarks del universo de GitHub para simbiosis comunitaria, armonizador celular, bandeja diaconal mancomunada y salvaguarda de menores (GOLD-297 a GOLD-306) | Reemplazar arquitectura local |
 | `DOSSIER-074` (`research`) | Benchmarks del universo de GitHub para despliegue soberano a costo $0, Cloudflare Tunnels, Docker Compose, WebAuthn y Litestream R2 (GOLD-307 a GOLD-316) | Reemplazar arquitectura local |
+| `DOSSIER-075` (`research`) | Benchmarks del universo de GitHub para ergonomía Apple HIG, filtro Elena Ramos, doble capa en iniciativas, blindaje wa.me y escala 15k (GOLD-320 a GOLD-329) | Reemplazar arquitectura local |
+| `DOSSIER-076` (`research`) | Benchmarks del universo de GitHub para identidad vectorial Amor y Gracia, conmutador multi-grupo Elena, contraste WCAG AAA y silencio sagrado (GOLD-330 a GOLD-339) | Reemplazar arquitectura local |
 
 ### Los 10 Principios y Decisiones Canónicas de Pórtico
 

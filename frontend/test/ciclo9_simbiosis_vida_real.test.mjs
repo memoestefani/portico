@@ -33,9 +33,9 @@ describe('Pórtico OS v3.3 - Ciclo 9: Simbiosis de Vida Real, Casos de Estrés y
       assert.match(content, /webcal:\/\/|liturgical\.ics/i, 'Falta protocolo webcal o feed ics');
     });
 
-    it('PublicPortal.tsx y MemberSilo.tsx deben integrar el Armonizador y el Feed Litúrgico', () => {
+    it('MemberSilo.tsx debe integrar el Armonizador y PublicPortal.tsx debe estar libre de herramientas de liderazgo (GOLD-332)', () => {
       const portalContent = fs.readFileSync(portalPath, 'utf-8');
-      assert.match(portalContent, /<CellHarmonizer/i, 'PublicPortal no renderiza CellHarmonizer');
+      assert.ok(!portalContent.includes('<CellHarmonizer'), 'PublicPortal no debe exponer herramientas de liderazgo internas como CellHarmonizer');
 
       const siloContent = fs.readFileSync(siloPath, 'utf-8');
       assert.match(siloContent, /<CellHarmonizer/i, 'MemberSilo no renderiza CellHarmonizer');

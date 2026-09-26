@@ -2504,10 +2504,12 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
             )}
           </div>
 
-          {/* Sección: Vida de la Iglesia y Servicio Comunitario (GOLD-320) */}
-          <div style={{ marginTop: '28px' }}>
-            <CommunityInitiativesHub publicShowcaseOnly={false} />
-          </div>
+          {/* Sección: Vida de la Iglesia y Servicio Comunitario (Solo para miembros / Mi Grupo, omitido en vista del Líder para evitar redundancia) */}
+          {!isLeaderView && (
+            <div style={{ marginTop: '28px' }}>
+              <CommunityInitiativesHub publicShowcaseOnly={false} />
+            </div>
+          )}
         </div>
       </div>
 

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <!-- Fondo Cantera y Lino Noble -->
+  <rect width="1200" height="630" fill="#F8F9FA"/>
+  
+  <!-- Patrón sutil arquitectónico -->
+  <rect x="40" y="40" width="1120" height="550" rx="24" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  
+  <!-- Acento superior ámbar cantera -->
+  <path d="M40 64C40 50.7452 50.7452 40 64 40H1136C1149.25 40 1160 50.7452 1160 64V72H40V64Z" fill="#D97706"/>
+  
+  <!-- Emblema de Pórtico -->
+  <g transform="translate(100, 120)">
+    <rect width="84" height="84" rx="20" fill="#D97706"/>
+    <!-- Ícono de columnas y dintel -->
+    <path d="M22 28H62M28 28V62M56 28V62M42 38V62" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Textos Editoriales con Charter / Sitka / Georgia -->
+  <text x="210" y="155" font-family="'Charter', 'Sitka Text', 'Georgia', serif" font-size="28" font-weight="700" fill="#D97706" letter-spacing="3">PÓRTICO OS v3.1</text>
+  <text x="210" y="190" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="600" fill="#64748B">Soberanía Eclesial • Amor y Gracia Durango</text>
+  
+  <!-- Título Principal -->
+  <text x="100" y="295" font-family="'Charter', 'Sitka Text', 'Georgia', serif" font-size="52" font-weight="700" fill="#1A1F2C">Comunidades de Fe, Hogar y Mesa</text>
+  <text x="100" y="360" font-family="'Charter', 'Sitka Text', 'Georgia', serif" font-size="44" font-weight="400" fill="#4B5563">Encuentra tu grupo pequeño cerca de ti.</text>
+  
+  <!-- Características / Insignias -->
+  <g transform="translate(100, 440)">
+    <!-- Pill 1 -->
+    <rect x="0" y="0" width="280" height="54" rx="27" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5"/>
+    <text x="140" y="34" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="18" font-weight="600" fill="#0F172A" text-anchor="middle">🔒 Cero Rastreo Comercial</text>
+    
+    <!-- Pill 2 -->
+    <rect x="300" y="0" width="310" height="54" rx="27" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5"/>
+    <text x="455" y="34" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="18" font-weight="600" fill="#0F172A" text-anchor="middle">📍 Privacidad Total en Hogares</text>
+    
+    <!-- Pill 3 -->
+    <rect x="630" y="0" width="280" height="54" rx="27" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1.5"/>
+    <text x="770" y="34" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="18" font-weight="600" fill="#065F46" text-anchor="middle">🟢 1-Tap Enlace WhatsApp</text>
+  </g>
+  
+  <!-- Pie de tarjeta -->
+  <line x1="100" y1="530" x2="1100" y2="530" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="100" y="565" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="16" font-weight="500" fill="#94A3B8">Pórtico OS • Durango, México • Aprobado bajo directrices LFPDPPP</text>
+  <text x="1100" y="565" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="16" font-weight="700" fill="#D97706" text-anchor="end">amorygracia.mx</text>
+</svg>

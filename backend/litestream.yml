@@ -1,0 +1,15 @@
+# litestream.yml - Replicación Continua de SQLite hacia Cloudflare R2 ($0 USD / Cero Egress)
+# Pórtico OS v3.4 - Amor y Gracia Durango
+
+dbs:
+  - path: ./data/tenants/amorygracia.db
+    replicas:
+      - type: s3
+        bucket: ${CLOUDFLARE_R2_BUCKET:-portico-wal-backups}
+        path: tenants/amorygracia
+        endpoint: https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
+        region: auto
+        access-key-id: ${CLOUDFLARE_R2_ACCESS_KEY_ID}
+        secret-access-key: ${CLOUDFLARE_R2_SECRET_ACCESS_KEY}
+        sync-interval: 5s
+        retention: 720h # 30 días de historial continuo

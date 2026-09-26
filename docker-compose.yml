@@ -1,0 +1,43 @@
+# docker-compose.yml - Pórtico OS v3.4 (Despliegue Soberano Llave en Mano)
+# Infraestructura Consolidada en Cloudflare (Cero Puertos Expuestos, Cero Proveedores Extra)
+
+services:
+  # Servicio Principal: Axum Rust + React 19 estático + SQLite
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: portico-app
+    restart: unless-stopped
+    environment:
+      - PORT=3000
+      - DATA_DIR=/app/data
+      - RUST_LOG=info
+      - CLOUDFLARE_R2_BUCKET=${CLOUDFLARE_R2_BUCKET:-portico-wal-backups}
+      - CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID:-}
+      - CLOUDFLARE_R2_ACCESS_KEY_ID=${CLOUDFLARE_R2_ACCESS_KEY_ID:-}
+      - CLOUDFLARE_R2_SECRET_ACCESS_KEY=${CLOUDFLARE_R2_SECRET_ACCESS_KEY:-}
+      - OPERATOR_KEY=${OPERATOR_KEY:-}
+    volumes:
+      - ./data:/app/data
+    networks:
+      - portico-net
+    expose:
+      - "3000" # Exposición interna EXCLUSIVA para el túnel; NUNCA mapeado al host del usuario
+
+  # Conector de Borde: Cloudflare Tunnel (Zero Trust Ingress)
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: portico-tunnel
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - app
+    networks:
+      - portico-net
+
+networks:
+  portico-net:
+    driver: bridge

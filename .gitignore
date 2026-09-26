@@ -1,0 +1,30 @@
+# .gitignore - Pórtico OS v3.4 (Producción Soberana)
+
+# Rust build artifacts
+target/
+**/target/
+
+# Node dependencies and builds
+node_modules/
+**/node_modules/
+
+# Local databases and WAL logs (persisted on disk, never committed to git)
+*.db-shm
+*.db-wal
+*.sqlite
+data/tenants/*.db
+backend/data/tenants/*.db
+
+# Secrets and environment configs
+.env
+.env.production
+.env.local
+
+# Operating system debris
+Thumbs.db
+.DS_Store
+desktop.ini
+*.tmp
+*.swp
+*.log
+.gemini/

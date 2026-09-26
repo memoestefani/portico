@@ -3,152 +3,283 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pórtico OS — Carta Pastoral y Plataforma Soberana para Grupos Pequeños</title>
-  <meta name="description" content="Pórtico OS es un sistema sobrio y de código libre nacido en Durango, México. Cuidado pastoral genuino para grupos pequeños y células en hogares, sin la saturación de WhatsApp ni costos por miembro.">
-  <meta name="theme-color" content="#FBF9F5">
+  <title>Pórtico — Grupos Pequeños en Hogares</title>
+  <meta name="description" content="Software sencillo y libre para coordinar grupos pequeños en hogares. En uso en Amor y Gracia Durango con el Pastor Josh.">
+  <meta name="theme-color" content="#FAF8F5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-canvas: #FBF9F5; --bg-surface: #FFFFFF; --border-subtle: #E6DFD5; --border-focus: #D4C9BC;
-      --text-primary: #2C2623; --text-secondary: #5C4F46; --text-muted: #8C7E74;
-      --accent-terracotta: #93432F; --accent-terracotta-hover: #7A3626;
-      --badge-green-bg: #ECFDF5; --badge-green-text: #065F46; --badge-green-dot: #10B981; --tag-bg: #F2ECE4;
+      --bg-page: #FAF8F5;
+      --bg-card: #FFFFFF;
+      --border: #E8E2D9;
+      --border-hover: #D6CCC0;
+      --text-main: #231F1D;
+      --text-muted: #6B625B;
+      --text-subtle: #968C83;
+      --accent: #93432F;
+      --accent-hover: #7A3626;
+      --dot-green: #10B981;
+      --dot-green-bg: #ECFDF5;
+      --dot-green-text: #065F46;
       --font-serif: 'Lora', Georgia, serif;
       --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font-sans); background: var(--bg-canvas); color: var(--text-primary); line-height: 1.68; -webkit-font-smoothing: antialiased; }
-    .page-wrapper { max-width: 680px; margin: 0 auto; padding: 52px 24px 80px; }
-    @media (max-width: 600px) { .page-wrapper { padding: 32px 18px 60px; } }
-    header { margin-bottom: 40px; display: flex; flex-direction: column; gap: 16px; }
-    .brand-row { display: flex; align-items: center; gap: 14px; }
-    .brand-titles { display: flex; flex-direction: column; }
-    .brand-name { font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em; color: var(--text-primary); line-height: 1.2; }
-    .brand-sub { font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
-    .workshop-badge { display: inline-flex; align-items: center; align-self: flex-start; padding: 4px 12px; background: var(--tag-bg); color: var(--accent-terracotta); border-radius: 999px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.03em; }
-    .letter-kicker { font-family: var(--font-serif); font-size: 0.95rem; font-style: italic; color: var(--accent-terracotta); margin-bottom: 12px; }
-    h1 { font-family: var(--font-serif); font-size: clamp(2rem, 5vw, 2.75rem); font-weight: 600; line-height: 1.22; letter-spacing: -0.02em; color: var(--text-primary); margin-bottom: 24px; }
-    .letter-lead { font-size: 1.12rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 40px; }
-    .divider { height: 1px; background: var(--border-subtle); margin: 36px 0; }
-    .realities-section h2 { font-family: var(--font-serif); font-size: 1.55rem; font-weight: 600; color: var(--text-primary); margin-bottom: 24px; letter-spacing: -0.01em; }
-    .reality-item { margin-bottom: 26px; padding-left: 18px; border-left: 3px solid var(--border-subtle); transition: border-color 0.2s ease; }
-    .reality-item:hover { border-left-color: var(--accent-terracotta); }
-    .reality-title { font-size: 1.08rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
-    .reality-desc { font-size: 0.98rem; color: var(--text-secondary); line-height: 1.65; }
-    .case-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 32px 28px; margin: 44px 0; box-shadow: 0 4px 20px rgba(44, 38, 35, 0.05); }
-    @media (max-width: 600px) { .case-card { padding: 24px 18px; } }
-    .status-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--badge-green-bg); color: var(--badge-green-text); padding: 5px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; margin-bottom: 18px; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--badge-green-dot); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
-    .case-title { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
-    .case-subtitle { font-size: 0.95rem; font-weight: 700; color: var(--accent-terracotta); margin-bottom: 16px; }
-    .case-body { font-size: 0.98rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 22px; }
-    .snapshot-container { border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-subtle); margin-bottom: 22px; box-shadow: 0 2px 10px rgba(44, 38, 35, 0.04); background: #111; }
-    .preview-snapshot { width: 100%; height: auto; display: block; }
-    .btn-live-portal, .btn-whatsapp, .btn-email { display: inline-flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; border-radius: var(--radius-md); transition: background 0.15s ease, transform 0.15s ease; }
-    .btn-live-portal { background: var(--accent-terracotta); color: #FFF; padding: 14px 28px; font-weight: 700; font-size: 1rem; box-shadow: 0 3px 12px rgba(147, 67, 47, 0.25); width: 100%; }
-    .btn-live-portal:hover { background: var(--accent-terracotta-hover); transform: translateY(-1px); }
-    .resilience-note { font-size: 0.84rem; color: var(--text-muted); line-height: 1.55; margin-top: 18px; padding: 12px 16px; background: var(--bg-canvas); border-radius: var(--radius-sm); border-left: 3px solid var(--border-focus); }
-    .contact-card { background: #2C2623; color: #FBF9F5; border-radius: var(--radius-lg); padding: 38px 30px; text-align: center; margin-top: 48px; }
-    @media (max-width: 600px) { .contact-card { padding: 28px 18px; } }
-    .contact-card h3 { font-family: var(--font-serif); font-size: 1.55rem; font-weight: 600; color: #FFF; margin-bottom: 12px; }
-    .contact-card p { font-size: 0.98rem; color: #D4C9BC; max-width: 520px; margin: 0 auto 26px; line-height: 1.6; }
-    .contact-actions { display: flex; flex-direction: column; gap: 12px; max-width: 440px; margin: 0 auto; }
-    .btn-whatsapp { background: #10B981; color: #FFF; padding: 14px 24px; font-weight: 700; font-size: 1rem; min-height: 48px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); }
-    .btn-whatsapp:hover { background: #059669; transform: translateY(-1px); }
-    .btn-email { color: #E6DFD5; padding: 12px 20px; font-weight: 600; font-size: 0.92rem; min-height: 44px; border: 1px solid rgba(230, 223, 213, 0.25); }
-    .btn-email:hover { background: rgba(255, 255, 255, 0.08); color: #FFF; }
-    footer { margin-top: 56px; padding-top: 28px; border-top: 1px solid var(--border-subtle); text-align: center; color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 580px;
+      text-align: center;
+    }
+
+    .logo-mark {
+      margin: 0 auto 20px auto;
+      display: inline-flex;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4.5vw, 2.5rem);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 30px 28px;
+      text-align: left;
+      box-shadow: 0 4px 20px rgba(35, 31, 29, 0.04);
+      margin-bottom: 28px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 11px;
+      background: var(--dot-green-bg);
+      color: var(--dot-green-text);
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--dot-green);
+    }
+
+    .card-title {
+      font-family: var(--font-serif);
+      font-size: 1.28rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .card-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 22px;
+    }
+
+    .btn-portal {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 13px 20px;
+      background: var(--accent);
+      color: #FFFFFF;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.96rem;
+      border-radius: 12px;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .btn-portal:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .bullets {
+      list-style: none;
+      text-align: left;
+      margin: 0 auto 32px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 0 8px;
+    }
+
+    .bullets li {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .bullet-dot {
+      color: var(--accent);
+      font-size: 1.1rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .contact-block {
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+      font-size: 0.88rem;
+      color: var(--text-subtle);
+    }
+
+    .contact-prompt {
+      margin-bottom: 12px;
+      color: var(--text-muted);
+    }
+
+    .contact-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .contact-link {
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-hover);
+      padding-bottom: 2px;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .contact-link:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .sep {
+      color: var(--border-hover);
+    }
+
+    .author-note {
+      margin-top: 18px;
+      font-size: 0.78rem;
+      color: var(--text-subtle);
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 24px 16px;
+      }
+      .card {
+        padding: 22px 18px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="page-wrapper">
-    <header>
-      <div class="brand-row">
-        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amor y Gracia Durango">
-          <circle cx="50" cy="50" r="48" fill="#93432F"/>
-          <g fill="#FBF9F5">
-            <path d="M 33 21 L 48 36 L 36 48 L 26 38 L 26 49 L 20 49 L 20 37 L 33 21 Z M 33 30 L 27 36 L 35 44 L 41 38 Z" fill-rule="evenodd"/>
-            <path d="M 52 32 L 67 21 L 80 37 L 80 49 L 50 81 L 38 69 L 44 63 L 50 69 L 72 46 L 72 38 L 67 31 L 58 40 L 47 40 L 52 32 Z M 52 47 L 64 47 L 64 53 L 45 72 L 37 64 L 52 47 Z" fill-rule="evenodd"/>
-          </g>
-        </svg>
-        <div class="brand-titles">
-          <span class="brand-name">Pórtico OS</span>
-          <span class="brand-sub">Amor y Gracia • Durango</span>
-        </div>
+
+  <main class="container">
+    <!-- Logotipo Amor y Gracia -->
+    <div class="logo-mark">
+      <svg width="44" height="44" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pórtico">
+        <circle cx="50" cy="50" r="48" fill="#93432F"/>
+        <g fill="#FAF8F5">
+          <path d="M 33 21 L 48 36 L 36 48 L 26 38 L 26 49 L 20 49 L 20 37 L 33 21 Z M 33 30 L 27 36 L 35 44 L 41 38 Z" fill-rule="evenodd"/>
+          <path d="M 52 32 L 67 21 L 80 37 L 80 49 L 50 81 L 38 69 L 44 63 L 50 69 L 72 46 L 72 38 L 67 31 L 58 40 L 47 40 L 52 32 Z M 52 47 L 64 47 L 64 53 L 45 72 L 37 64 L 52 47 Z" fill-rule="evenodd"/>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Título y Propósito -->
+    <h1>Pórtico</h1>
+    <p class="tagline">Software sencillo y libre para coordinar grupos pequeños en hogares.</p>
+
+    <!-- Tarjeta del caso vivo: Amor y Gracia Durango -->
+    <div class="card">
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        <span>En uso con el Pastor Josh en Durango</span>
       </div>
-      <div class="workshop-badge">Taller Artesanal de Software Soberano</div>
-    </header>
-    <main>
-      <article>
-        <p class="letter-kicker">Carta Pastoral y Fraternal</p>
-        <h1>Cuidado pastoral genuino en hogares, sin la saturación de WhatsApp ni cobros por miembro.</h1>
-        <p class="letter-lead">
-          Pórtico OS nació en Durango, México, en una mesa de trabajo junto a pastores y familias que abrían su sala cada semana. No es un producto comercial ni una plataforma de Silicon Valley; es un taller de software libre y sobrio al servicio de las iglesias locales. La comunidad Amor y Gracia en Durango es nuestro hogar fundacional y testimonio vivo.
-        </p>
-        <div class="divider"></div>
-        <section class="realities-section">
-          <h2>Tres realidades de la vida real que resolvemos juntos</h2>
-          <div class="reality-item">
-            <h3 class="reality-title">1. Coordinación familiar sin saturar WhatsApp</h3>
-            <p class="reality-desc">
-              Saber quién asiste a cenar, quién llega con café o pan dulce y en qué hogar nos reunimos. Todo con una confirmación clara y serena de un solo toque, sin perder mensajes esenciales entre cadenas de oración, stickers o avisos vecinales.
-            </p>
-          </div>
-          <div class="reality-item">
-            <h3 class="reality-title">2. Cuidado y descanso para la familia anfitriona</h3>
-            <p class="reality-desc">
-              Abrir la sala de una casa semana a semana requiere amor y esfuerzo. Pórtico rota los hogares y visibiliza los descansos con ternura pastoral para que ningún anfitrión termine abrumado ni agotado en silencio.
-            </p>
-          </div>
-          <div class="reality-item">
-            <h3 class="reality-title">3. Tu iglesia es la única dueña de sus datos</h3>
-            <p class="reality-desc">
-              Sin suscripciones mensuales abusivas, sin cobro por cada miembro que asiste y sin comercializar la información íntima de las familias. La base de datos vive con tu congregación y la descargas completa en un clic cuando lo desees.
-            </p>
-          </div>
-        </section>
-        <section class="case-card">
-          <div class="status-badge">
-            <span class="status-dot"></span>
-            <span>En uso comunitario activo en Durango</span>
-          </div>
-          <h3 class="case-title">Nuestra comunidad fundacional en Durango</h3>
-          <p class="case-subtitle">Iglesia Amor y Gracia • Cuidado pastoral del Pastor Josh</p>
-          <p class="case-body">
-            En Amor y Gracia organizamos nuestras reuniones en hogares por toda la ciudad de Durango con esta misma plataforma. Puedes entrar a explorar la experiencia pública tal como la viven nuestros vecinos:
-          </p>
-          <div class="snapshot-container">
-            <img src="assets/dossier/01_portico_publico.png" alt="Portal Comunitario de Grupos Pequeños de Amor y Gracia Durango" class="preview-snapshot" loading="lazy">
-          </div>
-          <a href="https://habitat-cleaning-benz-syndication.trycloudflare.com" target="_blank" rel="noopener noreferrer" class="btn-live-portal">
-            <span>Explorar Portal Comunitario en Vivo →</span>
-          </a>
-          <p class="resilience-note">
-            <strong>Nota de cortesía:</strong> Este portal enlaza a una instancia comunitaria real servida desde nuestro host local protegido en Durango. Si en este instante se encuentra en ventana de mantenimiento o descanso de equipo, puedes apreciar la vista previa interactiva arriba o escribirnos directamente para mostrarte el sistema en funcionamiento.
-          </p>
-        </section>
-        <section class="contact-card">
-          <h3>Conversemos con calma de pastor a pastor</h3>
-          <p>
-            Si sirves en una congregación o red de células que busca acompañar a sus familias con orden y dignidad, con gusto te compartimos nuestra experiencia y te ayudamos a ponerlo en marcha.
-          </p>
-          <div class="contact-actions">
-            <a href="https://wa.me/526181234567?text=Hola%20Guillermo%2C%20vi%20el%20portal%20de%20Amor%20y%20Gracia%20en%20P%C3%B3rtico%20y%20me%20gustar%C3%ADa%20platicar%20contigo%20sobre%20c%C3%B3mo%20usarlo%20en%20mi%20comunidad." target="_blank" rel="noopener noreferrer" class="btn-whatsapp">
-              <span>💬 Platicar por WhatsApp con Guillermo</span>
-            </a>
-            <a href="mailto:memoestefani@gmail.com?subject=Inter%C3%A9s%20en%20P%C3%B3rtico%20OS%20para%20nuestra%20comunidad" class="btn-email">
-              <span>✉️ Escribir por correo electrónico</span>
-            </a>
-          </div>
-        </section>
-      </article>
-    </main>
-    <footer>
-      <p>Pórtico OS v3.6 • Desarrollado con esmero artesanal en Durango, México.<br>Dedicado con gratitud al cuidado de las familias de Amor y Gracia.</p>
+      <h2 class="card-title">Comunidad Amor y Gracia</h2>
+      <p class="card-desc">
+        En Durango organizamos nuestras reuniones semanales en casas con esta plataforma. Puedes entrar a ver el catálogo público tal como lo usan nuestras familias.
+      </p>
+      <a href="https://habitat-cleaning-benz-syndication.trycloudflare.com" target="_blank" rel="noopener noreferrer" class="btn-portal">
+        <span>Ver portal en vivo →</span>
+      </a>
+    </div>
+
+    <!-- 3 Puntos Simples -->
+    <ul class="bullets">
+      <li>
+        <span class="bullet-dot">•</span>
+        <span>Coordinación clara de reuniones semanales sin saturar los grupos de WhatsApp.</span>
+      </li>
+      <li>
+        <span class="bullet-dot">•</span>
+        <span>Cuidado visible para que las familias anfitrionas descansen con tranquilidad.</span>
+      </li>
+      <li>
+        <span class="bullet-dot">•</span>
+        <span>La iglesia es la única dueña de sus datos, sin costos por miembro ni suscripciones.</span>
+      </li>
+    </ul>
+
+    <!-- Contacto Directo y Tranquilo -->
+    <footer class="contact-block">
+      <p class="contact-prompt">¿Te gustaría usarlo en tu comunidad o platicar con nosotros?</p>
+      <div class="contact-links">
+        <a href="https://wa.me/526181234567?text=Hola%20Guillermo%2C%20vi%20el%20portal%20de%20Amor%20y%20Gracia%20en%20P%C3%B3rtico%20y%20me%20gustar%C3%ADa%20platicar%20sobre%20c%C3%B3mo%20usarlo%20en%20mi%20iglesia." target="_blank" rel="noopener noreferrer" class="contact-link">WhatsApp</a>
+        <span class="sep">•</span>
+        <a href="mailto:memoestefani@gmail.com?subject=Inter%C3%A9s%20en%20P%C3%B3rtico" class="contact-link">memoestefani@gmail.com</a>
+      </div>
+      <p class="author-note">Guillermo Estefani · Durango, México</p>
     </footer>
-  </div>
+  </main>
+
 </body>
 </html>

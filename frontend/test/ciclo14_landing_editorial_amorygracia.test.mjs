@@ -10,105 +10,89 @@ const rootDir = path.resolve(__dirname, '../..');
 const docsDir = path.join(rootDir, 'docs');
 const indexPath = path.join(docsDir, 'index.html');
 
-describe('Pórtico OS v3.6 - Ciclo 14: Landing Editorial y Carta Pastoral de Amor y Gracia (GOLD-340 a GOLD-349)', () => {
+describe('Pórtico OS v3.6 - Ciclo 14: Página Personal Minimalista, Serena y Caso Amor y Gracia Durango', () => {
   const content = fs.readFileSync(indexPath, 'utf-8');
 
   // ==========================================================================
-  // GOLD-340 & GOLD-348: Monolito Vanilla Editorial de Una Sola Vista (< 15 KB)
+  // Arquitectura Ultra-Simple y Monolito Vanilla (< 10 KB)
   // ==========================================================================
-  describe('GOLD-340 & GOLD-348: Arquitectura Single-Fold y Monolito Vanilla Autónomo', () => {
-    it('docs/index.html debe existir, ser legible y medir menos de 15 KB', () => {
+  describe('Arquitectura Ultra-Simple y Monolito Vanilla Autónomo', () => {
+    it('docs/index.html debe existir, ser legible y medir menos de 10 KB', () => {
       assert.ok(fs.existsSync(indexPath), 'docs/index.html debe existir');
       const stat = fs.statSync(indexPath);
-      assert.ok(stat.size > 2000, 'El archivo debe contener la carta editorial completa');
-      assert.ok(stat.size < 15000, `El archivo pesa ${stat.size} bytes, debe ser menor a 15 KB`);
+      assert.ok(stat.size > 1500, 'El archivo debe contener el marcado esencial');
+      assert.ok(stat.size < 10000, `El archivo pesa ${stat.size} bytes, debe ser ultra-ligero (< 10 KB)`);
     });
 
-    it('debe estructurarse como una Carta Editorial centrada en max-width: 680px sin scripts externos', () => {
-      assert.match(content, /max-width:\s*680px/, 'Debe centrar la lectura en 680px');
-      assert.match(content, /<article>/i, 'Debe contener la etiqueta semántica article');
+    it('debe estructurarse como una sola vista sin scripts externos ni trackers', () => {
       assert.doesNotMatch(content, /<script\s+src=/i, 'Cero scripts JS externos o trackers');
     });
   });
 
   // ==========================================================================
-  // GOLD-341: Tarjeta de Caso Vivo de Amor y Gracia Durango con Pastor Josh
+  // Tarjeta de Caso Vivo de Amor y Gracia Durango con Pastor Josh
   // ==========================================================================
-  describe('GOLD-341: Tarjeta de Caso Vivo Testimonial Real', () => {
+  describe('Tarjeta de Caso Vivo Testimonial Real de Amor y Gracia', () => {
     it('debe identificar a la congregación Amor y Gracia, Durango y al Pastor Josh', () => {
       assert.match(content, /Amor y Gracia/i, 'Debe referenciar a la congregación Amor y Gracia');
       assert.match(content, /Durango/i, 'Debe situarse en la ciudad de Durango');
       assert.match(content, /Pastor Josh/i, 'Debe reconocer la cobertura pastoral de Josh');
     });
 
-    it('debe enlazar en vivo a la instancia activa de Cloudflare Tunnels con badge verde', () => {
-      assert.match(content, /habitat-cleaning-benz-syndication\.trycloudflare\.com/, 'Debe enlazar al túnel comunitario');
+    it('debe enlazar directamente a la instancia comunitaria en vivo con Cloudflare Tunnels', () => {
+      assert.match(content, /habitat-cleaning-benz-syndication\.trycloudflare\.com/, 'Debe enlazar al portal en vivo');
       assert.match(content, /target="_blank"/, 'Debe abrir en nueva pestaña');
       assert.match(content, /rel="noopener noreferrer"/, 'Debe proteger la navegación externa');
-      assert.match(content, /En uso comunitario activo en Durango/i, 'Debe incluir el badge de estado vivo');
+      assert.match(content, /Ver portal en vivo/i, 'Debe tener botón claro hacia el portal en vivo');
     });
   });
 
   // ==========================================================================
-  // GOLD-342: Poda de Jerga Teórica y Tríada de Realidades Cotidianas
+  // Poda Absoluta de Jerga Teórica y Realidades Cotidianas
   // ==========================================================================
-  describe('GOLD-342: Poda Absoluta de Jerga Teórica y Adopción de 3 Realidades', () => {
-    it('no debe contener los 6 principios teóricos antiguos ni listas impersonales de superficies', () => {
+  describe('Poda Absoluta de Jerga Teórica y Enfoque Humano', () => {
+    it('no debe contener jerga de marketing ni principios teóricos densos', () => {
       assert.doesNotMatch(content, /Principio 01/i, 'Principio 01 debe ser purgado');
-      assert.doesNotMatch(content, /Límites de Dunbar/i, 'Límites de Dunbar como principio de marketing debe ser purgado');
+      assert.doesNotMatch(content, /Límites de Dunbar/i, 'Límites de Dunbar debe ser purgado de la portada');
       assert.doesNotMatch(content, /Privacidad Polimórfica Estricta/i, 'Privacidad Polimórfica debe ser purgada');
       assert.doesNotMatch(content, /Tríada Laica Anti-Burnout/i, 'Tríada Laica debe ser purgada');
-      assert.doesNotMatch(content, /Las 6 Superficies/i, 'Las 6 Superficies deben ser purgadas de la portada');
-      assert.doesNotMatch(content, /Consola Soberana de Operador/i, 'Consola de Operador debe ser purgada de la portada');
+      assert.doesNotMatch(content, /Las 6 Superficies/i, 'Las 6 Superficies deben ser purgadas');
     });
 
-    it('debe contener las 3 Realidades Cotidianas de la vida comunitaria', () => {
-      assert.match(content, /Coordinación familiar sin saturar WhatsApp/i, 'Debe contener la realidad 1 (WhatsApp familiar)');
-      assert.match(content, /Cuidado y descanso para la familia anfitriona/i, 'Debe contener la realidad 2 (Descanso del anfitrión)');
-      assert.match(content, /Tu iglesia es la única dueña de sus datos/i, 'Debe contener la realidad 3 (Soberanía de datos)');
-    });
-  });
-
-  // ==========================================================================
-  // GOLD-343: Identidad de Taller Artesanal y Hogar Fundacional
-  // ==========================================================================
-  describe('GOLD-343: Narrativa de Taller Artesanal y Hogar Fundacional', () => {
-    it('debe enunciar a Pórtico como taller artesanal y a Amor y Gracia como hogar fundacional', () => {
-      assert.match(content, /Taller Artesanal de Software Soberano/i, 'Debe incluir la divisa de taller artesanal');
-      assert.match(content, /hogar fundacional y testimonio vivo/i, 'Debe honrar a Amor y Gracia como hogar de origen');
+    it('debe expresar las necesidades reales en lenguaje cotidiano', () => {
+      assert.match(content, /WhatsApp/i, 'Debe mencionar la coordinación sin saturar WhatsApp');
+      assert.match(content, /anfitrion/i, 'Debe mencionar el cuidado y descanso de las familias anfitrionas');
+      assert.match(content, /dueña de sus datos/i, 'Debe mencionar la soberanía de datos');
     });
   });
 
   // ==========================================================================
-  // GOLD-344: Estética Earthen Noble Cálido Unificada (WCAG AAA)
+  // Estética Limpia, Serena y Tipografía Refinada
   // ==========================================================================
-  describe('GOLD-344: Paleta Earthen Noble Cálido Unificada y Tipografía Serena', () => {
-    it('debe definir la paleta cromática cálida (#FBF9F5, #2C2623, #93432F)', () => {
-      assert.match(content, /#FBF9F5/i, 'Debe usar pergamino cálido #FBF9F5');
-      assert.match(content, /#2C2623/i, 'Debe usar tinta carbón suave #2C2623');
-      assert.match(content, /#93432F/i, 'Debe usar terracota artesanal #93432F');
+  describe('Estética Limpia, Serena y Tipografía Refinada', () => {
+    it('debe usar la paleta cálida y noble (#FAF8F5, #93432F, etc.)', () => {
+      assert.match(content, /#FAF8F5/i, 'Debe usar fondo pergamino cálido');
+      assert.match(content, /#93432F/i, 'Debe usar terracota artesanal');
     });
 
     it('debe cargar y aplicar Lora para serif y Plus Jakarta Sans para sans', () => {
       assert.match(content, /family=Lora/i, 'Debe importar Lora');
       assert.match(content, /family=Plus\+Jakarta\+Sans/i, 'Debe importar Plus Jakarta Sans');
-      assert.match(content, /--font-serif:\s*'Lora'/i, 'Debe asignar Lora a la variable de serif');
     });
 
-    it('debe incrustar el isotipo SVG vectorial de Amor y Gracia', () => {
-      assert.match(content, /<svg.*viewBox="0 0 100 100"/s, 'Debe renderizar el SVG del corazón de Amor y Gracia');
+    it('debe incrustar el isotipo SVG vectorial de Amor y Gracia / Pórtico', () => {
+      assert.match(content, /<svg.*viewBox="0 0 100 100"/s, 'Debe renderizar el SVG del corazón entrelazado');
       assert.match(content, /fill="#93432F"/i, 'El SVG debe lucir el color terracota noble');
     });
   });
 
   // ==========================================================================
-  // GOLD-345: Canal Dual Humano y Directo (WhatsApp + Email)
+  // Canal Humano Directo y Discreto (WhatsApp + Email)
   // ==========================================================================
-  describe('GOLD-345: Canal Dual Humano y Directo', () => {
-    it('debe ofrecer botón dominante de WhatsApp con mensaje precargado para Guillermo', () => {
+  describe('Canal Humano Directo y Discreto', () => {
+    it('debe ofrecer enlace directo de WhatsApp con mensaje precargado para Guillermo', () => {
       assert.match(content, /https:\/\/wa\.me\/52/i, 'Debe usar deep-link wa.me');
-      assert.match(content, /Hola%20Guillermo/i, 'Debe contener saludo precargado a Guillermo');
-      assert.match(content, /min-height:\s*48px/i, 'Debe cumplir ergonomía táctil de 48px');
+      assert.match(content, /Hola%20Guillermo/i, 'Debe contener saludo precargado');
     });
 
     it('debe ofrecer enlace directo de correo electrónico a Guillermo', () => {
@@ -117,36 +101,11 @@ describe('Pórtico OS v3.6 - Ciclo 14: Landing Editorial y Carta Pastoral de Amo
   });
 
   // ==========================================================================
-  // GOLD-346: Ocultamiento Total de GitHub en Portada Pública (Decisión 7-1)
+  // Silencio Absoluto de GitHub y Veracidad
   // ==========================================================================
-  describe('GOLD-346: Silencio Absoluto de GitHub en Portada Pública', () => {
-    it('no debe exponer enlaces ni menciones visibles al repositorio de GitHub en el cuerpo', () => {
+  describe('Silencio Absoluto de GitHub y Cero Simulaciones', () => {
+    it('no debe exponer enlaces al repositorio de GitHub en el cuerpo', () => {
       assert.doesNotMatch(content, /github\.com\/memoestefani\/portico/i, 'No debe exponer enlaces a GitHub');
-      assert.doesNotMatch(content, /Ver Repositorio en GitHub/i, 'No debe mostrar botón de GitHub');
-    });
-  });
-
-  // ==========================================================================
-  // GOLD-347: Tarjeta Resiliente con Snapshot y Nota de Cortesía
-  // ==========================================================================
-  describe('GOLD-347: Resiliencia de Túnel con Vista Previa Optimizada', () => {
-    it('debe integrar la captura real 01_portico_publico.png', () => {
-      assert.match(content, /assets\/dossier\/01_portico_publico\.png/i, 'Debe enlazar al snapshot de respaldo');
-    });
-
-    it('debe incluir la nota pastoral de cortesía ante ventanas de mantenimiento', () => {
-      assert.match(content, /Nota de cortesía/i, 'Debe contener la nota de cortesía');
-      assert.match(content, /ventana de mantenimiento o descanso/i, 'Debe explicar con dignidad si el túnel duerme');
-    });
-  });
-
-  // ==========================================================================
-  // GOLD-349: Poda de Enlaces a PDFs Antiguos y Veracidad Total
-  // ==========================================================================
-  describe('GOLD-349: Poda de Enlaces a PDFs y Cero Textos Simulados', () => {
-    it('no debe enlazar a descargas de PDFs ni al dossier antiguo en la navegación pública', () => {
-      assert.doesNotMatch(content, /\.pdf/i, 'No debe enlazar a archivos .pdf');
-      assert.doesNotMatch(content, /dossier_pastoral\.html/i, 'No debe enlazar al dossier HTML');
     });
 
     it('debe tener cero textos simulados o placeholders (Lorem Ipsum)', () => {

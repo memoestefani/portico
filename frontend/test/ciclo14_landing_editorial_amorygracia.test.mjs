@@ -135,8 +135,8 @@ describe('Pórtico — Portal en Desarrollo: Software Ligero para Organizar Grup
       assert.match(content, /family=Plus\+Jakarta\+Sans/i, 'Debe importar Plus Jakarta Sans');
     });
 
-    it('debe renderizar el isotipo SVG artesanal de Pórtico', () => {
-      assert.match(content, /<svg.*viewBox="0 0 100 100"/s, 'Debe renderizar el SVG del imagotipo de Pórtico');
+    it('debe priorizar pureza tipográfica editorial sin logos ni SVG decorativos', () => {
+      assert.doesNotMatch(content, /<svg/i, 'Cero logos o imágenes decorativas - pureza tipográfica editorial');
     });
   });
 

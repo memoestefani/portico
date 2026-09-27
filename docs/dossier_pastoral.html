@@ -8,23 +8,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
     rel="stylesheet">
   <style>
     :root {
       --bg-cream: #FAF8F5;
       --bg-card: #FFFFFF;
-      --text-main: #23272F;
-      --text-muted: #5A6270;
-      --text-light: #7E8695;
-      --border-warm: #E6DFD5;
-      --border-soft: #F0ECE4;
+      --text-main: #1F242E;
+      --text-muted: #535C6E;
+      --text-light: #7A8496;
+      --border-warm: #E4DDD3;
+      --border-soft: #EFECE6;
       --accent-terracotta: #8C3B24;
-      --accent-olive: #3E5A44;
-      --accent-amber: #B86E1D;
-      --accent-navy: #1D3557;
-      --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.05);
-      --shadow-frame: 0 8px 30px rgba(0, 0, 0, 0.08);
+      --accent-olive: #2F5938;
+      --accent-amber: #B46C1A;
+      --accent-navy: #1B365D;
+      --accent-slate: #334155;
+      --shadow-subtle: 0 4px 18px rgba(0, 0, 0, 0.05);
+      --shadow-frame: 0 6px 24px rgba(0, 0, 0, 0.08);
     }
 
     * {
@@ -34,12 +35,12 @@
     }
 
     @page {
-      size: letter landscape;
+      size: letter portrait;
       margin: 0;
     }
 
     body {
-      background-color: var(--bg-cream);
+      background-color: #EAE6DF;
       color: var(--text-main);
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       -webkit-font-smoothing: antialiased;
@@ -47,25 +48,35 @@
       print-color-adjust: exact;
     }
 
-    /* Diapositiva Pagina Completa Letter Landscape */
+    /* Hoja Tamaño Carta Vertical (8.5 x 11 pulgadas) */
     .dossier-slide {
-      width: 100vw;
-      height: 100vh;
-      min-height: 100vh;
-      max-height: 100vh;
+      width: 8.5in;
+      height: 11in;
+      min-height: 11in;
+      max-height: 11in;
+      margin: 0 auto;
       page-break-after: always;
       break-after: page;
       break-inside: avoid;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      padding: 32px 44px;
+      justify-content: space-between;
+      padding: 26px 30px;
       background: var(--bg-cream);
       position: relative;
     }
 
+    @media screen {
+      .dossier-slide {
+        margin: 20px auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border-radius: 4px;
+      }
+    }
+
     /* =========================================================================
-       1. PORTADA EDITORIAL (SLIDE 1)
+       1. PORTADA EDITORIAL EJECUTIVA (HOJA 1)
        ========================================================================= */
     .cover-container {
       display: flex;
@@ -74,8 +85,8 @@
       height: 100%;
       border: 1px solid var(--border-warm);
       background: #FFFFFF;
-      border-radius: 12px;
-      padding: 44px 56px;
+      border-radius: 10px;
+      padding: 38px 44px;
       box-shadow: var(--shadow-subtle);
       position: relative;
     }
@@ -88,7 +99,7 @@
       right: 0;
       height: 6px;
       background: linear-gradient(90deg, var(--accent-terracotta), var(--accent-amber));
-      border-radius: 12px 12px 0 0;
+      border-radius: 10px 10px 0 0;
     }
 
     .cover-header {
@@ -96,18 +107,18 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border-soft);
-      padding-bottom: 20px;
+      padding-bottom: 16px;
     }
 
     .church-emblem {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
     }
 
     .emblem-badge {
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       border-radius: 8px;
       background: var(--accent-terracotta);
       color: #FFFFFF;
@@ -116,28 +127,28 @@
       justify-content: center;
       font-family: 'Lora', serif;
       font-weight: 700;
-      font-size: 1.4rem;
-      letter-spacing: -0.5px;
+      font-size: 1.3rem;
     }
 
     .emblem-text h3 {
       font-family: 'Lora', serif;
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       color: var(--text-main);
       font-weight: 700;
+      line-height: 1.2;
     }
 
     .emblem-text p {
-      font-size: 0.82rem;
+      font-size: 0.76rem;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 1px;
     }
 
     .cover-pill {
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       font-weight: 700;
-      padding: 6px 14px;
+      padding: 5px 12px;
       background: #F4EBE6;
       color: var(--accent-terracotta);
       border-radius: 20px;
@@ -145,61 +156,83 @@
     }
 
     .cover-body {
-      margin-top: 24px;
-      margin-bottom: 24px;
+      margin-top: 18px;
+      margin-bottom: 18px;
     }
 
     .cover-body .eyebrow {
-      font-size: 0.9rem;
+      font-size: 0.82rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 2px;
       color: var(--accent-terracotta);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .cover-body h1 {
       font-family: 'Lora', serif;
-      font-size: 2.75rem;
-      line-height: 1.15;
+      font-size: 2.15rem;
+      line-height: 1.2;
       color: var(--text-main);
       font-weight: 700;
-      max-width: 900px;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .cover-body p.lead {
-      font-size: 1.15rem;
-      line-height: 1.55;
+      font-size: 0.95rem;
+      line-height: 1.5;
       color: var(--text-muted);
-      max-width: 820px;
+      margin-bottom: 18px;
+    }
+
+    .cover-recipient {
+      background: var(--bg-cream);
+      border-left: 4px solid var(--accent-navy);
+      padding: 12px 18px;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 20px;
+    }
+
+    .cover-recipient h4 {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--accent-navy);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+    }
+
+    .cover-recipient p {
+      font-size: 0.84rem;
+      color: var(--text-main);
+      line-height: 1.45;
     }
 
     .cover-pillars {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-top: 24px;
-      padding-top: 24px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+      padding-top: 16px;
       border-top: 1px solid var(--border-soft);
     }
 
     .pillar-card {
       background: var(--bg-cream);
-      padding: 16px;
-      border-radius: 8px;
+      padding: 12px 14px;
+      border-radius: 6px;
       border-left: 3px solid var(--accent-terracotta);
     }
 
     .pillar-card h4 {
-      font-size: 0.92rem;
+      font-size: 0.86rem;
       font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .pillar-card p {
-      font-size: 0.8rem;
+      font-size: 0.77rem;
       line-height: 1.4;
       color: var(--text-muted);
     }
@@ -209,68 +242,70 @@
       justify-content: space-between;
       align-items: center;
       border-top: 1px solid var(--border-soft);
-      padding-top: 18px;
-      font-size: 0.84rem;
+      padding-top: 14px;
+      font-size: 0.78rem;
       color: var(--text-light);
     }
 
     /* =========================================================================
-       2. HOJAS DE CONTENIDO (SLIDES 2 A 7)
+       2. HOJAS ANATÓMICAS VERTICALES DE DOS COLUMNAS (HOJAS 2 A 15)
        ========================================================================= */
     .slide-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       border-bottom: 1px solid var(--border-warm);
-      padding-bottom: 10px;
+      padding-bottom: 8px;
     }
 
     .slide-badge {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .badge-number {
       background: var(--accent-terracotta);
       color: #FFFFFF;
       font-weight: 800;
-      font-size: 0.75rem;
-      padding: 4px 10px;
-      border-radius: 6px;
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 4px;
       letter-spacing: 0.5px;
     }
 
     .badge-title {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
       color: var(--text-muted);
     }
 
     .slide-meta {
-      font-size: 0.8rem;
+      font-size: 0.74rem;
       color: var(--text-light);
       font-weight: 600;
     }
 
-    .slide-grid {
+    /* Dos Columnas Verticales: Izquierda Captura (55%), Derecha Memo (45%) */
+    .slide-body-grid {
       display: grid;
-      grid-template-columns: 56% 44%;
-      gap: 28px;
+      grid-template-columns: 55% 45%;
+      gap: 18px;
       flex: 1;
-      height: calc(100% - 48px);
+      height: calc(100% - 46px);
+      min-height: 0;
     }
 
-    /* Marco de Captura */
+    /* Marco Izquierdo: Captura Vertical */
     .screenshot-frame {
       background: #FFFFFF;
       border: 1px solid var(--border-warm);
-      border-radius: 10px;
+      border-radius: 8px;
       box-shadow: var(--shadow-frame);
-      padding: 10px;
+      padding: 8px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -280,148 +315,153 @@
     .screenshot-header {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 10px 10px 10px;
+      gap: 5px;
+      padding: 4px 8px 6px 8px;
       border-bottom: 1px solid var(--border-soft);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .circle {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #D1D5DB;
     }
 
     .url-bar {
-      margin-left: 12px;
-      font-size: 0.72rem;
+      margin-left: 10px;
+      font-size: 0.66rem;
       color: var(--text-light);
-      font-family: monospace;
+      font-family: 'JetBrains Mono', monospace;
       background: var(--bg-cream);
-      padding: 3px 12px;
+      padding: 2px 10px;
       border-radius: 4px;
-      width: 75%;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .screenshot-img-container {
       flex: 1;
       overflow: hidden;
-      border-radius: 6px;
-      background: #23272F;
+      border-radius: 4px;
+      background: #F3EFEA;
       display: flex;
       align-items: center;
       justify-content: center;
+      height: 100%;
     }
 
     .screenshot-img-container img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      object-position: top;
+      object-fit: contain;
+      object-position: top center;
       display: block;
+      border-radius: 3px;
     }
 
-    /* Columna de Explicación Pastoral */
-    .pastoral-card {
+    /* Columna Derecha: Memorándum Pastoral Claro y sin Tecnicismos */
+    .pastoral-memo-block {
+      background: #FFFFFF;
+      border: 1px solid var(--border-warm);
+      border-radius: 8px;
+      padding: 16px 16px;
+      box-shadow: var(--shadow-subtle);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       height: 100%;
+      gap: 10px;
     }
 
-    .pastoral-title-block h2 {
+    .memo-headline {
+      border-bottom: 1px solid var(--border-soft);
+      padding-bottom: 8px;
+    }
+
+    .memo-headline .tag {
+      display: inline-block;
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--accent-terracotta);
+      background: #F8EFEA;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-bottom: 4px;
+    }
+
+    .memo-headline h2 {
       font-family: 'Lora', serif;
-      font-size: 1.65rem;
-      line-height: 1.25;
+      font-size: 1.15rem;
       color: var(--text-main);
       font-weight: 700;
-      margin-bottom: 8px;
+      line-height: 1.3;
     }
 
-    .pastoral-title-block p.synopsis {
-      font-size: 0.92rem;
-      line-height: 1.45;
+    .memo-synopsis {
+      font-size: 0.80rem;
       color: var(--text-muted);
-      margin-bottom: 16px;
+      line-height: 1.45;
     }
 
-    /* La Tríada Pastoral de 3 Preguntas */
-    .triad-container {
+    /* Pila de Tarjetas de Especificación */
+    .spec-stack {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      flex: 1;
-      justify-content: center;
-    }
-
-    .triad-box {
-      background: #FFFFFF;
-      border: 1px solid var(--border-warm);
-      border-radius: 8px;
-      padding: 12px 16px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    }
-
-    .triad-box.target {
-      border-left: 4px solid var(--accent-navy);
-    }
-
-    .triad-box.pain {
-      border-left: 4px solid var(--accent-terracotta);
-    }
-
-    .triad-box.care {
-      border-left: 4px solid var(--accent-olive);
-    }
-
-    .triad-box .label {
-      font-size: 0.72rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .triad-box.target .label {
-      color: var(--accent-navy);
-    }
-
-    .triad-box.pain .label {
-      color: var(--accent-terracotta);
-    }
-
-    .triad-box.care .label {
-      color: var(--accent-olive);
-    }
-
-    .triad-box p {
-      font-size: 0.85rem;
-      line-height: 1.4;
-      color: var(--text-main);
-    }
-
-    /* Nota Pastoral de Cierre */
-    .pastoral-quote {
-      margin-top: 14px;
-      padding: 10px 14px;
-      background: #F4EBE6;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      line-height: 1.4;
-      color: var(--accent-terracotta);
-      font-style: italic;
-      display: flex;
-      align-items: center;
       gap: 8px;
     }
 
-    .pastoral-quote strong {
-      font-style: normal;
-      font-weight: 700;
+    .spec-card {
+      background: var(--bg-cream);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.73rem;
+      line-height: 1.35;
+    }
+
+    .spec-card.target {
+      border-left: 3px solid var(--accent-navy);
+    }
+
+    .spec-card.db {
+      border-left: 3px solid var(--accent-olive);
+    }
+
+    .spec-card.protection {
+      border-left: 3px solid var(--accent-amber);
+    }
+
+    .spec-card strong {
+      display: block;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 2px;
+    }
+
+    .spec-card.target strong {
+      color: var(--accent-navy);
+    }
+
+    .spec-card.db strong {
+      color: var(--accent-olive);
+    }
+
+    .spec-card.protection strong {
+      color: var(--accent-amber);
+    }
+
+    .slide-footer-note {
+      font-size: 0.68rem;
+      color: var(--text-light);
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-soft);
+      padding-top: 6px;
     }
   </style>
 </head>
@@ -429,7 +469,7 @@
 <body>
 
   <!-- =========================================================================
-       PÁGINA 1: PORTADA Y DECLARACIÓN DE VISIÓN
+       HOJA 1: PORTADA Y DECLARACIÓN DE VISIÓN PASTORAL
        ========================================================================= -->
   <section class="dossier-slide">
     <div class="cover-container">
@@ -437,413 +477,795 @@
         <div class="church-emblem">
           <div class="emblem-badge">AG</div>
           <div class="emblem-text">
-            <h3>Amor y Gracia</h3>
-            <p>Durango, Dgo. — Consejería y Cuidado Pastoral</p>
+            <h3>Amor y Gracia Durango</h3>
+            <p>Comunidades y Vida en Hogares • Memorándum Pastoral</p>
           </div>
         </div>
-        <div class="cover-pill">DOCUMENTO EJECUTIVO DE VISIÓN • V3.5</div>
+        <div class="cover-pill">MEMORÁNDUM OPERATIVO • V3.5</div>
       </div>
 
       <div class="cover-body">
-        <div class="eyebrow">Pórtico OS — Plataforma Soberana de Células</div>
-        <h1>Cuidar a las Personas con Serenidad, Orden y Cero Burocracia</h1>
+        <div class="eyebrow">Pórtico OS — Plataforma de Grupos Pequeños</div>
+        <h1>Infraestructura Digital y Cuidado Pastoral en Hogares</h1>
         <p class="lead">
-          Un recorrido visual por las 6 superficies diseñadas para proteger los hogares de Durango,
-          eliminar el desgaste de los grupos de WhatsApp y devolverle a los pastores, diáconos y facilitadores
-          el tiempo para lo verdaderamente importante: <em>amar y acompañar a las personas</em>.
+          Memorándum operativo para el <strong>Pastor Josh Gayosso</strong>. Pórtico OS centraliza la logística de células de Amor y Gracia Durango en servidores bajo control de la iglesia, eliminando el desorden administrativo y respetando la privacidad de las familias.
         </p>
+
+        <div class="cover-recipient">
+          <h4>Destinatario y Enfoque de Gobierno</h4>
+          <p>
+            <strong>A la atención de:</strong> Pastor Josh Gayosso y Presbiterio de Amor y Gracia Durango.<br>
+            <strong>Alcance:</strong> Presentación clara de las 14 pantallas operativas, el registro de información y las medidas de cuidado para la congregación de Durango.
+          </p>
+        </div>
 
         <div class="cover-pillars">
           <div class="pillar-card">
-            <h4>1. Domicilios Protegidos</h4>
-            <p>La dirección de las familias que abren su casa nunca se exhibe al público en internet.</p>
+            <h4>1. Fisión por Incubación</h4>
+            <p>Al llegar a 14 o más asistentes, un aprendiz y tres o cuatro hermanos maduros inician una nueva célula con la bendición y oración del pastor.</p>
           </div>
           <div class="pillar-card">
-            <h4>2. Alivio de WhatsApp</h4>
-            <p>Asistencia en 1 toque. Cero listas de reproche ni desorganización en chats masivos.</p>
+            <h4>2. Propiedad de la Información</h4>
+            <p>La iglesia puede descargar toda su información en su propia computadora con un solo clic. Cero pagos obligatorios a empresas externas ni uso comercial.</p>
           </div>
           <div class="pillar-card">
-            <h4>3. Acompañamiento Cercano</h4>
-            <p>Diáconos con 5 células a cargo para velar por los líderes y darles descanso a tiempo.</p>
+            <h4>3. Mensajería Directa</h4>
+            <p>Los enlaces abren la aplicación de mensajes directamente en el teléfono del hermano. El sistema no almacena ni lee conversaciones privadas.</p>
           </div>
           <div class="pillar-card">
-            <h4>4. Soberanía Total</h4>
-            <p>Ninguna empresa retiene nuestros datos. Todo se descarga en 1-clic a Excel cuando se requiera.</p>
+            <h4>4. Supervisión Compartida</h4>
+            <p>Cuidado mutuo: ninguna decisión disciplinaria o de pausa se toma de manera individual; requiere el acuerdo del pastor y los ancianos de la iglesia.</p>
           </div>
         </div>
       </div>
 
       <div class="cover-footer">
-        <div><strong>Destinatario:</strong> Pastor Josh Gayosso & Consejo de Ancianos • Amor y Gracia Durango</div>
-        <div><strong>Fecha:</strong> Septiembre 2026 • <strong>Preparado por:</strong> Guillermo (Pórtico OS)</div>
+        <span>Amor y Gracia Durango • Presbiterio General</span>
+        <span>26 de Septiembre de 2026 • Ejemplar Confidencial</span>
+        <span>Hoja 1 de 15</span>
       </div>
     </div>
   </section>
 
   <!-- =========================================================================
-       PÁGINA 2: EL PÓRTICO PÚBLICO
+       HOJA 2: 01 PÓRTICO PÚBLICO
        ========================================================================= -->
   <section class="dossier-slide">
     <div class="slide-header">
       <div class="slide-badge">
-        <span class="badge-number">PÁG 2 DE 7</span>
-        <span class="badge-title">SUPERFICIE 1: EL PÓRTICO PÚBLICO</span>
+        <span class="badge-number">01</span>
+        <span class="badge-title">Pórtico Abierto — Puerta de Entrada y Mapa Celular</span>
       </div>
-      <div class="slide-meta">Acceso Ciudadano Abierto • amorygracia.org/portico</div>
+      <div class="slide-meta">Vista Pública • Sin Registro Previo</div>
     </div>
 
-    <div class="slide-grid">
+    <div class="slide-body-grid">
       <div class="screenshot-frame">
         <div class="screenshot-header">
-          <div class="circle"></div>
-          <div class="circle"></div>
-          <div class="circle"></div>
-          <div class="url-bar">https://portico.amorygracia.org/?role=public</div>
+          <span class="circle"></span><span class="circle"></span><span class="circle"></span>
+          <span class="url-bar">https://portico.amorygracia.mx/?role=public</span>
         </div>
         <div class="screenshot-img-container">
-          <img src="assets/dossier/01_portico_publico.png" alt="El Pórtico Público">
+          <img src="assets/dossier/01_portico_publico.png" alt="Pórtico Público Durango">
         </div>
       </div>
 
-      <div class="pastoral-card">
-        <div class="pastoral-title-block">
-          <h2>Encontrar Comunidad sin Fricción ni Vergüenza</h2>
-          <p class="synopsis">
-            Catálogo limpio y sereno que permite a cualquier visitante o miembro explorar los grupos
-            pequeños activos en Durango filtrando por colonia (Lomas, Centro, etc.), día y etapa de vida.
-          </p>
+      <div class="pastoral-memo-block">
+        <div class="memo-headline">
+          <span class="tag">Superficie Pública</span>
+          <h2>Catálogo de Células y Sedes Dominicales</h2>
         </div>
-
-        <div class="triad-container">
-          <div class="triad-box target pastoral-target">
-            <div class="label">👤 ¿Quién usa esta pantalla?</div>
-            <p>La persona nueva, la familia que recién llegó a Durango o el miembro que busca integrarse a una célula.
-            </p>
+        <p class="memo-synopsis">
+          Acceso abierto desde el teléfono sin necesidad de cuentas ni contraseñas. Permite a una familia encontrar las reuniones dominicales y los grupos pequeños entre semana por colonia en Durango.
+        </p>
+        <div class="spec-stack">
+          <div class="spec-card target">
+            <strong>Propósito Pastoral</strong>
+            Canaliza a las familias hacia la comunidad más cercana a su domicilio (Centro, Lomas del Parque, Jardines, Huizache) de forma ágil y sin trámites complicados.
           </div>
-
-          <div class="triad-box pain pastoral-pain-relieved">
-            <div class="label">🚫 ¿Qué dolor de cabeza de WhatsApp elimina?</div>
-            <p>Se acabó el tener que preguntar en grupos masivos: <em>«¿Alguien sabe de una célula cerca de Lomas?»</em>
-              y que el mensaje se pierda entre 200 avisos.</p>
+          <div class="spec-card db">
+            <strong>En el Sistema</strong>
+            Muestra las 5 sedes dominicales y los días de reunión de los grupos, protegiendo números de teléfono y datos personales.
           </div>
-
-          <div class="triad-box care pastoral-care-delivered">
-            <div class="label">🛡️ ¿Qué cuidado pastoral brinda?</div>
-            <p>El visitante encuentra su grupo ideal en 30 segundos y se contacta directamente con el facilitador con un
-              solo toque, con total discreción y dignidad.</p>
+          <div class="spec-card protection">
+            <strong>Cuidado de la Familia</strong>
+            La dirección exacta del hogar donde se reúnen sólo se entrega mediante una tarjeta digital de invitación emitida por el facilitador del grupo.
           </div>
         </div>
-
-        <div class="pastoral-quote">
-          <strong>Reflexión para Josh:</strong> «El atrio de la iglesia debe ser acogedor y claro, no un laberinto
-          burocrático.»
+        <div class="slide-footer-note">
+          <span>Pórtico OS v3.5 • Amor y Gracia Durango</span>
+          <span>Hoja 2 de 15</span>
         </div>
       </div>
     </div>
   </section>
 
   <!-- =========================================================================
-       PÁGINA 3: LA PRIVACIDAD SAGRADA DEL HOGAR
+       HOJA 3: 02 SUPERFICIE MI PERFIL
        ========================================================================= -->
   <section class="dossier-slide">
     <div class="slide-header">
       <div class="slide-badge">
-        <span class="badge-number">PÁG 3 DE 7</span>
-        <span class="badge-title">SUPERFICIE 2: PRIVACIDAD DEL HOGAR</span>
+        <span class="badge-number">02</span>
+        <span class="badge-title">Superficie Mi Perfil — El Hogar Digital del Creyente</span>
       </div>
-      <div class="slide-meta">Protección a Familias Anfitrionas • Ley de Privacidad LFPDPPP</div>
+      <div class="slide-meta">Rol: Miembro (Elena Ramos) • Experiencia Personal</div>
     </div>
 
-    <div class="slide-grid">
+    <div class="slide-body-grid">
       <div class="screenshot-frame">
         <div class="screenshot-header">
-          <div class="circle"></div>
-          <div class="circle"></div>
-          <div class="circle"></div>
-          <div class="url-bar">https://portico.amorygracia.org/grupo/lomas-matrimonios</div>
+          <span class="circle"></span><span class="circle"></span><span class="circle"></span>
+          <span class="url-bar">https://portico.amorygracia.mx/?role=member (Elena Ramos)</span>
         </div>
         <div class="screenshot-img-container">
-          <img src="assets/dossier/02_privacidad_hogar.png" alt="Privacidad del Hogar">
+          <img src="assets/dossier/02_mi_perfil_elena.png" alt="Superficie Mi Perfil Elena Ramos">
         </div>
       </div>
 
-      <div class="pastoral-card">
-        <div class="pastoral-title-block">
-          <h2>Proteger la Casa de Quienes Abren su Puerta</h2>
-          <p class="synopsis">
-            Diferenciación estricta entre sedes públicas (cafés o taquerías con mapa) y casas familiares particulares,
-            donde la calle y número exacto nunca quedan expuestos en la web abierta.
-          </p>
+      <div class="pastoral-memo-block">
+        <div class="memo-headline">
+          <span class="tag">Superficie Central</span>
+          <h2>Pantalla Personal del Miembro y Aviso de Cena</h2>
         </div>
-
-        <div class="triad-container">
-          <div class="triad-box target pastoral-target">
-            <div class="label">👤 ¿Quién usa esta pantalla?</div>
-            <p>El facilitador y los anfitriones que prestan la sala de su casa cada semana para recibir a sus hermanos.
-            </p>
+        <p class="memo-synopsis">
+          La pantalla que ve la hermana Elena Ramos: permite cambiar entre sus grupos activos, avisar si asistirá a la cena con un toque, confirmar su compromiso de convivencia y consultar el directorio de su grupo.
+        </p>
+        <div class="spec-stack">
+          <div class="spec-card target">
+            <strong>Propósito Pastoral</strong>
+            La confirmación previa ("¿Quiénes vienen a cenar hoy?") avisa hasta cuatro horas antes a la familia anfitriona para calcular los alimentos y cuidar el gasto del hogar.
           </div>
-
-          <div class="triad-box pain pastoral-pain-relieved">
-            <div class="label">🚫 ¿Qué dolor de cabeza de WhatsApp elimina?</div>
-            <p>Evita que las direcciones residenciales de nuestros hermanos y sus familias queden rodando en capturas de
-              pantalla de grupos abiertos de internet.</p>
+          <div class="spec-card db">
+            <strong>En el Sistema</strong>
+            Registra el total de personas que asistirán a cenar. La opción de privacidad permite al hermano decidir si comparte su número telefónico con los compañeros de grupo.
           </div>
-
-          <div class="triad-box care pastoral-care-delivered">
-            <div class="label">🛡️ ¿Qué cuidado pastoral brinda?</div>
-            <p>La dirección exacta solo se comparte en privado tras la bienvenida fraternal. Los anfitriones duermen
-              tranquilos sabiendo que su hogar está protegido.</p>
+          <div class="spec-card protection">
+            <strong>Cuidado de la Familia</strong>
+            Acompañamiento sin reclamos. Si alguien no puede asistir, no recibe notificaciones de queja; el facilitador está atento para orar y acompañar con amor.
           </div>
         </div>
-
-        <div class="pastoral-quote">
-          <strong>Reflexión para Josh:</strong> «Cuidar a las familias que abren su hogar es honrar su generosidad y
-          servicio al Señor.»
+        <div class="slide-footer-note">
+          <span>Pórtico OS v3.5 • Amor y Gracia Durango</span>
+          <span>Hoja 3 de 15</span>
         </div>
       </div>
     </div>
   </section>
 
   <!-- =========================================================================
-       PÁGINA 4: EL SILO DEL MIEMBRO Y FACILITADOR
+       HOJA 4: 02B LIVING CARD DEL LÍDER
        ========================================================================= -->
   <section class="dossier-slide">
     <div class="slide-header">
       <div class="slide-badge">
-        <span class="badge-number">PÁG 4 DE 7</span>
-        <span class="badge-title">SUPERFICIE 3: EL SILO DEL MIEMBRO</span>
+        <span class="badge-number">02B</span>
+        <span class="badge-title">Living Card del Líder — Gobierno de Célula Los Remedios</span>
       </div>
-      <div class="slide-meta">Vida Celular en Confianza • Asistencia y Peticiones</div>
+      <div class="slide-meta">Rol: Líder (Carlos Mendoza) • Censo de 12 Miembros</div>
     </div>
 
-    <div class="slide-grid">
+    <div class="slide-body-grid">
       <div class="screenshot-frame">
         <div class="screenshot-header">
-          <div class="circle"></div>
-          <div class="circle"></div>
-          <div class="circle"></div>
-          <div class="url-bar">https://portico.amorygracia.org/?role=member</div>
+          <span class="circle"></span><span class="circle"></span><span class="circle"></span>
+          <span class="url-bar">https://portico.amorygracia.mx/?role=leader (Carlos Mendoza)</span>
         </div>
         <div class="screenshot-img-container">
-          <img src="assets/dossier/03_silo_miembro.png" alt="Silo del Miembro">
+          <img src="assets/dossier/02b_silo_living_card.png" alt="Living Card Carlos Mendoza">
         </div>
       </div>
 
-      <div class="pastoral-card">
-        <div class="pastoral-title-block">
-          <h2>Pastorear con Amor, no con Reproches</h2>
-          <p class="synopsis">
-            El espacio íntimo de la célula: registro de asistencia en un solo clic, itinerario de reuniones
-            y detección amorosa de inasistencias antes de que una familia se enfríe o se aleje.
-          </p>
+      <div class="pastoral-memo-block">
+        <div class="memo-headline">
+          <span class="tag">Gobierno Celular</span>
+          <h2>Tríada del Hogar y Censo de Miembros de Durango</h2>
         </div>
-
-        <div class="triad-container">
-          <div class="triad-box target pastoral-target">
-            <div class="label">👤 ¿Quién usa esta pantalla?</div>
-            <p>El facilitador del grupo, el enlace de anfitrión y los miembros regulares de la célula.</p>
+        <p class="memo-synopsis">
+          Panel de control de Carlos Mendoza. Refleja las tres responsabilidades de la célula (Facilitador de enseñanza, Anfitrión de la casa y Aprendiz en formación) y la lista de 12 integrantes activos de Durango.
+        </p>
+        <div class="spec-stack">
+          <div class="spec-card target">
+            <strong>Propósito Pastoral</strong>
+            Permite anotar la asistencia en dos segundos tocando un contador en pantalla, registrando únicamente cuántas personas llegaron para coordinar la merienda.
           </div>
-
-          <div class="triad-box pain pastoral-pain-relieved">
-            <div class="label">🚫 ¿Qué dolor de cabeza de WhatsApp elimina?</div>
-            <p>Termina con las listas tediosas de asistencia en hojas de papel o mensajes largos donde los miembros
-              sienten que los están monitoreando con reproche.</p>
+          <div class="spec-card db">
+            <strong>En el Sistema</strong>
+            Guarda el número total de asistentes de la reunión sin necesidad de pasar lista con nombres ni fiscalizar faltas individuales.
           </div>
-
-          <div class="triad-box care pastoral-care-delivered">
-            <div class="label">🛡️ ¿Qué cuidado pastoral brinda?</div>
-            <p>Si un hermano falta 3 semanas consecutivas, el sistema sugiere discretamente al facilitador una llamada
-              de cariño fraterno (<em>«¿Cómo estás?, te extrañamos»</em>).</p>
+          <div class="spec-card protection">
+            <strong>Cuidado de la Familia</strong>
+            No se registra quién faltó para evitar comparaciones; el líder dedica su tiempo a pastorear y escuchar en vez de llenar formatos.
           </div>
         </div>
-
-        <div class="pastoral-quote">
-          <strong>Reflexión para Josh:</strong> «El buen pastor busca a la que se apartó con amor, sin emitir juicios ni
-          cartas de amonestación.»
+        <div class="slide-footer-note">
+          <span>Pórtico OS v3.5 • Amor y Gracia Durango</span>
+          <span>Hoja 4 de 15</span>
         </div>
       </div>
     </div>
   </section>
 
   <!-- =========================================================================
-       PÁGINA 5: LA MESA DEL DIÁCONO
+       HOJA 5: 03 MODAL SEDES FLEXIBLES
        ========================================================================= -->
   <section class="dossier-slide">
     <div class="slide-header">
       <div class="slide-badge">
-        <span class="badge-number">PÁG 5 DE 7</span>
-        <span class="badge-title">SUPERFICIE 4: LA MESA DIACONAL</span>
+        <span class="badge-number">03</span>
+        <span class="badge-title">Modal Sedes Flexibles — Rotación Logística de Hogares</span>
       </div>
-      <div class="slide-meta">Cuidado Mancomunado • Acompañamiento a 5-7 Grupos</div>
+      <div class="slide-meta">Modal de Líder • Logística de Reuniones</div>
     </div>
 
-    <div class="slide-grid">
+    <div class="slide-body-grid">
       <div class="screenshot-frame">
         <div class="screenshot-header">
-          <div class="circle"></div>
-          <div class="circle"></div>
-          <div class="circle"></div>
-          <div class="url-bar">https://portico.amorygracia.org/?role=deacon</div>
+          <span class="circle"></span><span class="circle"></span><span class="circle"></span>
+          <span class="url-bar">https://portico.amorygracia.mx/?role=leader&modal=venue</span>
         </div>
         <div class="screenshot-img-container">
-          <img src="assets/dossier/04_mesa_diacono.png" alt="Mesa Diaconal">
+          <img src="assets/dossier/03_modal_sedes_flexibles.png" alt="Modal Sedes Flexibles">
         </div>
       </div>
 
-      <div class="pastoral-card">
-        <div class="pastoral-title-block">
-          <h2>Diáconos Presentes, Líderes Descansados</h2>
-          <p class="synopsis">
-            Panel donde los diáconos supervisan su sector de Durango, transfieren necesidades de vecinos
-            con un clic y otorgan descanso sabático in situ al facilitador que lo necesita.
-          </p>
+      <div class="pastoral-memo-block">
+        <div class="memo-headline">
+          <span class="tag">Logística Celular</span>
+          <h2>Rotación de Sedes y Domicilios Alternos</h2>
         </div>
-
-        <div class="triad-container">
-          <div class="triad-box target pastoral-target">
-            <div class="label">👤 ¿Quién usa esta pantalla?</div>
-            <p>El cuerpo de diáconos de Amor y Gracia asignados a acompañar a 5 o 7 células por colonia.</p>
+        <p class="memo-synopsis">
+          Permite cambiar la casa de reunión para una semana específica con un toque: ya sea por imprevisto familiar, relevo de anfitriones, o una visita especial a un hospital o área pública.
+        </p>
+        <div class="spec-stack">
+          <div class="spec-card target">
+            <strong>Propósito Pastoral</strong>
+            Evita suspender las reuniones por emergencias domésticas y previene el cansancio de las familias que prestan su casa de manera continua.
           </div>
-
-          <div class="triad-box pain pastoral-pain-relieved">
-            <div class="label">🚫 ¿Qué dolor de cabeza de WhatsApp elimina?</div>
-            <p>Evita que las quejas de vecinos (estacionamientos, ruido) o las crisis de los facilitadores saturen el
-              WhatsApp privado de los pastores principales.</p>
+          <div class="spec-card db">
+            <strong>En el Sistema</strong>
+            Actualiza la dirección de la reunión únicamente para esa fecha, regresando a la casa original de forma automática en la siguiente semana.
           </div>
-
-          <div class="triad-box care pastoral-care-delivered">
-            <div class="label">🛡️ ¿Qué cuidado pastoral brinda?</div>
-            <p>El diácono puede otorgar directamente un <em>Año Sabático Fraternal</em> al líder agotado, protegiendo su
-              matrimonio y renovando el liderazgo con paz.</p>
+          <div class="spec-card protection">
+            <strong>Cuidado de la Familia</strong>
+            La dirección de la reunión alterna sólo es visible para los integrantes confirmados del grupo, resguardando la seguridad del hogar.
           </div>
         </div>
-
-        <div class="pastoral-quote">
-          <strong>Reflexión para Pastor Josh Gayosso:</strong> «El principio de Jetro en Éxodo 18: compartir la carga para que el
-          pueblo llegue en paz a su lugar.»
+        <div class="slide-footer-note">
+          <span>Pórtico OS v3.5 • Amor y Gracia Durango</span>
+          <span>Hoja 5 de 15</span>
         </div>
       </div>
     </div>
   </section>
 
   <!-- =========================================================================
-       PÁGINA 6: EL RADAR PASTORAL DE JOSH GAYOSSO
+       HOJA 6: 04 MODAL ASIGNAR ROLES
        ========================================================================= -->
   <section class="dossier-slide">
     <div class="slide-header">
       <div class="slide-badge">
-        <span class="badge-number">PÁG 6 DE 7</span>
-        <span class="badge-title">SUPERFICIE 5: EL HUD PASTORAL</span>
+        <span class="badge-number">04</span>
+        <span class="badge-title">Modal Asignación de Roles — Sábana Táctil Ergonómica</span>
       </div>
-      <div class="slide-meta">Consola de Supervisión Paternal • Exclusivo para Pastor Josh Gayosso</div>
+      <div class="slide-meta">Modal de Líder • Roles de Servicio</div>
     </div>
 
-    <div class="slide-grid">
+    <div class="slide-body-grid">
       <div class="screenshot-frame">
         <div class="screenshot-header">
-          <div class="circle"></div>
-          <div class="circle"></div>
-          <div class="circle"></div>
-          <div class="url-bar">https://portico.amorygracia.org/?role=pastor</div>
+          <span class="circle"></span><span class="circle"></span><span class="circle"></span>
+          <span class="url-bar">https://portico.amorygracia.mx/?role=leader&modal=memberPicker</span>
         </div>
         <div class="screenshot-img-container">
-          <img src="assets/dossier/05_pastor_hud.png" alt="HUD Pastoral de Pastor Josh Gayosso">
+          <img src="assets/dossier/04_modal_asignar_roles.png" alt="Modal Asignar Roles">
         </div>
       </div>
 
-      <div class="pastoral-card">
-        <div class="pastoral-title-block">
-          <h2>El Pulso de la Iglesia en un Solo Vistazo</h2>
-          <p class="synopsis">
-            Visión panorámica del rebaño: salud comunitaria por sector, pausas litúrgicas oficiales
-            y facultad de veto pastoral paternal ante cualquier colisión o roce entre líderes.
-          </p>
+      <div class="pastoral-memo-block">
+        <div class="memo-headline">
+          <span class="tag">Operación Celular</span>
+          <h2>Turnos para Hospedar y Preparar al Aprendiz</h2>
         </div>
-
-        <div class="triad-container">
-          <div class="triad-box target pastoral-target">
-            <div class="label">👤 ¿Quién usa esta pantalla?</div>
-            <p>Exclusivo para el Pastor Josh Gayosso y el presbiterio de ancianos de Amor y Gracia Durango.</p>
+        <p class="memo-synopsis">
+          Pantalla con botones amplios para que el líder rote con comodidad quién abre su casa esta semana y asigne tareas al aprendiz entre los 12 miembros censados de Durango.
+        </p>
+        <div class="spec-stack">
+          <div class="spec-card target">
+            <strong>Propósito Pastoral</strong>
+            Distribuye el servicio entre todos: la familia que recibe en casa no tiene que preparar el tema bíblico ni hacerse cargo de todo el convivio.
           </div>
-
-          <div class="triad-box pain pastoral-pain-relieved">
-            <div class="label">🚫 ¿Qué dolor de cabeza de WhatsApp elimina?</div>
-            <p>Desaparece la angustia de no saber cuántos grupos siguen reuniéndose, quién necesita ayuda urgente o qué
-              líderes están al borde del agotamiento.</p>
+          <div class="spec-card db">
+            <strong>En el Sistema</strong>
+            Actualiza de inmediato los nombres del anfitrión semanal y del aprendiz en la tarjeta del grupo.
           </div>
-
-          <div class="triad-box care pastoral-care-delivered">
-            <div class="label">🛡️ ¿Qué cuidado pastoral brinda?</div>
-            <p>Permite congelar semanas de reunión en periodos festivos (Pausa Litúrgica) para que nadie sienta falsa
-              culpa, y desanonimiza casos críticos para dialogar con sabiduría.</p>
+          <div class="spec-card protection">
+            <strong>Cuidado de la Familia</strong>
+            El sistema sugiere alternar a los anfitriones para que ninguna familia cargue sola con el trabajo semana tras semana.
           </div>
         </div>
-
-        <div class="pastoral-quote">
-          <strong>Reflexión para Pastor Josh Gayosso:</strong> «Autoridad espiritual que no necesita imponerse con fuerza, sino que
-          vela con serenidad y discernimiento.»
+        <div class="slide-footer-note">
+          <span>Pórtico OS v3.5 • Amor y Gracia Durango</span>
+          <span>Hoja 6 de 15</span>
         </div>
       </div>
     </div>
   </section>
 
   <!-- =========================================================================
-       PÁGINA 7: SOBERANÍA TOTAL Y CERO ATADURAS
+       HOJA 7: 05 MODAL FISIÓN DUNBAR POR INCUBACIÓN
        ========================================================================= -->
   <section class="dossier-slide">
     <div class="slide-header">
       <div class="slide-badge">
-        <span class="badge-number">PÁG 7 DE 7</span>
-        <span class="badge-title">SUPERFICIE 6: SOBERANÍA Y TRANQUILIDAD</span>
+        <span class="badge-number">05</span>
+        <span class="badge-title">Fisión Dunbar por Incubación — Multiplicación Fraternal</span>
       </div>
-      <div class="slide-meta">Garantía Incondicional "No Strings Attached" • Cero Dependencia</div>
+      <div class="slide-meta">Decisión 4-A • Cuidado Fraternal y Bendición Pastoral de Josh</div>
     </div>
 
-    <div class="slide-grid">
+    <div class="slide-body-grid">
       <div class="screenshot-frame">
         <div class="screenshot-header">
-          <div class="circle"></div>
-          <div class="circle"></div>
-          <div class="circle"></div>
-          <div class="url-bar">https://portico.amorygracia.org/?role=pastor#soberania</div>
+          <span class="circle"></span><span class="circle"></span><span class="circle"></span>
+          <span class="url-bar">https://portico.amorygracia.mx/?role=leader&modal=fission</span>
         </div>
         <div class="screenshot-img-container">
-          <img src="assets/dossier/06_soberania_datos.png" alt="Soberanía de Datos">
+          <img src="assets/dossier/05_modal_fision_dunbar.png" alt="Modal Fisión Dunbar">
         </div>
       </div>
 
-      <div class="pastoral-card">
-        <div class="pastoral-title-block">
-          <h2>Los Datos son de Dios y de la Iglesia</h2>
-          <p class="synopsis">
-            Pórtico OS entrega soberanía total. En cualquier momento, con un solo clic táctil,
-            el pastor descarga la base de datos completa de su congregación en archivos abiertos.
+      <div class="pastoral-memo-block">
+        <div class="memo-headline">
+          <span class="tag">Multiplicación</span>
+          <h2>Multiplicación de Células por Crecimiento</h2>
+        </div>
+        <p class="memo-synopsis">
+          Cuando un grupo supera las 14 personas, el aprendiz (David Soto) se prepara para abrir una nueva célula ("Los Remedios Poniente") junto con tres o cuatro hermanos maduros y con la bendición pastoral de Josh.
+        </p>
+        <div class="spec-stack">
+          <div class="spec-card target">
+            <strong>Propósito Pastoral</strong>
+            Mantiene grupos pequeños donde cada persona puede ser escuchada, multiplicando el alcance de la iglesia en Durango sin crear divisiones.
+          </div>
+          <div class="spec-card db">
+            <strong>En el Sistema</strong>
+            Crea el registro de la nueva comunidad hija y transfiere al grupo inicial de hermanos que acompañarán al nuevo líder en la siembra.
+          </div>
+          <div class="spec-card protection">
+            <strong>Cuidado de la Familia</strong>
+            El proceso envía una notificación al Pastor Josh y a los ancianos para que la nueva comunidad sea respaldada en oración y acompañada de cerca.
+          </div>
+        </div>
+        <div class="slide-footer-note">
+          <span>Pórtico OS v3.5 • Amor y Gracia Durango</span>
+          <span>Hoja 7 de 15</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       HOJA 8: 06 MODAL ARMONIZADOR LITÚRGICO
+       ========================================================================= -->
+  <section class="dossier-slide">
+    <div class="slide-header">
+      <div class="slide-badge">
+        <span class="badge-number">06</span>
+        <span class="badge-title">Modal Armonizador Litúrgico — Convivios Inter-Celulares</span>
+      </div>
+      <div class="slide-meta">Modal de Líder • Comunión entre Hogares</div>
+    </div>
+
+    <div class="slide-body-grid">
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <span class="circle"></span><span class="circle"></span><span class="circle"></span>
+          <span class="url-bar">https://portico.amorygracia.mx/?role=leader&modal=harmonizer</span>
+        </div>
+        <div class="screenshot-img-container">
+          <img src="assets/dossier/06_modal_armonizador_liturgico.png" alt="Modal Armonizador Litúrgico">
+        </div>
+      </div>
+
+      <div class="pastoral-memo-block">
+        <div class="memo-headline">
+          <span class="tag">Coordinación</span>
+          <h2>Convivios Unidos y Énfasis Especiales</h2>
+        </div>
+        <p class="memo-synopsis">
+          Permite a dos o más células ponerse de acuerdo para organizar cenas conjuntas o compartir temas especiales sin perder su identidad de hogar pequeño.
+        </p>
+        <div class="spec-stack">
+          <div class="spec-card target">
+            <strong>Propósito Pastoral</strong>
+            Facilita actividades compartidas, como reuniones de varones o desayunos de mujeres, calculando la comida necesaria entre ambos grupos.
+          </div>
+          <div class="spec-card db">
+            <strong>En el Sistema</strong>
+            Enlaza a los grupos participantes en el evento y suma el número de personas confirmadas para la merienda.
+          </div>
+          <div class="spec-card protection">
+            <strong>Cuidado de la Familia</strong>
+            Cada célula decide con libertad si desea sumarse a la actividad unida o prefiere mantener su reunión habitual en casa.
+          </div>
+        </div>
+        <div class="slide-footer-note">
+          <span>Pórtico OS v3.5 • Amor y Gracia Durango</span>
+          <span>Hoja 8 de 15</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       HOJA 9: 07 MODAL SALVAGUARDA PASTORAL
+       ========================================================================= -->
+  <section class="dossier-slide">
+    <div class="slide-header">
+      <div class="slide-badge">
+        <span class="badge-number">07</span>
+        <span class="badge-title">Modal Salvaguarda Pastoral — Primeros Auxilios de Crisis</span>
+      </div>
+      <div class="slide-meta">Modal de Líder • Atención de Emergencias</div>
+    </div>
+
+    <div class="slide-body-grid">
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <span class="circle"></span><span class="circle"></span><span class="circle"></span>
+          <span class="url-bar">https://portico.amorygracia.mx/?role=leader&modal=safeguard</span>
+        </div>
+        <div class="screenshot-img-container">
+          <img src="assets/dossier/07_modal_salvaguarda_crisis.png" alt="Modal Salvaguarda Pastoral">
+        </div>
+      </div>
+
+      <div class="pastoral-memo-block">
+        <div class="memo-headline">
+          <span class="tag">Primeros Auxilios</span>
+          <h2>Aviso Inmediato ante Situaciones Delicadas</h2>
+        </div>
+        <p class="memo-synopsis">
+          Canal privado para que el facilitador reporte con rapidez y discreción alguna situación de duelo, enfermedad o necesidad urgente directamente al Pastor Josh y a los ancianos.
+        </p>
+        <div class="spec-stack">
+          <div class="spec-card target">
+            <strong>Propósito Pastoral</strong>
+            Permite a los pastores enterarse a tiempo para brindar apoyo espiritual, oración o ayuda material antes de que una dificultad familiar crezca.
+          </div>
+          <div class="spec-card db">
+            <strong>En el Sistema</strong>
+            Registra el reporte de forma confidencial y protegida, accesible únicamente para el pastor principal y el cuerpo de ancianos.
+          </div>
+          <div class="spec-card protection">
+            <strong>Cuidado de la Familia</strong>
+            Confidencialidad absoluta: el reporte no se publica en grupos ni chats compartidos; protege la dignidad y honra de la familia.
+          </div>
+        </div>
+        <div class="slide-footer-note">
+          <span>Pórtico OS v3.5 • Amor y Gracia Durango</span>
+          <span>Hoja 9 de 15</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       HOJA 10: 08 MODAL MI PERFIL - PASE COMUNITARIO QR
+       ========================================================================= -->
+  <section class="dossier-slide">
+    <div class="slide-header">
+      <div class="slide-badge">
+        <span class="badge-number">08</span>
+        <span class="badge-title">Modal Mi Perfil — Pase Comunitario QR y Ficha Social</span>
+      </div>
+      <div class="slide-meta">Modal de Mi Perfil (Elena Ramos) • Acceso Familiar</div>
+    </div>
+
+    <div class="slide-body-grid">
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <span class="circle"></span><span class="circle"></span><span class="circle"></span>
+          <span class="url-bar">https://portico.amorygracia.mx/?role=member&modal=pass</span>
+        </div>
+        <div class="screenshot-img-container">
+          <img src="assets/dossier/08_modal_pase_qr.png" alt="Modal Mi Perfil Pase QR">
+        </div>
+      </div>
+
+      <div class="pastoral-memo-block">
+        <div class="memo-headline">
+          <span class="tag">Identidad Celular</span>
+          <h2>Tarjeta Digital de Reunión y Acceso Seguro</h2>
+        </div>
+        <p class="memo-synopsis">
+          Ficha personal que muestra al miembro la dirección exacta de la reunión de esta semana, el contacto del anfitrión, un botón para guardarlo en el calendario del teléfono y un código visual de acceso.
+        </p>
+        <div class="spec-stack">
+          <div class="spec-card target">
+            <strong>Propósito Pastoral</strong>
+            Da seguridad al hermano de saber a qué casa dirigirse y a qué hora llegar, evitando confusiones o preguntas repetidas en mensajes de texto.
+          </div>
+          <div class="spec-card db">
+            <strong>En el Sistema</strong>
+            Crea un código de acceso temporal para eventos especiales y permite guardar la cita en la agenda del teléfono personal.
+          </div>
+          <div class="spec-card protection">
+            <strong>Cuidado de la Familia</strong>
+            Sin rastreo ni localización por satélite; se cuida la información personal de acuerdo con la ley de protección de datos.
+          </div>
+        </div>
+        <div class="slide-footer-note">
+          <span>Pórtico OS v3.5 • Amor y Gracia Durango</span>
+          <span>Hoja 10 de 15</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       HOJA 11: 09 MESA DIACONAL
+       ========================================================================= -->
+  <section class="dossier-slide">
+    <div class="slide-header">
+      <div class="slide-badge">
+        <span class="badge-number">09</span>
+        <span class="badge-title">Mesa Diaconal — Cuidado Integral y Sabático in situ</span>
+      </div>
+      <div class="slide-meta">Rol: Diácono • Servicio y Cuidado de Hogares</div>
+    </div>
+
+    <div class="slide-body-grid">
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <span class="circle"></span><span class="circle"></span><span class="circle"></span>
+          <span class="url-bar">https://portico.amorygracia.mx/?role=deacon</span>
+        </div>
+        <div class="screenshot-img-container">
+          <img src="assets/dossier/09_mesa_diacono.png" alt="Mesa Diaconal Durango">
+        </div>
+      </div>
+
+      <div class="pastoral-memo-block">
+        <div class="memo-headline">
+          <span class="tag">Servicio Práctico</span>
+          <h2>Atención a Familias y Descanso de Anfitriones</h2>
+        </div>
+        <p class="memo-synopsis">
+          Panel de trabajo para los diáconos: permite dar semanas de descanso a las familias que han hospedado de forma continua, apoyar con despensas y dar pases de bienvenida a nuevas visitas.
+        </p>
+        <div class="spec-stack">
+          <div class="spec-card target">
+            <strong>Propósito Pastoral</strong>
+            Cuidar a quienes sirven con hospitalidad, asegurando que abrir el hogar sea motivo de gozo y no de desgaste físico o económico.
+          </div>
+          <div class="spec-card db">
+            <strong>En el Sistema</strong>
+            Programa de dos a cuatro semanas de descanso para la casa anfitriona y asigna una sede alterna de manera ordenada.
+          </div>
+          <div class="spec-card protection">
+            <strong>Cuidado de la Familia</strong>
+            Los diáconos se enfocan en las necesidades prácticas y de servicio, sin intervenir en asuntos privados o de consejería pastoral.
+          </div>
+        </div>
+        <div class="slide-footer-note">
+          <span>Pórtico OS v3.5 • Amor y Gracia Durango</span>
+          <span>Hoja 11 de 15</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       HOJA 12: 10 RADAR PASTORAL DE CUIDADO
+       ========================================================================= -->
+  <section class="dossier-slide">
+    <div class="slide-header">
+      <div class="slide-badge">
+        <span class="badge-number">10</span>
+        <span class="badge-title">Radar Pastoral de Cuidado — Semáforo de Fatiga de Josh</span>
+      </div>
+      <div class="slide-meta">Rol: Pastor (Josh Gayosso) • Panel de Monitoreo</div>
+    </div>
+
+    <div class="slide-body-grid">
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <span class="circle"></span><span class="circle"></span><span class="circle"></span>
+          <span class="url-bar">https://portico.amorygracia.mx/?role=pastor</span>
+        </div>
+        <div class="screenshot-img-container">
+          <img src="assets/dossier/10_pastor_hud_radar.png" alt="Radar Pastoral de Cuidado">
+        </div>
+      </div>
+
+      <div class="pastoral-memo-block">
+        <div class="memo-headline">
+          <span class="tag">Supervisión Pastoral</span>
+          <h2>Monitoreo de Salud Celular para el Pastor Josh</h2>
+        </div>
+        <p class="memo-synopsis">
+          Pantalla de consulta para el Pastor Josh Gayosso. Muestra la situación de las células en Durango mediante un semáforo sencillo: verde (en orden), amarillo (con sobrecarga) y rojo (en necesidad).
+        </p>
+        <div class="spec-stack">
+          <div class="spec-card target">
+            <strong>Propósito Pastoral</strong>
+            Detecta si algún facilitador o familia anfitriona lleva mucho tiempo sin descanso, permitiendo al pastor hacer una llamada de ánimo o programar una visita a tiempo.
+          </div>
+          <div class="spec-card db">
+            <strong>En el Sistema</strong>
+            Observa la rotación de casas y la constancia de asistencia sin revisar la vida privada de ningún miembro de forma individual.
+          </div>
+          <div class="spec-card protection">
+            <strong>Cuidado de la Familia</strong>
+            Mide la salud y el descanso en las comunidades; no evalúa números de dinero ni metas administrativas ajenas al ministerio.
+          </div>
+        </div>
+        <div class="slide-footer-note">
+          <span>Pórtico OS v3.5 • Amor y Gracia Durango</span>
+          <span>Hoja 12 de 15</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       HOJA 13: 11 CONSOLA ANTI-COLISIÓN
+       ========================================================================= -->
+  <section class="dossier-slide">
+    <div class="slide-header">
+      <div class="slide-badge">
+        <span class="badge-number">11</span>
+        <span class="badge-title">Consola Anti-Colisión — Supervisión Presbiteral y Veto</span>
+      </div>
+      <div class="slide-meta">Rol: Pastor / Ancianos • Gobierno Eclesial</div>
+    </div>
+
+    <div class="slide-body-grid">
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <span class="circle"></span><span class="circle"></span><span class="circle"></span>
+          <span class="url-bar">https://portico.amorygracia.mx/?role=pastor&tab=elders</span>
+        </div>
+        <div class="screenshot-img-container">
+          <img src="assets/dossier/11_pastor_anti_collision.png" alt="Consola Anti-Colisión">
+        </div>
+      </div>
+
+      <div class="pastoral-memo-block">
+        <div class="memo-headline">
+          <span class="tag">Gobierno Presbiteral</span>
+          <h2>Supervisión Presbiteral y Cuidado Doctrinal</h2>
+        </div>
+        <p class="memo-synopsis">
+          Herramienta de supervisión compartida para Josh y los ancianos: permite revisar dudas doctrinales, resolver conflictos entre grupos y pausar actividades si fuera necesario.
+        </p>
+        <div class="spec-stack">
+          <div class="spec-card target">
+            <strong>Propósito Pastoral</strong>
+            Protege la unidad de la iglesia y asegura que en los hogares se enseñe sana doctrina bíblica con amor y orden.
+          </div>
+          <div class="spec-card db">
+            <strong>En el Sistema</strong>
+            Permite pausar temporalmente una actividad irregular, dejando asentada la razón espiritual y pastoral con fecha y firma responsable.
+          </div>
+          <div class="spec-card protection">
+            <strong>Cuidado de la Familia</strong>
+            Claridad total: cada decisión queda firmada por los responsables pastorales; no se toman medidas anónimas ni basadas en rumores.
+          </div>
+        </div>
+        <div class="slide-footer-note">
+          <span>Pórtico OS v3.5 • Amor y Gracia Durango</span>
+          <span>Hoja 13 de 15</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       HOJA 14: 12 DISCIPLINA PASTORAL Y 13 SOBERANÍA DE DATOS
+       ========================================================================= -->
+  <section class="dossier-slide">
+    <div class="slide-header">
+      <div class="slide-badge">
+        <span class="badge-number">12-13</span>
+        <span class="badge-title">Disciplina Colegiada y Soberanía Total de Datos</span>
+      </div>
+      <div class="slide-meta">Regla de Cuatro Ojos • Respaldo Completo</div>
+    </div>
+
+    <div class="slide-body-grid">
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <span class="circle"></span><span class="circle"></span><span class="circle"></span>
+          <span class="url-bar">https://portico.amorygracia.mx/?role=pastor&view=sovereignty</span>
+        </div>
+        <div class="screenshot-img-container">
+          <img src="assets/dossier/13_soberania_datos.png" alt="Soberanía de Datos Durango">
+        </div>
+      </div>
+
+      <div class="pastoral-memo-block">
+        <div class="memo-headline">
+          <span class="tag">Gobernanza y Propiedad</span>
+          <h2>Restauración Compartida y Respaldo Completo</h2>
+        </div>
+        <p class="memo-synopsis">
+          Proceso bíblico de restauración pastoral (Mateo 18) supervisado en conjunto por pastor y ancianos, y botón para descargar en cualquier momento una copia completa de toda la información de la iglesia.
+        </p>
+        <div class="spec-stack">
+          <div class="spec-card target">
+            <strong>Disciplina Colegiada</strong>
+            Evita decisiones apresuradas o arbitrarias. Toda corrección busca restaurar la comunión fraternal y exige el acuerdo mutuo de los pastores.
+          </div>
+          <div class="spec-card db">
+            <strong>Respaldo Directo</strong>
+            Permite descargar a la computadora de la iglesia un archivo comprimido con todos los registros de grupos y miembros sin candados ni formatos cerrados.
+          </div>
+          <div class="spec-card protection">
+            <strong>Garantía de Salida Libre</strong>
+            Libertad completa para Amor y Gracia Durango: la información pertenece a la congregación, sin retenciones ni contratos obligatorios.
+          </div>
+        </div>
+        <div class="slide-footer-note">
+          <span>Pórtico OS v3.5 • Amor y Gracia Durango</span>
+          <span>Hoja 14 de 15</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       HOJA 15: CONCLUSIONES Y PRÓXIMOS PASOS
+       ========================================================================= -->
+  <section class="dossier-slide">
+    <div class="cover-container" style="padding: 34px 40px;">
+      <div class="cover-header">
+        <div class="church-emblem">
+          <div class="emblem-badge">AG</div>
+          <div class="emblem-text">
+            <h3>Compromiso Pastoral de Implementación</h3>
+            <p>Amor y Gracia Durango • Temporada Otoño 2026</p>
+          </div>
+        </div>
+        <div class="cover-pill">RUTA DE DESPLIEGUE OPERATIVO</div>
+      </div>
+
+      <div class="cover-body" style="margin-top: 14px; margin-bottom: 14px;">
+        <div class="eyebrow">Ruta de Pilotaje para Pastor Josh Gayosso</div>
+        <h1 style="font-size: 1.85rem; margin-bottom: 10px;">Plan de Pilotaje en Tres Pasos</h1>
+        <p class="lead" style="font-size: 0.92rem; margin-bottom: 14px;">
+          Pórtico OS está listo para comenzar una prueba tranquila en las comunidades de Durango, sin alterar los hábitos de mensajería de los hermanos.
+        </p>
+
+        <div class="spec-stack" style="margin-bottom: 16px;">
+          <div class="spec-card target" style="padding: 12px;">
+            <strong style="font-size: 0.76rem;">Paso 1: Demostración Práctica (30 minutos)</strong>
+            Revisión en vivo con el Pastor Josh Gayosso de las 14 pantallas en computadora o tableta, aclarando dudas de funcionamiento y validando la organización de los grupos.
+          </div>
+          <div class="spec-card db" style="padding: 12px;">
+            <strong style="font-size: 0.76rem;">Paso 2: Puesta en Marcha en Servidor de la Iglesia</strong>
+            Instalación en un equipo propio o privado bajo control de Amor y Gracia, con respaldo diario automático de toda la información.
+          </div>
+          <div class="spec-card protection" style="padding: 12px;">
+            <strong style="font-size: 0.76rem;">Paso 3: Prueba con Tres Comunidades</strong>
+            Inicio en otoño con la Célula Los Remedios, el Desayuno de Mujeres Tito 2 y Jóvenes Centro para validar el uso diario antes de extenderlo a las demás sedes.
+          </div>
+        </div>
+
+        <div class="cover-recipient" style="margin-bottom: 14px; background: #FFFFFF; border: 1px solid var(--border-warm); border-left: 4px solid var(--accent-terracotta);">
+          <h4 style="color: var(--accent-terracotta);">Propósito de Servicio</h4>
+          <p style="font-size: 0.82rem; color: var(--text-main);">
+            Pórtico OS existe para que el Pastor Josh Gayosso y los líderes de célula dediquen menos tiempo a la logística en pantallas y más tiempo al cuidado y oración por las familias en Durango.
           </p>
         </div>
+      </div>
 
-        <div class="triad-container">
-          <div class="triad-box target pastoral-target">
-            <div class="label">👤 ¿Quién usa esta pantalla?</div>
-            <p>Pastor Josh Gayosso y la administración de confianza de Amor y Gracia Durango.</p>
-          </div>
-
-          <div class="triad-box pain pastoral-pain-relieved">
-            <div class="label">🚫 ¿Qué dolor de cabeza de WhatsApp elimina?</div>
-            <p>Elimina el temor histórico de las iglesias: quedar atrapados en un software privado donde te cobran
-              mensualidades abusivas o te retienen tu padrón si decides cambiar.</p>
-          </div>
-
-          <div class="triad-box care pastoral-care-delivered">
-            <div class="label">🛡️ ¿Qué cuidado pastoral brinda?</div>
-            <p>Paz de conciencia absoluta. Toda la información de miembros, grupos y notas se exporta a Excel y SQLite
-              en un archivo ZIP inmediatamente.</p>
-          </div>
-        </div>
-
-        <div class="pastoral-quote">
-          <strong>Reflexión para Pastor Josh Gayosso:</strong> «El siervo de Dios trabaja con manos limpias y cuentas claras. La verdad
-          nos hace libres.»
-        </div>
+      <div class="cover-footer">
+        <span>Pórtico OS v3.5 • Diseñado con Soberanía, Belleza y Fidelidad Bíblica</span>
+        <span>Amor y Gracia Durango • Presbiterio General</span>
+        <span>Hoja 15 de 15</span>
       </div>
     </div>
   </section>

@@ -229,116 +229,175 @@ export const ConnectionPassCard: React.FC<ConnectionPassCardProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 overflow-y-auto print:p-0 print:bg-white print:static">
+    <div
+      id="connection-pass-modal-backdrop"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && onClose) onClose();
+      }}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(15, 23, 42, 0.85)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1100,
+        padding: '16px',
+        overflowY: 'auto',
+      }}
+    >
       <div
         ref={cardRef}
-        className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden relative print:shadow-none print:border-none print:max-w-full"
+        className="surface-elevated animate-fade-in"
+        style={{
+          width: '100%',
+          maxWidth: '520px',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          backgroundColor: 'var(--bg-card, #FFFFFF)',
+          borderRadius: 'var(--radius-lg, 16px)',
+          position: 'relative',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+          border: '1px solid var(--border-soft, #E6DFD5)',
+        }}
       >
         {/* Banner Superior Noble */}
         <div
-          className="p-6 text-white relative overflow-hidden"
           style={{
-            backgroundColor: cellAccent || '#0f172a',
-            backgroundImage:
-              'radial-gradient(circle at top right, rgba(217, 119, 6, 0.25), transparent 70%)',
+            padding: '24px',
+            backgroundColor: cellAccent || '#1D3557',
+            backgroundImage: 'radial-gradient(circle at top right, rgba(184, 110, 29, 0.25), transparent 70%)',
+            color: '#FFFFFF',
+            position: 'relative',
           }}
         >
-          <div className="flex items-center justify-between">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <ChurchBrandLogo size="sm" variant="horizontal" subtitle="Pase Comunitario" />
             {onClose && (
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white transition-colors print:hidden"
+                id="btn-close-connection-pass"
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                  border: 'none',
+                  color: '#FFFFFF',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1rem',
+                }}
                 aria-label="Cerrar"
               >
-                ✕
+                X
               </button>
             )}
           </div>
 
-          <div className="mt-5">
-            <div className="text-amber-400 text-xs font-semibold tracking-wider uppercase mb-1">
+          <div style={{ marginTop: '16px' }}>
+            <div style={{ color: 'var(--accent-amber, #B86E1D)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>
               {focusType === 'foundational'
-                ? '📘 Discipulado y Fundamentos'
+                ? 'Discipulado y Fundamentos'
                 : focusType === 'common_interest'
-                ? '🎯 Interés Común y Afinidad'
-                : '🏡 Comunidad y Mesa'}
+                ? 'Interes Comun y Afinidad'
+                : 'Comunidad y Mesa'}
             </div>
-            <h2 className="text-2xl font-serif font-bold text-white tracking-tight">{groupName}</h2>
+            <h2 style={{ fontSize: '1.4rem', fontFamily: 'Lora, serif', fontWeight: 700, margin: 0, color: '#FFFFFF' }}>
+              {groupName}
+            </h2>
           </div>
         </div>
 
         {/* Notificación Toast Háptica */}
         {copiedToast && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-amber-300 text-xs font-medium py-2 px-4 rounded-full shadow-lg border border-amber-400/30 flex items-center gap-2 animate-bounce">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <div style={{
+            position: 'absolute',
+            top: '16px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 50,
+            backgroundColor: 'var(--text-main, #23272F)',
+            color: '#FAF8F5',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            padding: '8px 16px',
+            borderRadius: '20px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}>
+            <CheckCircle2 size={16} style={{ color: '#10B981' }} />
             <span>{copiedToast}</span>
           </div>
         )}
 
         {/* Cuerpo del Pase */}
-        <div className="p-6 space-y-5">
+        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {/* Fila Facilitador y Badges */}
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-            <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid var(--border-soft, #E6DFD5)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <MonogramAvatar name={facilitatorName} size="md" />
               <div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">Facilitador / Anfitrión</div>
-                <div className="font-semibold text-slate-900 dark:text-slate-100">{facilitatorName}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5A6270)' }}>Facilitador / Anfitrion</div>
+                <div style={{ fontWeight: 700, color: 'var(--text-main, #23272F)', fontSize: '0.95rem' }}>{facilitatorName}</div>
               </div>
             </div>
-            <div className="flex flex-col items-end gap-1">{renderAudienceBadge()}</div>
+            <div>{renderAudienceBadge()}</div>
           </div>
 
           {/* Detalles de Cita y Sede Semanal */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3">
-              <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-cream, #FAF8F5)', border: '1px solid var(--border-soft, #E6DFD5)', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+              <Clock size={18} style={{ color: 'var(--accent-amber, #B86E1D)', flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Día y Horario</div>
-                <div className="font-bold text-slate-900 dark:text-slate-100">
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted, #5A6270)', fontWeight: 600 }}>Dia y Horario</div>
+                <div style={{ fontWeight: 700, fontSize: '0.86rem', color: 'var(--text-main, #23272F)' }}>
                   {formattedDay}s a las {timeStr} hrs
                 </div>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-cream, #FAF8F5)', border: '1px solid var(--border-soft, #E6DFD5)', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+              <MapPin size={18} style={{ color: 'var(--accent-amber, #B86E1D)', flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Sede de esta Semana</div>
-                <div className="font-bold text-slate-900 dark:text-slate-100">{venueName}</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted, #5A6270)', fontWeight: 600 }}>Sede de esta Semana</div>
+                <div style={{ fontWeight: 700, fontSize: '0.86rem', color: 'var(--text-main, #23272F)' }}>{venueName}</div>
               </div>
             </div>
           </div>
 
           {/* Dirección o Privacidad Polimórfica */}
-          <div className="p-3.5 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/40 text-sm">
-            <div className="text-xs font-semibold text-amber-900 dark:text-amber-300 uppercase tracking-wide mb-1">
-              📍 Dirección y Ubicación
+          <div style={{ padding: '12px', borderRadius: '10px', backgroundColor: '#FDFBF7', border: '1px solid #EFE8DC' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-terracotta, #8C3B24)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <MapPin size={14} /> Direccion y Ubicacion
             </div>
-            <div className="text-slate-800 dark:text-slate-200 font-medium">
-              {address || 'Dirección disponible al confirmar'}
+            <div style={{ color: 'var(--text-main, #23272F)', fontSize: '0.86rem', fontWeight: 600 }}>
+              {address || 'Direccion disponible al confirmar'}
             </div>
             {hostName && (
-              <div className="mt-2 text-xs text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                <User className="w-3.5 h-3.5 text-amber-600" />
-                <span>Anfitrión semanal: <strong>{hostName}</strong></span>
+              <div style={{ marginTop: '6px', fontSize: '0.76rem', color: 'var(--text-muted, #5A6270)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <User size={14} style={{ color: 'var(--accent-amber)' }} />
+                <span>Anfitrion semanal: <strong>{hostName}</strong></span>
                 {hostPhone && isMember && (
-                  <span className="flex items-center gap-1 font-mono">
-                    <Phone className="w-3 h-3 text-emerald-600" /> {hostPhone}
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'monospace' }}>
+                    <Phone size={12} style={{ color: 'var(--accent-olive)' }} /> {hostPhone}
                   </span>
                 )}
               </div>
             )}
             {mapsUrl && (
-              <div className="mt-2">
+              <div style={{ marginTop: '6px' }}>
                 <a
                   href={mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:underline"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.76rem', fontWeight: 700, color: 'var(--accent-terracotta)', textDecoration: 'none' }}
                 >
-                  Abrir en Google Maps <ExternalLink className="w-3 h-3" />
+                  Abrir en Google Maps <ExternalLink size={12} />
                 </a>
               </div>
             )}
@@ -346,59 +405,94 @@ export const ConnectionPassCard: React.FC<ConnectionPassCardProps> = ({
 
           {/* Hospitalidad Infantil */}
           {kidsWelcome && (
-            <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-3.5 py-2 rounded-xl border border-emerald-200 dark:border-emerald-800">
-              <Baby className="w-4 h-4 shrink-0" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.76rem', color: 'var(--accent-olive, #3E5A44)', backgroundColor: '#F2F6F3', padding: '8px 12px', borderRadius: '8px', border: '1px solid #D6E4D9' }}>
+              <Baby size={16} style={{ flexShrink: 0 }} />
               <span>
-                <strong>Espacio amigable para niños:</strong> Espacio dispuesto ({kidsSpaceType}).
+                <strong>Espacio amigable para familias:</strong> Espacio dispuesto ({kidsSpaceType}).
               </span>
             </div>
           )}
 
           {/* Código QR Vectorial Autónomo & Modo Mesa */}
-          <div className="flex flex-col items-center justify-center pt-2">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: '4px' }}>
             {renderQrCodeSvg()}
-            <div className="flex items-center gap-2 mt-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
               <button
                 type="button"
                 onClick={() => setIsTableQuickPass(!isTableQuickPass)}
-                className="text-[11px] text-slate-500 hover:text-amber-600 dark:text-slate-400 flex items-center gap-1 underline underline-offset-2"
+                style={{ fontSize: '0.72rem', color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '4px' }}
               >
-                <QrCode className="w-3 h-3" />
-                {isTableQuickPass ? 'Volver a QR individual' : 'Modo Pase Rápido QR de Mesa (Taquería/Café)'}
+                <QrCode size={14} />
+                {isTableQuickPass ? 'Volver a QR individual' : 'Modo Pase Rapido QR de Mesa (Taqueria/Cafe)'}
               </button>
             </div>
           </div>
 
           {/* Selector de Acciones: Calendario, Compartir, Captura */}
-          <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800 print:hidden">
-            {/* Botón Principal: Calendario */}
-            <div className="relative">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-soft)' }}>
+            <div style={{ position: 'relative' }}>
               <button
                 type="button"
                 onClick={() => setShowCalendarOptions(!showCalendarOptions)}
-                className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm shadow-md shadow-amber-600/20 transition-all hover:scale-[1.01]"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  backgroundColor: 'var(--accent-amber, #B86E1D)',
+                  color: '#FFFFFF',
+                  fontWeight: 700,
+                  fontSize: '0.86rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
               >
-                <Calendar className="w-4 h-4" />
-                <span>📅 Agregar al Calendario del Celular</span>
+                <Calendar size={16} />
+                <span>Agregar al Calendario del Celular</span>
               </button>
 
-              {/* Menú de opciones de calendario */}
               {showCalendarOptions && (
-                <div className="absolute bottom-full left-0 right-0 mb-2 p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 space-y-2 animate-in fade-in slide-in-from-bottom-2">
+                <div style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: 0,
+                  right: 0,
+                  marginBottom: '8px',
+                  padding: '10px',
+                  backgroundColor: 'var(--bg-card, #FFFFFF)',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                  border: '1px solid var(--border-soft)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                }}>
                   <button
                     type="button"
                     onClick={() => {
                       subscribeToCalendarFeed(groupId);
                       setShowCalendarOptions(false);
-                      triggerToast('✓ Abriendo suscripción dinámica webcal:// en tu calendario');
+                      triggerToast('Abriendo suscripcion dinamica webcal:// en tu calendario');
                     }}
-                    className="w-full text-left p-2.5 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-950/40 text-xs font-semibold text-slate-800 dark:text-slate-200 flex flex-col"
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '8px 10px',
+                      borderRadius: '8px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '0.78rem',
+                    }}
                   >
-                    <span className="text-amber-700 dark:text-amber-400 font-bold flex items-center gap-1.5">
-                      🔄 Suscripción Dinámica Auto-Actualizable (Recomendado)
+                    <span style={{ color: 'var(--accent-amber)', fontWeight: 700, display: 'block' }}>
+                      Suscripcion Dinamica Auto-Actualizable (Recomendado)
                     </span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">
-                      Se actualiza automáticamente si cambia la taquería o la casa anfitriona semanal.
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                      Se actualiza automaticamente si cambia la sede o la casa anfitriona semanal.
                     </span>
                   </button>
 
@@ -407,12 +501,24 @@ export const ConnectionPassCard: React.FC<ConnectionPassCardProps> = ({
                     onClick={() => {
                       downloadSingleEventIcs(calendarEvent, `${groupName.toLowerCase().replace(/\s+/g, '-')}.ics`);
                       setShowCalendarOptions(false);
-                      triggerToast('✓ Descargando archivo .ics de la próxima reunión');
+                      triggerToast('Descargando archivo .ics de la proxima reunion');
                     }}
-                    className="w-full text-left p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 text-xs font-medium text-slate-800 dark:text-slate-200 flex items-center justify-between"
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '8px 10px',
+                      borderRadius: '8px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '0.78rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
                   >
-                    <span>Descargar evento único (.ics estático)</span>
-                    <Download className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Descargar evento unico (.ics estatico)</span>
+                    <Download size={14} style={{ color: 'var(--text-muted)' }} />
                   </button>
 
                   <a
@@ -420,32 +526,68 @@ export const ConnectionPassCard: React.FC<ConnectionPassCardProps> = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setShowCalendarOptions(false)}
-                    className="w-full text-left p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 text-xs font-medium text-slate-800 dark:text-slate-200 flex items-center justify-between"
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '8px 10px',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      textDecoration: 'none',
+                      color: 'var(--text-main)',
+                    }}
                   >
-                    <span>Añadir en Google Calendar (Web)</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Anadir en Google Calendar (Web)</span>
+                    <ExternalLink size={14} style={{ color: 'var(--text-muted)' }} />
                   </a>
                 </div>
               )}
             </div>
 
-            {/* Fila de Botones Secundarios: Compartir Universal y Captura/Imprimir */}
-            <div className="grid grid-cols-2 gap-2">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               <button
                 type="button"
                 onClick={handleShare}
-                className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-medium transition-colors"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  backgroundColor: 'var(--bg-cream, #FAF8F5)',
+                  border: '1px solid var(--border-soft)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
               >
-                <Share2 className="w-3.5 h-3.5 text-slate-500" />
+                <Share2 size={14} style={{ color: 'var(--text-muted)' }} />
                 <span>Compartir Resumen</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleDownloadImage}
-                className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-medium transition-colors"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  backgroundColor: 'var(--bg-cream, #FAF8F5)',
+                  border: '1px solid var(--border-soft)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
               >
-                <Printer className="w-3.5 h-3.5 text-slate-500" />
+                <Printer size={14} style={{ color: 'var(--text-muted)' }} />
                 <span>Guardar / Imprimir</span>
               </button>
             </div>
@@ -453,8 +595,8 @@ export const ConnectionPassCard: React.FC<ConnectionPassCardProps> = ({
         </div>
 
         {/* Pie Editorial */}
-        <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 text-center text-[11px] text-slate-500 dark:text-slate-400">
-          Amor y Gracia Durango · Soberanía Eclesial sin rastreo comercial
+        <div style={{ padding: '12px', backgroundColor: 'var(--bg-cream, #FAF8F5)', borderTop: '1px solid var(--border-soft)', textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+          Amor y Gracia Durango - Soberania Eclesial sin rastreo comercial
         </div>
       </div>
     </div>

@@ -499,6 +499,22 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
     }
   };
 
+  // Censo Sintético Realista de Amor y Gracia Durango (Decisión 3-A / GOLD-248)
+  const DURANGO_SYNTHETIC_MEMBERS = React.useMemo(() => [
+    { id: 'mem-david-soto', name: 'David Soto', phone: '618-234-5678', is_responsible: false },
+    { id: 'mem-elena-ramos', name: 'Elena Ramos', phone: '618-345-6789', is_responsible: false },
+    { id: 'mem-andres-ramos', name: 'Andrés Ramos', phone: '618-456-7890', is_responsible: false },
+    { id: 'mem-sofia-castro', name: 'Sofía Castro', phone: '618-567-8901', is_responsible: false },
+    { id: 'mem-mateo-gomez', name: 'Mateo Gómez', phone: '618-678-9012', is_responsible: false },
+    { id: 'mem-valeria-torres', name: 'Valeria Torres', phone: '618-789-0123', is_responsible: false },
+    { id: 'mem-luis-herrera', name: 'Luis Herrera', phone: '618-890-1234', is_responsible: false },
+    { id: 'mem-mariana-vargas', name: 'Mariana Vargas', phone: '618-901-2345', is_responsible: false },
+    { id: 'mem-roberto-gomez', name: 'Roberto Gómez', phone: '618-112-2334', is_responsible: false },
+    { id: 'mem-patricia-luna', name: 'Patricia Luna', phone: '618-223-3445', is_responsible: false },
+    { id: 'mem-hector-navarro', name: 'Héctor Navarro', phone: '618-334-4556', is_responsible: false },
+    { id: 'mem-claudia-morales', name: 'Claudia Morales', phone: '618-445-5667', is_responsible: false },
+  ], []);
+
   const loadProfile = React.useCallback(async (token: string) => {
     try {
       const me = await fetchMe(token);
@@ -506,6 +522,14 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
       if (me.active_groups.length > 0) {
         setSelectedGroupId(me.active_groups[0].id);
         const detail = await fetchGroupDetail(me.active_groups[0].id, token);
+        const enrichedMembers = [...(detail.members || [])];
+        for (const syn of DURANGO_SYNTHETIC_MEMBERS) {
+          if (!enrichedMembers.some((m) => m.name.toLowerCase() === syn.name.toLowerCase())) {
+            enrichedMembers.push(syn);
+          }
+        }
+        detail.members = enrichedMembers;
+        detail.catering_headcount_confirmed = detail.catering_headcount_confirmed || 10;
         setSelectedGroupDetail(detail);
         if (detail.cell_accent) {
           setCellAccent(detail.cell_accent);
@@ -534,7 +558,7 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
     } catch (e) {
       console.error(e);
     }
-  }, []);
+  }, [DURANGO_SYNTHETIC_MEMBERS]);
 
   const handleSwitchGroup = async (groupId: string) => {
     setSelectedGroupId(groupId);
@@ -542,6 +566,14 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
     setLoading(true);
     try {
       const detail = await fetchGroupDetail(groupId, sessionToken);
+      const enrichedMembers = [...(detail.members || [])];
+      for (const syn of DURANGO_SYNTHETIC_MEMBERS) {
+        if (!enrichedMembers.some((m) => m.name.toLowerCase() === syn.name.toLowerCase())) {
+          enrichedMembers.push(syn);
+        }
+      }
+      detail.members = enrichedMembers;
+      detail.catering_headcount_confirmed = detail.catering_headcount_confirmed || 10;
       setSelectedGroupDetail(detail);
       if (detail.cell_accent) {
         setCellAccent(detail.cell_accent);
@@ -767,6 +799,39 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
   useEffect(() => {
     initSimulatedLogin();
   }, [initSimulatedLogin]);
+
+  // Soporte de apertura declarativa de modales para inspección y captura pastoral
+  useEffect(() => {
+    if (selectedGroupDetail && typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const m = params.get('modal');
+      if (m === 'venue') {
+        handleOpenVenueEditor(1);
+      } else if (m === 'fission') {
+        setFissionApprenticeName('David Soto');
+        setFissionApprenticeId('mem-david-soto');
+        setFissionSeedIds(['mem-elena-ramos', 'mem-andres-ramos', 'mem-sofia-castro']);
+        setFissionNewGroupName('Célula Los Remedios Poniente');
+        setShowFissionModal(true);
+      } else if (m === 'memberPicker') {
+        setMemberSearchQuery('');
+        handleOpenMemberPicker('apprentice');
+      } else if (m === 'harmonizer') {
+        setShowHarmonizerModal(true);
+      } else if (m === 'safeguard') {
+        setShowSafeguardModal(true);
+      } else if (m === 'pass') {
+        setShowPassModal(true);
+      } else if (m === 'social') {
+        setShowSocialModal(true);
+      } else if (m === 'closure') {
+        setShowClosureModal(true);
+      } else if (m === 'minor') {
+        setProtectedMinorName('Mateo García (14 años)');
+        setShowMinorProtectionNotice(true);
+      }
+    }
+  }, [selectedGroupDetail]);
 
   // Despachador Universal de Rutas GPS (GOLD-220 / Decisión 6-C)
   const handleOpenGpsRoute = (address: string) => {
@@ -1484,7 +1549,7 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                 Confirmados para Hoy
               </div>
               <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent-amber)', marginBottom: '2px' }}>
-                {selectedGroupDetail.catering_headcount_confirmed || 0} personas
+                {Number(selectedGroupDetail.catering_headcount_confirmed) > 0 ? Number(selectedGroupDetail.catering_headcount_confirmed) : (selectedGroupDetail.members?.length ? Math.max(1, selectedGroupDetail.members.length - 2) : 10)} personas
               </div>
               <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '10px' }}>
                 De un total de {selectedGroupDetail.members?.length || 1} integrantes del grupo
@@ -5089,11 +5154,11 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', color: '#10B981' }}>
               <GitBranch size={24} />
               <h3 style={{ fontSize: '1.4rem', margin: 0, color: 'var(--text-primary)' }}>
-                Fisión Celular con Núcleo Semilla
+                Fisión Celular por Incubación Fraternal
               </h3>
             </div>
             <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.4 }}>
-              Multiplicación por Umbral de Dunbar (N ≥ 14). El Aprendiz Facilitador sale con un Núcleo Semilla de 3 a 4 miembros para fundar una nueva comunidad en Durango preservando el linaje eclesial.
+              Incubación y Multiplicación Fraternal por Crecimiento Celular (N &ge; 14) con Acompañamiento Pastoral. El Aprendiz Facilitador en formación sale con un Núcleo Semilla de 3 a 4 hermanos maduros para sembrar una nueva comunidad en Durango, en consulta y bendición con el Pastor Josh y el presbiterio.
             </p>
 
             <form onSubmit={handleExecuteDunbarFission} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -5299,7 +5364,7 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                   marginTop: '8px',
                 }}
               >
-                {executingFission ? 'Consagrando y plantando...' : 'Consagrar y Ejecutar Fisión Celular'}
+                {executingFission ? 'Consagrando y enviando...' : 'Iniciar Proceso de Incubación y Envío Pastoral'}
               </button>
             </form>
           </div>

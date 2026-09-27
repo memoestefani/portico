@@ -237,6 +237,21 @@ export const PastorHud: React.FC = () => {
     }
   }, [loading]);
 
+  // Soporte de apertura declarativa de modales y pestañas para inspección y captura pastoral
+  useEffect(() => {
+    if (!loading && typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const m = params.get('modal');
+      if (m === 'veto') setShowVetoModal(true);
+      if (m === 'discipline') setShowDisciplineModal(true);
+      if (m === 'broadcast') setShowBroadcastModal(true);
+      const t = params.get('tab');
+      if (t === 'elders' || t === 'sabbaticals' || t === 'deacons' || t === 'territory' || t === 'initiatives') {
+        setActiveTab(t as any);
+      }
+    }
+  }, [loading]);
+
   const handleCloneDraft = async (editionId: string, groupName: string) => {
     if (
       !confirm(

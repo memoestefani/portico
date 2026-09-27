@@ -22,37 +22,38 @@ describe('Pórtico OS v3.5 - Ciclo 11: Dossier Pastoral Ejecutivo Automatizado y
       assert.ok(stat.size > 2000, 'El archivo HTML debe tener contenido sustancial');
     });
 
-    it('debe definir reglas W3C Paged Media con @page letter landscape y márgenes cero', () => {
+    it('debe definir reglas W3C Paged Media con @page letter portrait y márgenes cero', () => {
       const content = fs.readFileSync(htmlPath, 'utf-8');
-      assert.match(content, /@page\s*\{\s*size:\s*letter landscape;\s*margin:\s*0;\s*\}/, 'Debe especificar @page { size: letter landscape; margin: 0; }');
+      assert.match(content, /@page\s*\{\s*size:\s*letter portrait;\s*margin:\s*0;\s*\}/, 'Debe especificar @page { size: letter portrait; margin: 0; }');
       assert.match(content, /break-after:\s*page/, 'Debe forzar salto de página con break-after: page');
       assert.match(content, /break-inside:\s*avoid/, 'Debe evitar corte de elementos con break-inside: avoid');
     });
 
-    it('debe contener exactamente 7 diapositivas pastorales (.dossier-slide)', () => {
+    it('debe contener exactamente 15 hojas pastorales (.dossier-slide)', () => {
       const content = fs.readFileSync(htmlPath, 'utf-8');
       const matches = content.match(/<section class="dossier-slide">/g);
       assert.ok(matches, 'Debe contener secciones con clase dossier-slide');
-      assert.equal(matches.length, 7, 'El dossier debe tener exactamente 7 páginas');
+      assert.equal(matches.length, 15, 'El dossier debe tener exactamente 15 páginas');
     });
 
-    it('las 6 páginas de contenido deben incluir la Tríada Pastoral de 3 preguntas humanas', () => {
+    it('las páginas de contenido anatómico deben incluir la especificación de propósito, base de datos y salvaguarda', () => {
       const content = fs.readFileSync(htmlPath, 'utf-8');
-      const targetMatches = content.match(/pastoral-target/g);
-      const painMatches = content.match(/pastoral-pain-relieved/g);
-      const careMatches = content.match(/pastoral-care-delivered/g);
+      const targetMatches = content.match(/spec-card target/g);
+      const dbMatches = content.match(/spec-card db/g);
+      const protectionMatches = content.match(/spec-card protection/g);
 
-      assert.ok(targetMatches && targetMatches.length === 6, 'Debe haber 6 tarjetas de ¿Quién usa esta pantalla?');
-      assert.ok(painMatches && painMatches.length === 6, 'Debe haber 6 tarjetas de ¿Qué dolor de cabeza de WhatsApp elimina?');
-      assert.ok(careMatches && careMatches.length === 6, 'Debe haber 6 tarjetas de ¿Qué cuidado pastoral brinda?');
+      assert.ok(targetMatches && targetMatches.length >= 13, 'Debe haber tarjetas de Propósito Pastoral');
+      assert.ok(dbMatches && dbMatches.length >= 13, 'Debe haber tarjetas de Mutación y Base de Datos');
+      assert.ok(protectionMatches && protectionMatches.length >= 13, 'Debe haber tarjetas de Salvaguarda Eclesial');
     });
 
-    it('debe honrar la identidad noble de Amor y Gracia Durango y el pastoreo de Josh', () => {
+    it('debe honrar la identidad noble de Amor y Gracia Durango y el pastoreo de Josh sin emojis', () => {
       const content = fs.readFileSync(htmlPath, 'utf-8');
       assert.match(content, /Amor y Gracia/i, 'Debe incluir el nombre de la congregación');
       assert.match(content, /Durango/i, 'Debe referenciar a Durango');
       assert.match(content, /Pastor Josh/i, 'Debe estar dedicado al Pastor Josh');
       assert.doesNotMatch(content, /Lorem ipsum/i, 'Cero placeholders o textos simulados');
+      assert.doesNotMatch(content, /[\u{1F300}-\u{1F9FF}]/u, 'Cero emojis en la plantilla editorial');
     });
   });
 
@@ -96,14 +97,22 @@ describe('Pórtico OS v3.5 - Ciclo 11: Dossier Pastoral Ejecutivo Automatizado y
       assert.match(content, /--window-size=(\$Width|\d+),(\$Height|\d+)/, 'Debe fijar resolución exacta');
     });
 
-    it('las 6 capturas de pantalla deben existir en docs/assets/dossier/ y ser imágenes válidas', () => {
+    it('las capturas de pantalla deben existir en docs/assets/dossier/ y ser imágenes válidas', () => {
       const expectedImages = [
         '01_portico_publico.png',
-        '02_privacidad_hogar.png',
-        '03_silo_miembro.png',
-        '04_mesa_diacono.png',
-        '05_pastor_hud.png',
-        '06_soberania_datos.png'
+        '02_mi_perfil_elena.png',
+        '02b_silo_living_card.png',
+        '03_modal_sedes_flexibles.png',
+        '04_modal_asignar_roles.png',
+        '05_modal_fision_dunbar.png',
+        '06_modal_armonizador_liturgico.png',
+        '07_modal_salvaguarda_crisis.png',
+        '08_modal_pase_qr.png',
+        '09_mesa_diacono.png',
+        '10_pastor_hud_radar.png',
+        '11_pastor_anti_collision.png',
+        '12_modal_disciplina_pastoral.png',
+        '13_soberania_datos.png'
       ];
 
       for (const img of expectedImages) {

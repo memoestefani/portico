@@ -60,8 +60,8 @@ describe('Pórtico — Portal en Desarrollo: Software Ligero para Organizar Grup
       assert.doesNotMatch(content, /portal en vivo/i, 'No debe contener la frase "portal en vivo"');
     });
 
-    it('debe enlazar al Dossier Pastoral en PDF de 15 páginas y purgar enlaces muertos', () => {
-      assert.match(content, /href="Dossier_Pastoral_Portico\.pdf"/, 'Debe enlazar al dossier PDF canónico');
+    it('debe enlazar al Cuaderno de Visión Comunitaria en PDF (Dossier_Portico_Publico.pdf) y purgar enlaces muertos', () => {
+      assert.match(content, /href="Dossier_Portico_Publico\.pdf"/, 'Debe enlazar al cuaderno de visión pública');
       assert.match(content, /target="_blank"/, 'Debe abrir en nueva pestaña');
       assert.match(content, /rel="noopener noreferrer"/, 'Debe proteger la navegación externa');
       assert.doesNotMatch(content, /trycloudflare\.com/, 'Cero enlaces muertos a túneles caídos de Cloudflare');

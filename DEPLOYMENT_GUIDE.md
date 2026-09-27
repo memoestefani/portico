@@ -1,7 +1,7 @@
 # 🚀 Guía de Despliegue y Protocolo de Actualizaciones — Pórtico OS v3.6
 
 > **Repositorio de Producción:** [`https://github.com/memoestefani/portico`](https://github.com/memoestefani/portico)  
-> **Identidad de Operador:** Guillermo (`memoestefani@gmail.com`)  
+> **Identidad de Operador:** Administrador Pórtico  
 > **Presupuesto:** **$0 USD/mes** (Cloudflare Tunnels + GitHub Pages + Cloudflare R2 Free Tier + SQLite Local)
 
 ---
@@ -10,13 +10,15 @@
 
 | Componente | Estatus | URL / Endpoint | Función |
 | :--- | :---: | :--- | :--- |
-| **Landing Page Pública (GitHub Pages)** | 🟢 Live | [`https://memoestefani.github.io/portico/`](https://memoestefani.github.io/portico/) | Carta Pastoral Editorial con modal nativo de contacto y acceso a Dossier en PDF. |
-| **Dossier Pastoral Ejecutivo (PDF)** | 🟢 Live | [`docs/Dossier_Pastoral_Portico.pdf`](file:///c:/Users/52331/Documents/Proyectos/portico/docs/Dossier_Pastoral_Portico.pdf) | Dossier de 15 láminas con el modelo mental y arquitectura de escala. |
+| **Landing Page Pública (GitHub Pages)** | 🟢 Live | [`https://memoestefani.github.io/portico/`](https://memoestefani.github.io/portico/) | Carta Pastoral Editorial con modal nativo de contacto y acceso al Cuaderno de Visión en PDF. |
+| **Cuaderno de Visión Comunitaria (PDF)** | 🟢 Live | [`docs/Dossier_Portico_Publico.pdf`](file:///c:/Users/52331/Documents/Proyectos/portico/docs/Dossier_Portico_Publico.pdf) | Cuaderno de 3 páginas de visión pública, catálogo vecinal y descanso de hogares. |
+| **Expediente de Gobernanza Interna (PDF)** | 🟢 Live | [`docs/Dossier_Pastoral_Portico.pdf`](file:///c:/Users/52331/Documents/Proyectos/portico/docs/Dossier_Pastoral_Portico.pdf) | Dossier de 15 láminas reservado para diálogo pastoral directo. |
+| **Tarjeta Gráfica Social (Open Graph)** | 🟢 Live | [`docs/og.png`](file:///c:/Users/52331/Documents/Proyectos/portico/docs/og.png) | Previsualización de 1200x630 px optimizada para WhatsApp (<300 KB), Facebook y X. |
 | **Formulario de Contacto (Web3Forms)** | 🟢 Live | `https://api.web3forms.com/submit` | Envíos anónimos seguros vía token `d173722b-...` con honeypot y time-gating. |
 | **Backend & Servidor Web (Rust Axum)** | 🟢 Local | `http://127.0.0.1:3000` | Motor HTTP de alto rendimiento sirviendo API y frontend embebido `dist/`. |
 | **Persistencia Database-per-Tenant** | 🟢 Local | `backend/data/tenants/*.db` | Base física SQLite aislada por comunidad sin mezcla de datos. |
 | **Salida Soberana Dual (.db + CSV)** | 🟢 Live | `/api/pastor/export-sovereign-archive` | Exportación pastoral soberana completa sin dependencias de terceros. |
-| **Pruebas Automatizadas** | 🟢 100% | **324 tests verdes** (287 frontend, 37 backend) | Certificación continua de cero regresiones, cero mockups y cero debris. |
+| **Pruebas Automatizadas** | 🟢 100% | **339 tests verdes** (302 frontend, 37 backend) | Certificación continua de cero regresiones, cero mockups y cero debris. |
 
 ---
 

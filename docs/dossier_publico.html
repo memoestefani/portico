@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Pórtico — Cuaderno de Visión Comunitaria | Casas abiertas para la ciudad</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-cream: #FAF8F5;
+      --bg-card: #FFFFFF;
+      --text-main: #1F242E;
+      --text-muted: #535C6E;
+      --text-light: #7A8496;
+      --border-warm: #E4DDD3;
+      --border-soft: #EFECE6;
+      --accent: #93432F;
+      --accent-hover: #7A3626;
+      --accent-olive: #2F5938;
+      --accent-amber: #B46C1A;
+      --accent-navy: #1B365D;
+      --shadow-subtle: 0 4px 18px rgba(0, 0, 0, 0.04);
+      --shadow-frame: 0 6px 20px rgba(0, 0, 0, 0.07);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    @page {
+      size: letter portrait;
+      margin: 0;
+    }
+
+    body {
+      background-color: #EAE6DF;
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .dossier-slide {
+      width: 8.5in;
+      height: 11in;
+      min-height: 11in;
+      max-height: 11in;
+      margin: 0 auto;
+      page-break-after: always;
+      break-after: page;
+      break-inside: avoid;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 34px 38px;
+      background: var(--bg-cream);
+      position: relative;
+    }
+
+    @media screen {
+      .dossier-slide {
+        margin: 24px auto;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+        border-radius: 4px;
+      }
+    }
+
+    /* Encabezados y pies de pagina uniformes */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-warm);
+    }
+
+    .slide-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(147, 67, 47, 0.08);
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    .slide-meta {
+      font-size: 0.72rem;
+      color: var(--text-light);
+      letter-spacing: 0.5px;
+    }
+
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-warm);
+      font-size: 0.72rem;
+      color: var(--text-light);
+    }
+
+    .slide-footer-brand {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Lamina 1: Portada Editorial */
+    .cover-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-warm);
+      border-radius: 12px;
+      padding: 34px 38px;
+      box-shadow: var(--shadow-subtle);
+      position: relative;
+    }
+
+    .cover-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent-amber) 100%);
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    .cover-top {
+      margin-top: 8px;
+    }
+
+    .cover-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(147, 67, 47, 0.08);
+      padding: 5px 12px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+    }
+
+    .cover-title {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 2.85rem;
+      font-weight: 600;
+      line-height: 1.15;
+      letter-spacing: -0.025em;
+      color: var(--text-main);
+      margin-bottom: 12px;
+    }
+
+    .cover-subtitle {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+      line-height: 1.45;
+      color: var(--accent);
+      margin-bottom: 22px;
+    }
+
+    .cover-lead {
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: var(--text-muted);
+      max-width: 620px;
+      margin-bottom: 28px;
+    }
+
+    .pillar-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .pillar-card {
+      background: var(--bg-cream);
+      border: 1px solid var(--border-warm);
+      border-radius: 9px;
+      padding: 16px 15px;
+    }
+
+    .pillar-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .pillar-title {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 0.96rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .pillar-desc {
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    .cover-footnote {
+      padding-top: 14px;
+      border-top: 1px solid var(--border-soft);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      color: var(--text-light);
+    }
+
+    /* Lamina 2: La Experiencia del Portico Publico */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px 0;
+    }
+
+    .slide-heading {
+      margin-bottom: 12px;
+    }
+
+    .slide-title {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.7rem;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.25;
+      letter-spacing: -0.015em;
+      margin-bottom: 6px;
+    }
+
+    .slide-intro {
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: var(--text-muted);
+    }
+
+    .preview-showcase {
+      background: var(--bg-card);
+      border: 1px solid var(--border-warm);
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: var(--shadow-frame);
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .preview-image {
+      width: 100%;
+      height: auto;
+      max-height: 4.8in;
+      object-fit: cover;
+      object-position: top;
+      border-radius: 6px;
+      border: 1px solid var(--border-soft);
+      display: block;
+    }
+
+    .preview-caption {
+      margin-top: 8px;
+      font-size: 0.72rem;
+      color: var(--text-light);
+      font-style: italic;
+      text-align: center;
+    }
+
+    .features-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .feature-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-warm);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .feature-item-title {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .feature-item-desc {
+      font-size: 0.76rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+
+    /* Lamina 3: Cuidado del Hogar y Puerta de Dialogo */
+    .split-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 10px;
+      flex: 1;
+    }
+
+    .split-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-warm);
+      border-radius: 10px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .info-card.primary {
+      border-left: 4px solid var(--accent);
+    }
+
+    .info-card.olive {
+      border-left: 4px solid var(--accent-olive);
+    }
+
+    .info-card.navy {
+      border-left: 4px solid var(--accent-navy);
+    }
+
+    .card-header-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .card-heading {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.12rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .card-paragraph {
+      font-size: 0.82rem;
+      line-height: 1.55;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .card-paragraph:last-child {
+      margin-bottom: 0;
+    }
+
+    .contact-invitation-box {
+      background: #FFFFFF;
+      border: 1px solid var(--border-warm);
+      border-radius: 10px;
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      box-shadow: var(--shadow-subtle);
+      position: relative;
+    }
+
+    .contact-invitation-box::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--accent);
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    .dialogue-steps {
+      list-style: none;
+      margin: 12px 0 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dialogue-steps li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+
+    .step-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(147, 67, 47, 0.08);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .portal-link-card {
+      background: var(--bg-cream);
+      border: 1px solid var(--border-warm);
+      border-radius: 8px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+
+    .portal-link-url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================================================================
+       LAMINA 01: PORTADA Y PRINCIPIO
+       ========================================================================= -->
+  <section class="dossier-slide">
+    <div class="cover-card">
+      <div class="cover-top">
+        <span class="cover-badge">Pórtico · Cuaderno de Visión Comunitaria</span>
+        <h1 class="cover-title">Pórtico</h1>
+        <p class="cover-subtitle">Casas abiertas para la ciudad, coordinación sin saturar WhatsApp</p>
+        <p class="cover-lead">
+          Pórtico es un software ligero concebido para organizar grupos pequeños y comunidades en hogares de la ciudad.
+          Facilita el encuentro vecinal preservando la paz de la mesa familiar, el descanso sagrado de las familias anfitrionas y la custodia soberana de la información comunitaria.
+        </p>
+      </div>
+
+      <div class="pillar-grid">
+        <div class="pillar-card">
+          <div class="pillar-number">01 / PROXIMIDAD</div>
+          <h3 class="pillar-title">Cercanía sin Barreras</h3>
+          <p class="pillar-desc">
+            Permite a vecinos y familias encontrar grupos hogareños en su propio sector mediante un catálogo sereno, sin obligar descargas de aplicaciones ni suscripciones.
+          </p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-number">02 / DESCANSO</div>
+          <h3 class="pillar-title">Cuidado del Anfitrión</h3>
+          <p class="pillar-desc">
+            Protege el descanso de los hogares anfitriones frente al agotamiento crónico, cuidando el ritmo familiar y evitando la saturación de los grupos de mensajería.
+          </p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-number">03 / SOBERANÍA</div>
+          <h3 class="pillar-title">Custodia Comunitaria</h3>
+          <p class="pillar-desc">
+            La comunidad es la única dueña de sus datos. Cero cobros por miembro, cero dependencia de nubes extractivas y total independencia tecnológica.
+          </p>
+        </div>
+      </div>
+
+      <div class="cover-footnote">
+        <span>Documento Editorial Público · Versión de Visión</span>
+        <span>Página 1 de 3</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       LAMINA 02: LA EXPERIENCIA DEL PORTICO PUBLICO
+       ========================================================================= -->
+  <section class="dossier-slide">
+    <header class="slide-header">
+      <span class="slide-tag">Superficie 01 · El Pórtico Público</span>
+      <span class="slide-meta">Hospitalidad en la Acera de la Ciudad</span>
+    </header>
+
+    <div class="slide-body">
+      <div class="slide-heading">
+        <h2 class="slide-title">El Catálogo Abierto: Hospitalidad sin Barreras de Entrada</h2>
+        <p class="slide-intro">
+          Una vitrina comunitaria serena donde cualquier persona o vecino puede explorar grupos de hogar cercanos en su colonia, conociendo facilitadores, horarios y propósitos sin ansiedad de umbral.
+        </p>
+      </div>
+
+      <div class="preview-showcase">
+        <img src="assets/dossier/portico_publico_catalogo_recortado.png" alt="Catálogo Abierto del Pórtico Público" class="preview-image">
+        <p class="preview-caption">Superficie 01: Búsqueda vecinal inmediata por sectores y colonias con fichas claras de acogida hogareña.</p>
+      </div>
+
+      <div class="features-row">
+        <div class="feature-item">
+          <h4 class="feature-item-title">Proximidad Vecinal</h4>
+          <p class="feature-item-desc">
+            Navegación horizontal fluida por sectores y colonias para propiciar relaciones cotidianas a corta distancia del hogar.
+          </p>
+        </div>
+
+        <div class="feature-item">
+          <h4 class="feature-item-title">Respeto al Umbral</h4>
+          <p class="feature-item-desc">
+            Consulta libre y abierta que no exige formularios invasivos ni registros obligatorios para conocer la vida comunitaria.
+          </p>
+        </div>
+
+        <div class="feature-item">
+          <h4 class="feature-item-title">Intimidad Residencial</h4>
+          <p class="feature-item-desc">
+            La información residencial exacta se comparte con prudencia pastoral, resguardando la seguridad del hogar familiar.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="slide-footer">
+      <span class="slide-footer-brand">Pórtico · Cuaderno de Visión Comunitaria</span>
+      <span>Página 2 de 3</span>
+    </footer>
+  </section>
+
+  <!-- =========================================================================
+       LAMINA 03: CUIDADO DEL HOGAR, SOBERANIA Y DIALOGO FRATERNO
+       ========================================================================= -->
+  <section class="dossier-slide">
+    <header class="slide-header">
+      <span class="slide-tag">Sostenibilidad Pastoral · Relación Directa</span>
+      <span class="slide-meta">Cuidado Mutuo y Acompañamiento</span>
+    </header>
+
+    <div class="slide-body">
+      <div class="slide-heading">
+        <h2 class="slide-title">Cuidado de las Familias y Diálogo Fraterno</h2>
+        <p class="slide-intro">
+          Creemos que la tecnología eclesiástica no debe operar como un producto comercial masivo, sino como un instrumento artesanal al servicio de personas, hogares y comunidades reales.
+        </p>
+      </div>
+
+      <div class="split-layout">
+        <div class="split-col">
+          <div class="info-card primary">
+            <div class="card-header-tag">Principio Pastoral</div>
+            <h3 class="card-heading">Descanso Sabático del Hogar</h3>
+            <p class="card-paragraph">
+              Abrir las puertas de una casa cada semana exige energía, tiempo y serenidad. Pórtico promueve activamente el descanso rotativo y la alternancia de anfitriones para que ninguna familia experimente fatiga en su vocación hospitalaria.
+            </p>
+          </div>
+
+          <div class="info-card olive">
+            <div class="card-header-tag">Tecnología Propia</div>
+            <h3 class="card-heading">Soberanía de Datos</h3>
+            <p class="card-paragraph">
+              La iglesia custodia su propia base de datos de manera íntegra e independiente. No existen suscripciones mensuales por miembro registrado ni modelos extractivos que condicionen el ministerio de la comunidad.
+            </p>
+          </div>
+
+          <div class="info-card navy">
+            <div class="card-header-tag">Coordinación Serena</div>
+            <h3 class="card-heading">Silencio en los Grupos de Chat</h3>
+            <p class="card-paragraph">
+              Reemplaza las cadenas infinitas de mensajes con fichas estables de encuentro, permitiendo que WhatsApp vuelva a ser un espacio de conversación afectuosa y no una pizarra de anuncios saturada.
+            </p>
+          </div>
+        </div>
+
+        <div class="split-col">
+          <div class="contact-invitation-box">
+            <div>
+              <div class="card-header-tag">Acompañamiento Relacional</div>
+              <h3 class="card-heading">Diálogo Caso por Caso</h3>
+              <p class="card-paragraph">
+                No ofrecemos un botón de descarga indiscriminada ni un autoservicio transaccional. Implementar un modelo de hogares abiertos requiere discernir el contexto particular de cada congregación, sus pastores y sus líderes.
+              </p>
+
+              <ul class="dialogue-steps">
+                <li>
+                  <span class="step-badge">1</span>
+                  <span><strong>Contacto inicial:</strong> Envía una solicitud a través de nuestro portal web con los datos básicos de tu comunidad.</span>
+                </li>
+                <li>
+                  <span class="step-badge">2</span>
+                  <span><strong>Conversación fraternal:</strong> Conversamos sobre el tamaño de tu congregación, su dinámica de grupos y necesidades específicas.</span>
+                </li>
+                <li>
+                  <span class="step-badge">3</span>
+                  <span><strong>Acompañamiento e implementación:</strong> Compartimos el expediente de gobernanza interna y el soporte necesario para poner en marcha el sistema.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="portal-link-card">
+              <p style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 2px;">Para iniciar este diálogo fraterno, visita:</p>
+              <div class="portal-link-url">https://memoestefani.github.io/portico/</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="slide-footer">
+      <span class="slide-footer-brand">Pórtico · Cuaderno de Visión Comunitaria</span>
+      <span>Página 3 de 3</span>
+    </footer>
+  </section>
+
+</body>
+
+</html>

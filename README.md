@@ -138,7 +138,7 @@ cd frontend
 npm test
 npm run build
 ```
-* **287 pruebas pasando (0 fallas en 156 suites):** 
+* **302 pruebas pasando (0 fallas en 162 suites de frontend) + 37 pruebas en Rust (backend portico-core):** 100% verde.
   * Ciclo 2 (Sobriedad y Rendimiento)
   * Ciclo 3 (Decisiones Canónicas)
   * Ciclo 4 (Gobernanza y Branding Noble)
@@ -157,7 +157,26 @@ npm run build
   * Ciclo 17 (Búsqueda de Miembros Acotada a la Célula y Asignación Fraterna de Roles: GOLD-349 a GOLD-351)
   * Ciclo 18 (Logística Celular Agnóstica, Edición de Doble Puerta Exclusiva del Líder y Sedes Flexibles: GOLD-352 a GOLD-355)
   * Ciclo 19 (Las 10 Decisiones Pastorales, Modo Claro Earthen Noble y Versionado Histórico del Dossier: GOLD-356 a GOLD-365)
+  * Ciclo 20 (Pórtico Público, Aislamiento Visual de Superficie 01, Cuaderno Editorial de 3 Páginas, Filtro Ético Implícito y Tarjeta Social Open Graph: GOLD-356 a GOLD-358)
 * **Build de producción:** 0 errores, 0 advertencias de compilación (`tsc -b && vite build` sobre 1,906 módulos en `dist/`).
+
+---
+
+## 📖 Dualidad Documental y Recursos Editoriales
+
+Pórtico implementa una política de separación estricta para evitar la apropiación indebida de su arquitectura eclesiológica o su explotación comercial:
+
+1. **Cuaderno de Visión Comunitaria (Público · 3 Páginas):**
+   * Archivo: `docs/Dossier_Portico_Publico.pdf` (compilado desde `docs/dossier_publico.html`).
+   * Contenido: Propuesta de valor, catálogo abierto vecinal (Superficie 01), descanso del hogar anfitrión y soberanía de datos. Cero menciones a tablas técnicas, esquemas SQLite o consolas internas.
+   * Acceso: Descarga directa desde la landing pública.
+2. **Expediente de Gobernanza Interna y Multi-Campus (Pastoral · 15 Páginas):**
+   * Archivo: `docs/Dossier_Pastoral_Portico.pdf` (compilado desde `docs/dossier_pastoral.html`).
+   * Contenido: Especificación completa de presbiterio, ruteo anti-colisión, fisión celular Dunbar, orden de ancianos y diaconado.
+   * Acceso: Entrega exclusiva y personalizada mediante diálogo pastoral directo evaluado caso por caso.
+3. **Tarjeta de Previsualización Social (Open Graph · WhatsApp & Redes):**
+   * Archivo: `docs/og.png` (generado mediante `tools/generar_og_preview.ps1`).
+   * Especificaciones: 1200x630 px, peso < 300 KB (óptimo para evitar descarte en WhatsApp), estética editorial refinada, sin saturación visual ni URLs impresas.
 
 ---
 

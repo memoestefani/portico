@@ -86,7 +86,7 @@
       border: 1px solid var(--border-warm);
       background: #FFFFFF;
       border-radius: 10px;
-      padding: 38px 44px;
+      padding: 26px 34px;
       box-shadow: var(--shadow-subtle);
       position: relative;
     }
@@ -107,18 +107,18 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border-soft);
-      padding-bottom: 16px;
+      padding-bottom: 12px;
     }
 
     .church-emblem {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
     }
 
     .emblem-badge {
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       border-radius: 8px;
       background: var(--accent-terracotta);
       color: #FFFFFF;
@@ -127,28 +127,28 @@
       justify-content: center;
       font-family: 'Lora', serif;
       font-weight: 700;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
     }
 
     .emblem-text h3 {
       font-family: 'Lora', serif;
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       color: var(--text-main);
       font-weight: 700;
       line-height: 1.2;
     }
 
     .emblem-text p {
-      font-size: 0.76rem;
+      font-size: 0.74rem;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 1px;
     }
 
     .cover-pill {
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 5px 12px;
+      padding: 4px 12px;
       background: #F4EBE6;
       color: var(--accent-terracotta);
       border-radius: 20px;
@@ -156,84 +156,166 @@
     }
 
     .cover-body {
-      margin-top: 18px;
-      margin-bottom: 18px;
+      margin-top: 10px;
+      margin-bottom: 10px;
     }
 
     .cover-body .eyebrow {
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 2px;
       color: var(--accent-terracotta);
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
 
     .cover-body h1 {
       font-family: 'Lora', serif;
-      font-size: 2.15rem;
+      font-size: 1.9rem;
       line-height: 1.2;
       color: var(--text-main);
       font-weight: 700;
-      margin-bottom: 14px;
+      margin-bottom: 8px;
     }
 
     .cover-body p.lead {
-      font-size: 0.95rem;
-      line-height: 1.5;
+      font-size: 0.86rem;
+      line-height: 1.42;
       color: var(--text-muted);
-      margin-bottom: 18px;
+      margin-bottom: 10px;
     }
 
-    .cover-recipient {
+    .mental-model-box {
       background: var(--bg-cream);
+      border: 1px solid var(--border-warm);
       border-left: 4px solid var(--accent-navy);
-      padding: 12px 18px;
-      border-radius: 0 6px 6px 0;
-      margin-bottom: 20px;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 8px 0 10px 0;
     }
 
-    .cover-recipient h4 {
+    .model-header h4 {
       font-size: 0.86rem;
       font-weight: 700;
       color: var(--accent-navy);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
-    .cover-recipient p {
-      font-size: 0.84rem;
+    .model-header .model-subtitle {
+      font-size: 0.70rem;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 6px;
+      font-style: italic;
+    }
+
+    .model-lead {
+      font-size: 0.73rem;
       color: var(--text-main);
-      line-height: 1.45;
+      line-height: 1.34;
+      margin-bottom: 8px;
+    }
+
+    .math-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .math-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-soft);
+      border-radius: 5px;
+      padding: 8px 10px;
+    }
+
+    .math-card.current {
+      border-top: 3px solid var(--accent-olive);
+    }
+
+    .math-card.projected {
+      border-top: 3px solid var(--accent-navy);
+    }
+
+    .math-header {
+      font-size: 0.73rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .math-card.current .math-header {
+      color: var(--accent-olive);
+    }
+
+    .math-card.projected .math-header {
+      color: var(--accent-navy);
+    }
+
+    .math-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .math-list li {
+      font-size: 0.67rem;
+      line-height: 1.32;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+      position: relative;
+      padding-left: 9px;
+    }
+
+    .math-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent-terracotta);
+    }
+
+    .math-list li strong {
+      color: var(--text-main);
+    }
+
+    .roles-summary {
+      background: #FFFFFF;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 0.68rem;
+      line-height: 1.32;
+      color: var(--text-main);
+      border: 1px dashed var(--border-warm);
     }
 
     .cover-pillars {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 12px;
-      padding-top: 16px;
+      gap: 8px;
+      margin-top: 6px;
+      padding-top: 8px;
       border-top: 1px solid var(--border-soft);
     }
 
     .pillar-card {
       background: var(--bg-cream);
-      padding: 12px 14px;
-      border-radius: 6px;
+      padding: 6px 9px;
+      border-radius: 4px;
       border-left: 3px solid var(--accent-terracotta);
     }
 
     .pillar-card h4 {
-      font-size: 0.86rem;
+      font-size: 0.75rem;
       font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 4px;
+      margin-bottom: 1px;
     }
 
     .pillar-card p {
-      font-size: 0.77rem;
-      line-height: 1.4;
+      font-size: 0.68rem;
+      line-height: 1.26;
       color: var(--text-muted);
     }
 
@@ -242,8 +324,8 @@
       justify-content: space-between;
       align-items: center;
       border-top: 1px solid var(--border-soft);
-      padding-top: 14px;
-      font-size: 0.78rem;
+      padding-top: 10px;
+      font-size: 0.75rem;
       color: var(--text-light);
     }
 
@@ -485,28 +567,54 @@
       </div>
 
       <div class="cover-body">
-        <div class="eyebrow">Pórtico OS — Plataforma de Grupos Pequeños</div>
+        <div class="eyebrow">Pórtico OS — Amor y Gracia Durango</div>
         <h1>Infraestructura Digital y Cuidado Pastoral en Hogares</h1>
         <p class="lead">
-          Memorándum operativo para el <strong>Pastor Josh Gayosso</strong>. Pórtico OS centraliza la logística de células de Amor y Gracia Durango en servidores bajo control de la iglesia, eliminando el desorden administrativo y respetando la privacidad de las familias.
+          Memorándum operativo para el <strong>Pastor Josh Gayosso</strong>. Pórtico OS organiza la vida en hogares de Amor y Gracia Durango en servidores bajo control de la iglesia, cuidando a las personas con serenidad y respetando la intimidad de las familias.
         </p>
 
-        <div class="cover-recipient">
-          <h4>Destinatario y Enfoque de Gobierno</h4>
-          <p>
-            <strong>A la atención de:</strong> Pastor Josh Gayosso y Presbiterio de Amor y Gracia Durango.<br>
-            <strong>Alcance:</strong> Presentación clara de las 14 pantallas operativas, el registro de información y las medidas de cuidado para la congregación de Durango.
+        <div class="mental-model-box">
+          <div class="model-header">
+            <h4>Conversación Fraterna con Josh: Por qué no son Células, sino Grupos Pequeños</h4>
+            <span class="model-subtitle">Matemática bíblica de Diáconos y Ancianos para sostener de 300 a 25,000 creyentes sin quemar al equipo (Hechos 6 y Éxodo 18)</span>
+          </div>
+          <p class="model-lead">
+            Josh ya conoce de sobra este argumento porque en los años 90 se utilizó intensamente para implementar el modelo de "células" en las iglesias cristianas, con pirámides de multiplicación, cuotas numéricas y la consecuente fatiga de pastores y anfitriones. Por eso aquí no se llaman células ni hay metas de venta: son <strong>grupos pequeños</strong> en salas de hogar compartiendo el pan. La razón por la que escalar de 300 a 25,000 creyentes no es una promesa exagerada es que la unidad de cuidado nunca se infla; lo que se distribuye con rigor bíblico es la responsabilidad pastoral:
           </p>
+
+          <div class="math-grid">
+            <div class="math-card current">
+              <div class="math-header">1. Ratios Bíblicos de Cuidado Personal</div>
+              <ul class="math-list">
+                <li><strong>Grupo Pequeño (10 a 12 personas):</strong> La sala de un hogar. Todos tienen voz y cenan en paz. A las 14 personas incuba con bendición pastoral.</li>
+                <li><strong>1 Diácono = 5 a 6 grupos pequeños (~50 a 60 personas):</strong> Sirve las mesas y la logística física (Hechos 6). Su ministerio clave es cuidar la salud y descanso del anfitrión (que la familia no se desgaste), despensas de socorro y emergencias. Con 5 casas, visita una por semana en paz.</li>
+                <li><strong>1 Anciano = 10 a 12 grupos pequeños (~100 a 120 personas):</strong> Pastorea espiritualmente a 2 diáconos y a los 10-12 facilitadores. Vela por la sana enseñanza, el matrimonio de los líderes y atiende crisis mayores (duelos, consejería compleja).</li>
+              </ul>
+            </div>
+
+            <div class="math-card projected">
+              <div class="math-header">2. Matemática de Escala: 300 vs 25,000</div>
+              <ul class="math-list">
+                <li><strong>Amor y Gracia Hoy (300 Creyentes):</strong> 25 a 30 grupos pequeños • 5 diáconos en terreno • 2 a 3 ancianos supervisando. Josh pastorea en intimidad a <strong>7 u 8 líderes de confianza</strong>, sin cuellos de botella ni agotamiento.</li>
+                <li><strong>Escala Regional (25,000 Creyentes):</strong> ~2,100 grupos pequeños en salas de todo Durango • ~350 a 400 diáconos de barrio (1 cada 5-6 casas) • ~180 a 200 ancianos organizados en <strong>5 sedes dominicales</strong> (~35-40 ancianos y ~70 diáconos por sede de 5,000 personas).</li>
+                <li><strong>Círculo del Pastor Josh:</strong> Preside el consejo de sedes (un presbiterio ejecutivo de <strong>12 a 15 hombres probados</strong>, pastores de sede y ancianos directores).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="roles-summary">
+            <strong>La Regla de Oro:</strong> Para el hermano de a pie, la iglesia nunca mide 25,000 personas. Para él siempre mide 12 amigos cenando en una sala, un diácono que sabe si le falta salud o trabajo, y un anciano que ora por su familia. No se divide una iglesia: se multiplican los hogares cuidados.
+          </div>
         </div>
 
         <div class="cover-pillars">
           <div class="pillar-card">
             <h4>1. Fisión por Incubación</h4>
-            <p>Al llegar a 14 o más asistentes, un aprendiz y tres o cuatro hermanos maduros inician una nueva célula con la bendición y oración del pastor.</p>
+            <p>Al llegar a 14 asistentes, el grupo no se divide a la fuerza: un aprendiz formado y 3 o 4 hermanos maduros inician un nuevo grupo pequeño con oración.</p>
           </div>
           <div class="pillar-card">
             <h4>2. Propiedad de la Información</h4>
-            <p>La iglesia puede descargar toda su información en su propia computadora con un solo clic. Cero pagos obligatorios a empresas externas ni uso comercial.</p>
+            <p>La iglesia puede descargar toda su base de datos en su computadora en un clic. Cero pagos obligatorios a empresas externas ni uso comercial.</p>
           </div>
           <div class="pillar-card">
             <h4>3. Mensajería Directa</h4>
@@ -514,7 +622,7 @@
           </div>
           <div class="pillar-card">
             <h4>4. Supervisión Compartida</h4>
-            <p>Cuidado mutuo: ninguna decisión disciplinaria o de pausa se toma de manera individual; requiere el acuerdo del pastor y los ancianos de la iglesia.</p>
+            <p>Cuidado mutuo: ninguna medida correctiva o de pausa opera de forma individual; requiere acuerdo del pastor y los ancianos de la iglesia.</p>
           </div>
         </div>
       </div>
@@ -534,7 +642,7 @@
     <div class="slide-header">
       <div class="slide-badge">
         <span class="badge-number">01</span>
-        <span class="badge-title">Pórtico Abierto — Puerta de Entrada y Mapa Celular</span>
+        <span class="badge-title">Pórtico Abierto — Puerta de Entrada y Mapa de Hogares</span>
       </div>
       <div class="slide-meta">Vista Pública • Sin Registro Previo</div>
     </div>
@@ -553,7 +661,7 @@
       <div class="pastoral-memo-block">
         <div class="memo-headline">
           <span class="tag">Superficie Pública</span>
-          <h2>Catálogo de Células y Sedes Dominicales</h2>
+          <h2>Catálogo de Grupos Pequeños y Sedes Dominicales</h2>
         </div>
         <p class="memo-synopsis">
           Acceso abierto desde el teléfono sin necesidad de cuentas ni contraseñas. Permite a una familia encontrar las reuniones dominicales y los grupos pequeños entre semana por colonia en Durango.
@@ -640,7 +748,7 @@
     <div class="slide-header">
       <div class="slide-badge">
         <span class="badge-number">02B</span>
-        <span class="badge-title">Living Card del Líder — Gobierno de Célula Los Remedios</span>
+        <span class="badge-title">Ficha del Líder — Comunidad Los Remedios</span>
       </div>
       <div class="slide-meta">Rol: Líder (Carlos Mendoza) • Censo de 12 Miembros</div>
     </div>
@@ -658,11 +766,11 @@
 
       <div class="pastoral-memo-block">
         <div class="memo-headline">
-          <span class="tag">Gobierno Celular</span>
+          <span class="tag">Vida en Hogares</span>
           <h2>Tríada del Hogar y Censo de Miembros de Durango</h2>
         </div>
         <p class="memo-synopsis">
-          Panel de control de Carlos Mendoza. Refleja las tres responsabilidades de la célula (Facilitador de enseñanza, Anfitrión de la casa y Aprendiz en formación) y la lista de 12 integrantes activos de Durango.
+          Panel de control de Carlos Mendoza. Refleja las tres responsabilidades del grupo pequeño (Facilitador de enseñanza, Anfitrión de la casa y Aprendiz en formación) y la lista de 12 integrantes activos de Durango.
         </p>
         <div class="spec-stack">
           <div class="spec-card target">
@@ -711,7 +819,7 @@
 
       <div class="pastoral-memo-block">
         <div class="memo-headline">
-          <span class="tag">Logística Celular</span>
+          <span class="tag">Logística en Hogares</span>
           <h2>Rotación de Sedes y Domicilios Alternos</h2>
         </div>
         <p class="memo-synopsis">
@@ -764,7 +872,7 @@
 
       <div class="pastoral-memo-block">
         <div class="memo-headline">
-          <span class="tag">Operación Celular</span>
+          <span class="tag">Servicio en Hogares</span>
           <h2>Turnos para Hospedar y Preparar al Aprendiz</h2>
         </div>
         <p class="memo-synopsis">
@@ -818,10 +926,10 @@
       <div class="pastoral-memo-block">
         <div class="memo-headline">
           <span class="tag">Multiplicación</span>
-          <h2>Multiplicación de Células por Crecimiento</h2>
+          <h2>Multiplicación de Grupos Pequeños</h2>
         </div>
         <p class="memo-synopsis">
-          Cuando un grupo supera las 14 personas, el aprendiz (David Soto) se prepara para abrir una nueva célula ("Los Remedios Poniente") junto con tres o cuatro hermanos maduros y con la bendición pastoral de Josh.
+          Cuando un grupo supera las 14 personas, el aprendiz (David Soto) se prepara para abrir un nuevo grupo pequeño ("Los Remedios Poniente") junto con tres o cuatro hermanos maduros y con la bendición pastoral de Josh.
         </p>
         <div class="spec-stack">
           <div class="spec-card target">
@@ -852,7 +960,7 @@
     <div class="slide-header">
       <div class="slide-badge">
         <span class="badge-number">06</span>
-        <span class="badge-title">Modal Armonizador Litúrgico — Convivios Inter-Celulares</span>
+        <span class="badge-title">Modal Armonizador — Convivios entre Grupos</span>
       </div>
       <div class="slide-meta">Modal de Líder • Comunión entre Hogares</div>
     </div>
@@ -874,7 +982,7 @@
           <h2>Convivios Unidos y Énfasis Especiales</h2>
         </div>
         <p class="memo-synopsis">
-          Permite a dos o más células ponerse de acuerdo para organizar cenas conjuntas o compartir temas especiales sin perder su identidad de hogar pequeño.
+          Permite a dos o más grupos pequeños ponerse de acuerdo para organizar cenas conjuntas o compartir temas especiales sin perder su identidad de hogar pequeño.
         </p>
         <div class="spec-stack">
           <div class="spec-card target">
@@ -887,7 +995,7 @@
           </div>
           <div class="spec-card protection">
             <strong>Cuidado de la Familia</strong>
-            Cada célula decide con libertad si desea sumarse a la actividad unida o prefiere mantener su reunión habitual en casa.
+            Cada grupo decide con libertad si desea sumarse a la actividad unida o prefiere mantener su reunión habitual en casa.
           </div>
         </div>
         <div class="slide-footer-note">
@@ -976,7 +1084,7 @@
 
       <div class="pastoral-memo-block">
         <div class="memo-headline">
-          <span class="tag">Identidad Celular</span>
+          <span class="tag">Identidad Comunitaria</span>
           <h2>Tarjeta Digital de Reunión y Acceso Seguro</h2>
         </div>
         <p class="memo-synopsis">
@@ -1083,10 +1191,10 @@
       <div class="pastoral-memo-block">
         <div class="memo-headline">
           <span class="tag">Supervisión Pastoral</span>
-          <h2>Monitoreo de Salud Celular para el Pastor Josh</h2>
+          <h2>Monitoreo de Salud de Grupos Pequeños para el Pastor Josh</h2>
         </div>
         <p class="memo-synopsis">
-          Pantalla de consulta para el Pastor Josh Gayosso. Muestra la situación de las células en Durango mediante un semáforo sencillo: verde (en orden), amarillo (con sobrecarga) y rojo (en necesidad).
+          Pantalla de consulta para el Pastor Josh Gayosso. Muestra la situación de los grupos pequeños en Durango mediante un semáforo sencillo: verde (en orden), amarillo (con sobrecarga) y rojo (en necesidad).
         </p>
         <div class="spec-stack">
           <div class="spec-card target">
@@ -1250,14 +1358,14 @@
           </div>
           <div class="spec-card protection" style="padding: 12px;">
             <strong style="font-size: 0.76rem;">Paso 3: Prueba con Tres Comunidades</strong>
-            Inicio en otoño con la Célula Los Remedios, el Desayuno de Mujeres Tito 2 y Jóvenes Centro para validar el uso diario antes de extenderlo a las demás sedes.
+            Inicio en otoño con la Comunidad Los Remedios, el Desayuno de Mujeres Tito 2 y Jóvenes Centro para validar el uso diario antes de extenderlo a las demás sedes.
           </div>
         </div>
 
         <div class="cover-recipient" style="margin-bottom: 14px; background: #FFFFFF; border: 1px solid var(--border-warm); border-left: 4px solid var(--accent-terracotta);">
           <h4 style="color: var(--accent-terracotta);">Propósito de Servicio</h4>
           <p style="font-size: 0.82rem; color: var(--text-main);">
-            Pórtico OS existe para que el Pastor Josh Gayosso y los líderes de célula dediquen menos tiempo a la logística en pantallas y más tiempo al cuidado y oración por las familias en Durango.
+            Pórtico OS existe para que el Pastor Josh Gayosso y los líderes de grupo pequeño dediquen menos tiempo a la logística en pantallas y más tiempo al cuidado y oración por las familias en Durango.
           </p>
         </div>
       </div>

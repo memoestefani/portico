@@ -101,15 +101,22 @@ $inputUri = "file:///" + ($resolvedInputHtml -replace "\\", "/")
 Write-Host ""
 Write-Host "Compilando PDF editorial en modo Headless..." -ForegroundColor Yellow
 
+$tempProfile = Join-Path $env:TEMP ("edge_pdf_" + [Guid]::NewGuid().ToString("N"))
 $argsList = @(
     "--headless=new",
     "--disable-gpu",
+    "--user-data-dir=$tempProfile",
     "--no-pdf-header-footer",
     "--print-to-pdf=$resolvedOutputPdf",
     $inputUri
 )
 
 $proc = Start-Process -FilePath $edgeExe -ArgumentList $argsList -Wait -PassThru -WindowStyle Hidden
+
+# Limpiar perfil temporal
+if (Test-Path $tempProfile) {
+    Remove-Item -Recurse -Force $tempProfile -ErrorAction SilentlyContinue
+}
 
 if (Test-Path $resolvedOutputPdf) {
     $fileInfo = Get-Item $resolvedOutputPdf

@@ -14,6 +14,17 @@
     <meta property="og:image" content="/og-card.svg" />
     
     <!-- Zero-Download System Fonts (GOLD-217 / Decisión 3-C): Google Fonts CDN eliminado para $0 costo de datos celulares -->
+    <script>
+      (function() {
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var theme = params.get('theme');
+          if (theme === 'light' || theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', theme);
+          }
+        } catch(e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

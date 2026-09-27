@@ -16,11 +16,9 @@ import {
   AlertCircle,
   X,
   MessageCircle,
-  Users,
   HeartHandshake,
   Building,
   Home,
-  Sparkles,
   SlidersHorizontal,
 } from 'lucide-react';
 import { formatDayOfWeek } from '../utils';
@@ -86,7 +84,7 @@ export const PublicPortal: React.FC = () => {
   const [passModalGroup, setPassModalGroup] = useState<PublicEdition | null>(null);
 
   // Privacidad Escalonada: Público General vs Usuario con Cuenta vs Miembro Admitido (Solicitud de Usuario)
-  const [hasAccount, setHasAccount] = useState<boolean>(() => {
+  const [hasAccount] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('portico_session_token') || localStorage.getItem('portico_token');
       const urlHasAccount = new URLSearchParams(window.location.search).get('has_account');
@@ -247,19 +245,12 @@ export const PublicPortal: React.FC = () => {
   });
 
   return (
-    <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 20px 80px 20px' }}>
-      {/* Hero Section con Tipografía Transitional (Charter / Georgia) y Lenguaje Sobrio */}
-      <section style={{ marginBottom: '32px', textAlign: 'center' }}>
-        <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
-          <ChurchBrandLogo
-            size={36}
-            variant="full"
-            tenantName="Amor y Gracia"
-            locality="Durango, Dgo."
-            color="var(--accent-terracotta)"
-          />
+    <div style={{ width: '100%', maxWidth: '1280px', margin: '0 auto', padding: '24px 16px 80px 16px', boxSizing: 'border-box', overflowX: 'clip' }}>
+      {/* Hero Section con Tipografía Transitional (Charter / Georgia) y Lenguaje Sobrio (D3, D4, D5) */}
+      <section style={{ marginBottom: '28px', textAlign: 'center', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+          <ChurchBrandLogo size={36} variant="icon" color="var(--accent-amber)" />
         </div>
-
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -269,73 +260,83 @@ export const PublicPortal: React.FC = () => {
           backgroundColor: 'var(--accent-amber-light)',
           border: '1px solid var(--accent-amber-border)',
           color: 'var(--accent-amber)',
-          fontSize: '0.85rem',
+          fontSize: '0.82rem',
           fontWeight: 700,
-          marginBottom: '16px',
+          marginBottom: '14px',
         }}>
-          <Users size={16} />
-          <span>{config?.active_season?.nombre_publico || 'Temporada Activa'} • Comunidades en Hogares</span>
+          <span>{config?.active_season?.nombre_publico || 'Temporada Activa'} · Comunidades y Grupos</span>
         </div>
 
         <h1 style={{
-          fontSize: 'clamp(2.2rem, 5vw, 3.2rem)',
-          lineHeight: 1.15,
-          marginBottom: '16px',
+          fontSize: 'clamp(1.8rem, 4.5vw, 2.8rem)',
+          lineHeight: 1.18,
+          marginBottom: '14px',
           color: 'var(--text-primary)',
           letterSpacing: '-0.02em',
+          wordBreak: 'break-word',
+          overflowWrap: 'break-word',
         }}>
-          Grupos Pequeños en Durango
+          Comunidades y Grupos de Hogar
         </h1>
         <p style={{
           maxWidth: '680px',
-          margin: '0 auto',
+          margin: '0 auto 20px auto',
           color: 'var(--text-secondary)',
-          fontSize: '1.1rem',
+          fontSize: '1.02rem',
           lineHeight: 1.5,
         }}>
-          Reuniones semanales en hogares para conversar, estudiar la Biblia y apoyarse mutuamente. Explora los grupos en tu zona y asiste con libertad.
+          Reuniones semanales para conocer a Dios, y apoyarse mutuamente en tu ciudad o en línea.
         </p>
 
-        {/* Indicador de Privacidad Escalonada (Público General vs Con Cuenta vs Admitido) */}
+        {/* Selector de Ciudad o Región (D3 / Multi-Sede) */}
         <div style={{
-          marginTop: '20px',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '12px',
-          padding: '8px 18px',
-          borderRadius: 'var(--radius-full)',
-          backgroundColor: hasAccount ? 'rgba(79, 70, 229, 0.08)' : 'var(--bg-surface)',
-          border: hasAccount ? '1px solid var(--accent-indigo)' : '1px solid var(--border-subtle)',
-          fontSize: '0.84rem',
-          color: 'var(--text-secondary)',
-          flexWrap: 'wrap',
+          display: 'flex',
           justifyContent: 'center',
+          gap: '6px',
+          flexWrap: 'wrap',
+          marginBottom: '8px',
         }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <Lock size={14} style={{ color: hasAccount ? 'var(--accent-indigo)' : 'var(--accent-emerald)' }} />
-            {hasAccount ? (
-              <span><strong>Modo Miembro con Cuenta:</strong> Direcciones completas habilitadas · Notas de acceso reservadas para admitidos.</span>
-            ) : (
-              <span><strong>Modo Público General:</strong> Nombres protegidos a primer nombre · Direcciones aproximadas por zona.</span>
-            )}
-          </span>
-          <button
-            type="button"
-            id="btn-toggle-account-view"
-            onClick={() => setHasAccount(!hasAccount)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--accent-terracotta)',
-              fontWeight: 700,
-              fontSize: '0.84rem',
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              padding: '2px 4px',
-            }}
-          >
-            {hasAccount ? 'Cambiar a vista pública' : 'Ingresar con cuenta / Ver como miembro'}
-          </button>
+          {['Todas', 'Durango', 'Torreón', 'Mazatlán', 'En Línea'].map((city) => {
+            const isSelected = (selectedCampus === '' && city === 'Todas') ||
+              (city !== 'Todas' && (selectedCampus.toLowerCase().includes(city.toLowerCase()) || selectedMacroZone.toLowerCase().includes(city.toLowerCase())));
+            return (
+              <button
+                key={city}
+                type="button"
+                id={`btn-city-${city.toLowerCase().replace(/\s+/g, '-').normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`}
+                onClick={() => {
+                  if (city === 'Todas') {
+                    setSelectedCampus('');
+                    setSelectedMacroZone('all');
+                  } else if (city === 'En Línea') {
+                    setSelectedFocusType('online');
+                  } else {
+                    const matchingCampus = config?.campuses.find((c) =>
+                      c.ciudad.toLowerCase().includes(city.toLowerCase()) ||
+                      c.nombre_publico.toLowerCase().includes(city.toLowerCase())
+                    );
+                    if (matchingCampus) {
+                      setSelectedCampus(matchingCampus.slug);
+                    } else {
+                      setSelectedMacroZone(city);
+                    }
+                  }
+                }}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: '0.8rem',
+                  fontWeight: isSelected ? 700 : 500,
+                  border: isSelected ? '1px solid var(--accent-terracotta)' : '1px solid var(--border-subtle)',
+                  backgroundColor: isSelected ? 'var(--accent-rose-light)' : 'var(--bg-surface)',
+                  color: isSelected ? 'var(--accent-terracotta)' : 'var(--text-secondary)',
+                  cursor: 'pointer',
+                }}
+              >
+                <span>{city}</span>
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -388,17 +389,19 @@ export const PublicPortal: React.FC = () => {
               </div>
             </div>
             <p style={{ margin: '0 0 16px 0', fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-              Tenemos 5 sedes en la ciudad de Durango con reuniones alegres, música en vivo, enseñanza bíblica y espacio seguro para tus hijos.
+              {config?.campuses && config.campuses.length === 1
+                ? 'Contamos con 1 sede de reunión dominical con alabanza, música en vivo, enseñanza bíblica y espacio seguro para tus hijos.'
+                : `Contamos con ${config?.campuses?.length || 1} sedes de reunión dominical con alabanza, música en vivo, enseñanza bíblica y espacio seguro para tus hijos.`}
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-                5 Sedes en Durango
+                {config?.campuses && config.campuses.length === 1 ? '1 Sede Dominical' : `${config?.campuses?.length || 1} Sedes Dominicales`}
               </span>
               <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                 Área Infantil Segura
               </span>
               <span style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-                Punto de Conexión en Atrio
+                Música en Vivo
               </span>
             </div>
           </div>
@@ -460,7 +463,7 @@ export const PublicPortal: React.FC = () => {
           </div>
         </div>
 
-        {/* Barra de Filtro de Intención */}
+        {/* Barra de Filtro de Intención (D5, D10) */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
           <button
             type="button"
@@ -469,19 +472,17 @@ export const PublicPortal: React.FC = () => {
             style={{
               padding: '8px 18px',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              backgroundColor: intentTrack === 'both' ? 'var(--text-primary)' : 'var(--bg-surface)',
-              color: intentTrack === 'both' ? 'var(--bg-primary)' : 'var(--text-secondary)',
-              border: '1px solid var(--border-subtle)',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              backgroundColor: intentTrack === 'both' ? 'var(--accent-amber)' : 'var(--bg-surface)',
+              color: intentTrack === 'both' ? '#161513' : 'var(--text-primary)',
+              border: intentTrack === 'both' ? '1px solid var(--accent-amber)' : '1px solid var(--border-subtle)',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
             }}
           >
-            <Sparkles size={14} strokeWidth={1.5} />
-            <span>Ver Todo el Ecosistema</span>
+            <span>Todos los Grupos</span>
           </button>
           <button
             type="button"
@@ -490,19 +491,17 @@ export const PublicPortal: React.FC = () => {
             style={{
               padding: '8px 18px',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              backgroundColor: intentTrack === 'temple' ? 'var(--accent-warm)' : 'var(--bg-surface)',
-              color: intentTrack === 'temple' ? '#161513' : 'var(--text-secondary)',
-              border: intentTrack === 'temple' ? '1px solid var(--accent-warm)' : '1px solid var(--border-subtle)',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              backgroundColor: intentTrack === 'temple' ? 'var(--accent-amber)' : 'var(--bg-surface)',
+              color: intentTrack === 'temple' ? '#161513' : 'var(--text-primary)',
+              border: intentTrack === 'temple' ? '1px solid var(--accent-amber)' : '1px solid var(--border-subtle)',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
             }}
           >
-            <Building size={14} strokeWidth={1.5} />
-            <span>Sedes Dominicales (5)</span>
+            <span>Sedes Dominicales ({config?.campuses?.length || 1})</span>
           </button>
           <button
             type="button"
@@ -511,74 +510,151 @@ export const PublicPortal: React.FC = () => {
             style={{
               padding: '8px 18px',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.85rem',
-              fontWeight: 600,
+              fontSize: '0.84rem',
+              fontWeight: 700,
               backgroundColor: intentTrack === 'home' ? 'var(--accent-olive)' : 'var(--bg-surface)',
-              color: intentTrack === 'home' ? '#FAF8F5' : 'var(--text-secondary)',
+              color: intentTrack === 'home' ? '#FFFFFF' : 'var(--text-primary)',
               border: intentTrack === 'home' ? '1px solid var(--accent-olive)' : '1px solid var(--border-subtle)',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
             }}
           >
-            <Home size={14} strokeWidth={1.5} />
-            <span>Grupos en la Ciudad ({displayedGroups.length})</span>
+            <span>Grupos en Casas ({displayedGroups.length})</span>
           </button>
         </div>
       </section>
 
-      {/* Punto de Conexión Dominical en el Atrio (GOLD-266 / Decisión 5-B / Visible en ruta domingo o todo) */}
+      {/* Sedes Físicas Dominicales Recursivas a la Realidad (Decisión Dominical y Dinámica) */}
       {(intentTrack === 'both' || intentTrack === 'temple') && (
-        <div style={{
-          backgroundColor: 'var(--bg-surface)',
-          border: '1.5px solid var(--accent-warm)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '20px 24px',
-          marginBottom: '28px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '16px',
-          boxShadow: 'var(--shadow-sm)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{
-              width: '46px',
-              height: '46px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'rgba(212, 175, 55, 0.15)',
-              border: '1px solid var(--accent-warm)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--accent-warm)',
-              flexShrink: 0,
-            }}>
-              <Building size={22} strokeWidth={1.5} />
-            </div>
+        <section
+          id="sunday-campuses-section"
+          aria-label="Sedes de reunión dominical"
+          style={{
+            marginBottom: '28px',
+            backgroundColor: 'var(--bg-surface)',
+            border: '1.5px solid var(--accent-amber)',
+            borderRadius: 'var(--radius-lg)',
+            padding: '24px',
+            boxShadow: 'var(--shadow-sm)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
             <div>
-              <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-primary)', fontWeight: 800 }}>
-                Punto de Conexión Dominical en el Atrio (Primer Día de la Semana)
+              <span style={{
+                fontSize: '0.74rem',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                backgroundColor: 'var(--accent-amber-light)',
+                color: 'var(--accent-amber)',
+                padding: '3px 8px',
+                borderRadius: 'var(--radius-sm)',
+                display: 'inline-block',
+                marginBottom: '4px',
+              }}>
+                Ruta Dominical · Sedes Físicas ({config?.campuses?.length || 1})
+              </span>
+              <h3 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--text-primary)' }}>
+                Nuestras Sedes de Reunión Dominical
               </h3>
-              <p style={{ margin: '4px 0 0 0', fontSize: '0.86rem', color: 'var(--text-secondary)', lineHeight: 1.4, maxWidth: '720px' }}>
-                ¿Prefieres conocer a los anfitriones en persona antes de asistir a una casa? El domingo al terminar cada reunión general, acércate al <strong>Punto de Conexión en el Atrio</strong>. Nuestros diáconos y servidores te presentarán personalmente a las familias de tu zona.
-              </p>
+            </div>
+            <div style={{ fontSize: '0.86rem', color: 'var(--text-secondary)' }}>
+              Horarios habituales: Domingos 10:00 y 12:30 hrs
             </div>
           </div>
-          <div style={{
-            padding: '6px 14px',
-            borderRadius: 'var(--radius-full)',
-            backgroundColor: 'rgba(212, 175, 55, 0.12)',
-            fontSize: '0.8rem',
-            fontWeight: 700,
-            color: 'var(--accent-warm)',
-            border: '1px solid var(--accent-warm)',
-          }}>
-            Domingos 10:00 y 12:30 hrs
+
+          <p style={{ margin: '0 0 18px 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            {config?.campuses && config.campuses.length === 1
+              ? 'Reunión dominical general con alabanza, predicación bíblica y atención para niños en nuestra sede.'
+              : `Contamos con ${config?.campuses?.length || 1} sedes en la región. Toca en cualquier ubicación para abrir la dirección directamente en Google Maps o Waze.`}
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+            {(config?.campuses && config.campuses.length > 0 ? config.campuses : [
+              {
+                id: 'campus-central',
+                slug: 'durango-central',
+                nombre_publico: 'Campus Central',
+                ciudad: 'Durango',
+                address: 'Blvd. Dolores del Río 105, Zona Centro, Durango',
+                macro_zone: 'Centro',
+                pastor_name: 'Pastor Samuel Gómez',
+                atrium_welcome_lead: 'Mateo Valenzuela',
+              }
+            ]).map((camp) => (
+              <div
+                key={camp.id}
+                style={{
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: '12px',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>
+                      {camp.nombre_publico}
+                    </strong>
+                    <span style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      backgroundColor: 'var(--bg-surface)',
+                      border: '1px solid var(--border-subtle)',
+                      padding: '2px 8px',
+                      borderRadius: 'var(--radius-sm)',
+                      color: 'var(--text-secondary)',
+                    }}>
+                      {camp.macro_zone || camp.ciudad}
+                    </span>
+                  </div>
+
+                  <div style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', marginBottom: '8px', lineHeight: 1.4 }}>
+                    {camp.address || `Sede oficial en ${camp.ciudad}`}
+                  </div>
+
+                  <div style={{ fontSize: '0.78rem', color: 'var(--accent-amber)', fontWeight: 600, marginBottom: '4px' }}>
+                    Reuniones: Domingos 10:00 y 12:30 hrs
+                  </div>
+
+                  {camp.pastor_name && (
+                    <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                      Atención: {camp.pastor_name}
+                    </div>
+                  )}
+                </div>
+
+                <a
+                  id={`btn-campus-maps-${camp.slug}`}
+                  href={camp.address ? `https://maps.google.com/?q=${encodeURIComponent(camp.address)}` : `https://maps.google.com/?q=${encodeURIComponent(camp.nombre_publico + ' ' + camp.ciudad)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary tap-target-44"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '8px 14px',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    borderRadius: 'var(--radius-sm)',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    textAlign: 'center',
+                  }}
+                >
+                  Abrir en Google Maps
+                </a>
+              </div>
+            ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* Proximidad Primero en 2 Pasos y Descongestión del Acantilado Móvil (GOLD-324 / GOLD-335) */}
@@ -652,23 +728,23 @@ export const PublicPortal: React.FC = () => {
                 filterKids !== null,
                 filterTransitOnly === true,
               ].filter(Boolean).length > 0) && (
-                <span style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 800,
-                  backgroundColor: 'var(--accent-terracotta)',
-                  color: '#FFFFFF',
-                  padding: '1px 6px',
-                  borderRadius: 'var(--radius-full)',
-                }}>
-                  {[
-                    selectedCampus !== '',
-                    selectedAffinity !== '',
-                    selectedFocusType !== 'all',
-                    filterKids !== null,
-                    filterTransitOnly === true,
-                  ].filter(Boolean).length}
-                </span>
-              )}
+                  <span style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    backgroundColor: 'var(--accent-terracotta)',
+                    color: '#FFFFFF',
+                    padding: '1px 6px',
+                    borderRadius: 'var(--radius-full)',
+                  }}>
+                    {[
+                      selectedCampus !== '',
+                      selectedAffinity !== '',
+                      selectedFocusType !== 'all',
+                      filterKids !== null,
+                      filterTransitOnly === true,
+                    ].filter(Boolean).length}
+                  </span>
+                )}
             </button>
 
             <button
@@ -1293,8 +1369,8 @@ export const PublicPortal: React.FC = () => {
                       {group.venue_type === 'institucional'
                         ? (group.liaison_name || group.host_reference || 'Enlace Institucional')
                         : (group.host_reference && group.host_reference !== 'Hogar sede'
-                            ? formatVisibleName(group.host_reference)
-                            : (group.host_reference || 'Hogar sede'))}
+                          ? formatVisibleName(group.host_reference)
+                          : (group.host_reference || 'Hogar sede'))}
                     </strong>
                   </div>
                   {group.apprentice_name && (

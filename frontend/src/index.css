@@ -86,7 +86,7 @@
   --text-primary: #F5F3EF;       /* Blanco Lino Cálido (WCAG AAA > 12:1) */
   --text-secondary: #A8A398;     /* Arena Suave */
   --text-muted: #736E65;         /* Tierra Neutra */
-  --text-dim: #545048;
+  --text-dim: #8F8A80;
 
   --accent-amber: #D4AF37;       /* Trigo Dorado Cálido */
   --accent-amber-light: rgba(212, 175, 55, 0.15);
@@ -119,7 +119,7 @@
     --text-primary: #F5F3EF;
     --text-secondary: #A8A398;
     --text-muted: #736E65;
-    --text-dim: #545048;
+    --text-dim: #8F8A80;
 
     --accent-amber: #D4AF37;
     --accent-amber-light: rgba(212, 175, 55, 0.15);
@@ -139,7 +139,7 @@
 }
 
 /* ==========================================================================
-   RESET & BLINDAJE UNIVERSAL DE HARDWARE (GOLD-225)
+   RESET & BLINDAJE UNIVERSAL DE HARDWARE (GOLD-225 / GOLD-350)
    ========================================================================== */
 
 * {
@@ -152,6 +152,9 @@ html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: clip;
 }
 
 body {
@@ -162,8 +165,18 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100dvh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: clip;
+  box-sizing: border-box;
   padding-bottom: max(16px, env(safe-area-inset-bottom));
-  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: clip;
+  box-sizing: border-box;
 }
 
 /* Invariante Universal Anti-Zoom iOS Safari (GOLD-225):
@@ -180,11 +193,13 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary);
   letter-spacing: -0.015em;
   line-height: 1.25;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* ==========================================================================
-   ARQUITECTURA DE SUPERFICIES CERO-BLUR (GOLD-216)
-   Reemplazo de backdrop-filter por fondos sólidos con sombras en GPU.
+   ARQUITECTURA DE SUPERFICIES CERO-BLUR (GOLD-216 / GOLD-359)
+   Reemplazo de backdrop-filter por fondos sólidos con sombras en GPU y relieve cenital.
    ========================================================================== */
 
 .surface-card,
@@ -192,7 +207,7 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -201,7 +216,7 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-elevated);
+  box-shadow: var(--shadow-elevated), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 /* ==========================================================================
@@ -337,16 +352,55 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================================================
-   LAYOUT ADAPTATIVO MASTER-DETAIL PARA TABLETAS (GOLD-224)
+   LAYOUT ADAPTATIVO MASTER-DETAIL Y HOJA DESLIZANTE (GOLD-340 / DECISION 2-B)
    ========================================================================== */
 
-@media (min-width: 768px) and (max-width: 1199px) {
+@media (min-width: 768px) {
   .tablet-master-detail {
     display: grid;
-    grid-template-columns: 340px 1fr;
+    grid-template-columns: 360px 1fr;
     gap: 24px;
     align-items: start;
   }
+}
+
+@media (max-width: 767px) {
+  .pastoral-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(26, 32, 26, 0.6);
+    z-index: 1100;
+    display: flex;
+    align-items: flex-end;
+    animation: fadeIn var(--transition-fast) ease-out;
+  }
+
+  .pastoral-bottom-sheet {
+    width: 100%;
+    max-height: 88vh;
+    overflow-y: auto;
+    background-color: var(--bg-surface);
+    border-top-left-radius: var(--radius-xl);
+    border-top-right-radius: var(--radius-xl);
+    padding: 24px 20px 36px 20px;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+    animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    border-top: 1px solid var(--border-subtle);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sheet-drag-handle {
+    width: 36px;
+    height: 5px;
+    border-radius: 9999px;
+    background-color: var(--border-strong);
+    margin: 0 auto 16px auto;
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 /* ==========================================================================

@@ -194,6 +194,12 @@ export interface SessionVenueItem {
   venue_type: string;
   host_name: string | null;
   host_phone: string | null;
+  is_joint_meeting?: boolean;
+  partner_group_name?: string | null;
+  is_retreat?: boolean;
+  retreat_date_range?: string | null;
+  arrival_notes?: string | null;
+  time_override?: string | null;
 }
 
 export interface SafeguardAlertItem {
@@ -284,6 +290,8 @@ export interface PastorGroupRow {
   audience_orientation?: string;
   responsible_name?: string | null;
   members_count?: number;
+  host_phone?: string;
+  meeting_day?: string;
 }
 
 export interface TenantSummary {
@@ -564,6 +572,18 @@ export interface CommunityInitiative {
   volunteers: Array<{ name: string; phone: string }>;
 }
 
+export interface InitiativeSuggestion {
+  id: string;
+  title: string;
+  category: 'servicio' | 'lectura_cultura' | 'convivencia' | 'apoyo_vecinal';
+  proposed_date: string;
+  proposed_location: string;
+  suggested_by_name: string;
+  suggested_by_role: 'leader' | 'deacon';
+  notes: string;
+  status: 'pending' | 'converted' | 'discarded';
+}
+
 export interface JointMeetingLog {
   id: string;
   host_group_id: string;
@@ -597,4 +617,18 @@ export interface PastorCollisionDispute {
   elder_sector: string;
   reason: string;
   status: 'pending' | 'ratified' | 'vetoed';
+}
+
+export type WeeklyLogisticsMode =
+  | 'habitual_home'
+  | 'alternate_home'
+  | 'outreach_hospital_creso'
+  | 'fellowship_outing';
+
+export interface WeeklyLogisticsUpdate {
+  mode: WeeklyLogisticsMode;
+  venue_label?: string;
+  notes?: string;
+  extraordinary_time?: string;
+  updated_at: string;
 }

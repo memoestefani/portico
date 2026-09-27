@@ -44,7 +44,7 @@ export const PastorAntiCollisionDesk: React.FC = () => {
       prev.map((d) => (d.id === id ? { ...d, status: 'ratified' } : d))
     );
     const item = disputes.find((d) => d.id === id);
-    setStatusMsg(`✓ Transición ratificada con bendición pastoral para ${item?.member_name}. Ambos facilitadores han sido notificados.`);
+    setStatusMsg(`Transición ratificada con bendición pastoral para ${item?.member_name}. Ambos facilitadores han sido notificados.`);
     setTimeout(() => setStatusMsg(null), 5000);
   };
 
@@ -53,7 +53,7 @@ export const PastorAntiCollisionDesk: React.FC = () => {
       prev.map((d) => (d.id === id ? { ...d, status: 'vetoed' } : d))
     );
     const item = disputes.find((d) => d.id === id);
-    setStatusMsg(`⏸ Veto pastoral preventivo aplicado a ${item?.member_name}. La transferencia está pausada para diálogo fraterno con el Anciano ${item?.elder_name}.`);
+    setStatusMsg(`Veto pastoral preventivo aplicado a ${item?.member_name}. La transferencia está pausada para diálogo fraterno con el Anciano ${item?.elder_name}.`);
     setTimeout(() => setStatusMsg(null), 6000);
   };
 
@@ -63,7 +63,7 @@ export const PastorAntiCollisionDesk: React.FC = () => {
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-amber, #fbbf24)', textTransform: 'uppercase', marginBottom: '4px' }}>
             <ShieldAlert size={14} />
-            <span>Desanonimización Contextual Exclusiva para Pastor Principal (GOLD-301)</span>
+            <span>Desanonimización Contextual Exclusiva para Pastor Principal</span>
           </div>
           <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#f8fafc', fontFamily: 'var(--font-serif)' }}>
             Ruteo Anti-Colisión y Mediación Pastoral de Traslados
@@ -82,7 +82,7 @@ export const PastorAntiCollisionDesk: React.FC = () => {
 
       {disputes.length === 0 ? (
         <div style={{ padding: '24px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>
-          ✓ Todas las transiciones celulares están en paz y armonía. Cero conflictos de ruteo activos.
+          Todas las transiciones celulares están en paz y armonía. Cero conflictos de ruteo activos.
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>

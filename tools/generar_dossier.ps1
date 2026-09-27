@@ -3,7 +3,7 @@
 # Pórtico OS v3.5 — Ciclo 11: Generador Nativo de Dossier Pastoral en PDF
 # ==============================================================================
 # Propósito: Compilar la plantilla editorial docs/dossier_pastoral.html a un
-# PDF horizontal de alta resolución listo para enviar por WhatsApp a Pastor Josh.
+# PDF horizontal de alta resolución listo para enviar por WhatsApp a Pastor Josh Gayosso.
 # Cero dependencias externas (usa el motor oficial de Microsoft Edge en Windows).
 # ==============================================================================
 
@@ -19,8 +19,30 @@ if ([string]::IsNullOrWhiteSpace($InputHtml)) {
     $InputHtml = Join-Path $PSScriptRoot "..\docs\dossier_pastoral.html"
 }
 
+$dossiersDir = Join-Path $PSScriptRoot "..\docs\dossiers"
+if (-not (Test-Path $dossiersDir)) {
+    New-Item -ItemType Directory -Path $dossiersDir -Force | Out-Null
+}
+
+$canonicalPdfPath = Join-Path $PSScriptRoot "..\docs\Dossier_Pastoral_Portico_Amor_y_Gracia.pdf"
+
 if ([string]::IsNullOrWhiteSpace($OutputPdf)) {
-    $OutputPdf = Join-Path $PSScriptRoot "..\docs\Dossier_Pastoral_Portico_Amor_y_Gracia.pdf"
+    $todayStr = (Get-Date).ToString("yyyy-MM-dd")
+    $existingToday = Get-ChildItem -Path $dossiersDir -Filter "${todayStr}_v-*_Dossier_Pastoral_Josh_Gayosso.pdf" -ErrorAction SilentlyContinue
+    $nextVersion = 1
+    if ($existingToday) {
+        $versions = @()
+        foreach ($f in $existingToday) {
+            if ($f.Name -match "${todayStr}_v-(\d+)_") {
+                $versions += [int]$matches[1]
+            }
+        }
+        if ($versions.Count -gt 0) {
+            $nextVersion = ($versions | Measure-Object -Maximum).Maximum + 1
+        }
+    }
+    $versionedFileName = "${todayStr}_v-${nextVersion}_Dossier_Pastoral_Josh_Gayosso.pdf"
+    $OutputPdf = Join-Path $dossiersDir $versionedFileName
 }
 
 $resolvedInputHtml = [System.IO.Path]::GetFullPath($InputHtml)
@@ -94,13 +116,16 @@ if (Test-Path $resolvedOutputPdf) {
     $sizeKb = [math]::Round($fileInfo.Length / 1KB, 1)
     $sizeMb = [math]::Round($fileInfo.Length / 1MB, 2)
     
+    Copy-Item -Path $resolvedOutputPdf -Destination $canonicalPdfPath -Force
+    
     Write-Host ""
     Write-Host "============================================================" -ForegroundColor Green
     Write-Host " [EXITO] Dossier Pastoral generado correctamente!" -ForegroundColor Green
-    Write-Host " Archivo: $resolvedOutputPdf" -ForegroundColor Green
+    Write-Host " Archivo Historico: $resolvedOutputPdf" -ForegroundColor Green
+    Write-Host " Copia Canonica:    $canonicalPdfPath" -ForegroundColor Green
     Write-Host " Peso: ${sizeKb} KB (${sizeMb} MB)" -ForegroundColor Green
     Write-Host "============================================================" -ForegroundColor Green
-    Write-Host " Listo para adjuntar y enviar por WhatsApp a Pastor Josh." -ForegroundColor Cyan
+    Write-Host " Listo para adjuntar y enviar por WhatsApp a Pastor Josh Gayosso." -ForegroundColor Cyan
 } else {
     Write-Error "Fallo la generacion del archivo PDF."
     exit 1

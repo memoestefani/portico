@@ -105,7 +105,7 @@ pub fn seed_tenant_a_data(conn: &Connection) -> Result<()> {
             "Amor y Gracia Durango",
             "México",
             "amorygracia.mx",
-            "Pastor Josh García",
+            "Pastor Josh Gayosso",
             "privacidad@amorygracia.mx",
             "active",
             now,
@@ -981,7 +981,7 @@ pub fn seed_tenant_a_data(conn: &Connection) -> Result<()> {
         member_name: "Elena Rostova".to_string(),
         original_join_year: 2012,
         ministry_role: "atrium_dean".to_string(),
-        commissioned_by: "Pastor Josh García".to_string(),
+        commissioned_by: "Pastor Josh Gayosso".to_string(),
         commissioned_at: Utc::now().to_rfc3339(),
     });
     let _ = insert_emeritus_guardian(conn, &EmeritusGuardian {
@@ -990,7 +990,7 @@ pub fn seed_tenant_a_data(conn: &Connection) -> Result<()> {
         member_name: "David Morales".to_string(),
         original_join_year: 2014,
         ministry_role: "intercession_pillar".to_string(),
-        commissioned_by: "Pastor Josh García".to_string(),
+        commissioned_by: "Pastor Josh Gayosso".to_string(),
         commissioned_at: Utc::now().to_rfc3339(),
     });
 

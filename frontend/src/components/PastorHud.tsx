@@ -56,7 +56,6 @@ import {
   Sliders,
   Users,
   Send,
-  AlertTriangle,
   ShieldCheck,
   Building,
   Award,
@@ -71,6 +70,7 @@ import { DeaconDesk } from './DeaconDesk';
 import { GroupPastoralCard } from './GroupPastoralCard';
 import { PastorAntiCollisionDesk } from './PastorAntiCollisionDesk';
 import { LiturgicalPauseManager } from './LiturgicalPauseManager';
+import { CommunityInitiativesHub } from './CommunityInitiativesHub';
 
 export const PastorHud: React.FC = () => {
   const [overview, setOverview] = useState<PastorOverview | null>(null);
@@ -83,7 +83,7 @@ export const PastorHud: React.FC = () => {
   const [showPastoralCard, setShowPastoralCard] = useState<boolean>(false);
 
   // Navegación de pestañas del HUD
-  const [activeTab, setActiveTab] = useState<'radar' | 'leaders' | 'sabbaticals' | 'deacons' | 'elders' | 'territory' | 'scale'>('radar');
+  const [activeTab, setActiveTab] = useState<'radar' | 'leaders' | 'sabbaticals' | 'deacons' | 'elders' | 'territory' | 'scale' | 'initiatives'>('radar');
 
   // Estados
   const [campuses, setCampuses] = useState<Campus[]>([]);
@@ -127,12 +127,20 @@ export const PastorHud: React.FC = () => {
   const [vetoReason, setVetoReason] = useState<string>('');
   const [isSubmittingVeto, setIsSubmittingVeto] = useState<boolean>(false);
 
-  // Modal Disciplina Pastoral (GOLD-254)
+  // Modal Disciplina Pastoral Colegiada en Ancianos (GOLD-254 & GOLD-343)
   const [showDisciplineModal, setShowDisciplineModal] = useState<boolean>(false);
   const [disciplineMemberId, setDisciplineMemberId] = useState<string>('');
   const [disciplineAction, setDisciplineAction] = useState<string>('suspension');
   const [disciplineReason, setDisciplineReason] = useState<string>('');
+  const [disciplineProposer, setDisciplineProposer] = useState<string>('Andrés Ramos (Anciano Moderador)');
+  const [disciplineChecker, setDisciplineChecker] = useState<string>('Pastor Principal Josh');
   const [isSubmittingDiscipline, setIsSubmittingDiscipline] = useState<boolean>(false);
+
+  // Estados de Búsqueda, Mantenimiento y Ergonomía Móvil (GOLD-340 & GOLD-344)
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [showSearchInput, setShowSearchInput] = useState<boolean>(false);
+  const [showMaintenanceMenu, setShowMaintenanceMenu] = useState<boolean>(false);
+  const [showMobileDetail, setShowMobileDetail] = useState<boolean>(false);
 
   // Modal Comunicado Pastoral Oficial (GOLD-256)
   const [showBroadcastModal, setShowBroadcastModal] = useState<boolean>(false);
@@ -218,6 +226,17 @@ export const PastorHud: React.FC = () => {
     loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    if (!loading && window.location.hash) {
+      setTimeout(() => {
+        const el = document.querySelector(window.location.hash);
+        if (el) {
+          el.scrollIntoView({ behavior: 'auto', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [loading]);
+
   const handleCloneDraft = async (editionId: string, groupName: string) => {
     if (
       !confirm(
@@ -240,7 +259,7 @@ export const PastorHud: React.FC = () => {
         auth.session_token
       );
       setStatusMessage(
-        `✓ Grupo "${groupName}" clonado a borrador con ID ${res.new_edition_id.slice(
+        `Grupo "${groupName}" clonado a borrador con ID ${res.new_edition_id.slice(
           0,
           8
         )}... (Línea sucesoria preservada en edition_lineage)`
@@ -257,20 +276,20 @@ export const PastorHud: React.FC = () => {
 
   const handleExportSovereignArchive = () => {
     setIsExportingArchive(true);
-    setStatusMessage('📦 Generando y descargando Respaldo Soberano (archivo ZIP con .db y CSVs completos)...');
-    
+    setStatusMessage('Generando y descargando copia completa (archivo ZIP con .db y CSVs)...');
+
     // Disparar descarga directa del archivo ZIP desde el endpoint de Axum
     const downloadUrl = '/api/pastor/export-sovereign-archive';
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.setAttribute('download', 'amorygracia_respaldo_soberano.zip');
+    link.setAttribute('download', 'amorygracia_respaldo_completo.zip');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
     setTimeout(() => {
       setIsExportingArchive(false);
-      setStatusMessage('✓ Respaldo Soberano descargado con éxito. Su información eclesial es 100% suya.');
+      setStatusMessage('Copia de seguridad descargada con éxito. La información pertenece a la congregación.');
     }, 2000);
   };
 
@@ -320,7 +339,7 @@ export const PastorHud: React.FC = () => {
       const res = await vetoEdition(selectedGroup.id, vetoReason);
       setShowVetoModal(false);
       setVetoReason('');
-      setStatusMessage(`🛑 Veto Pastoral Ejecutado sobre "${selectedGroup.nombre_publico}": ${res.message}`);
+      setStatusMessage(`Veto Pastoral Ejecutado sobre "${selectedGroup.nombre_publico}": ${res.message}`);
       await loadData();
     } catch (e: any) {
       alert(e.message || 'Error al ejecutar veto pastoral');
@@ -329,7 +348,7 @@ export const PastorHud: React.FC = () => {
     }
   };
 
-  // Disciplina Pastoral (GOLD-254)
+  // Disciplina Pastoral Colegiada (GOLD-254 & GOLD-343 - Regla de los Cuatro Ojos)
   const handleExecuteDiscipline = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!disciplineMemberId) {
@@ -342,7 +361,9 @@ export const PastorHud: React.FC = () => {
       setShowDisciplineModal(false);
       setDisciplineMemberId('');
       setDisciplineReason('');
-      setStatusMessage(`⚖️ Medida de Disciplina Pastoral Aplicada: ${res.message}`);
+      setStatusMessage(
+        `Medida de Disciplina Pastoral Aplicada con doble firma conciliar (${disciplineProposer} y ${disciplineChecker}): ${res.message}`
+      );
       await loadData();
     } catch (e: any) {
       alert(e.message || 'Error al aplicar disciplina pastoral');
@@ -364,7 +385,7 @@ export const PastorHud: React.FC = () => {
       setShowBroadcastModal(false);
       setBroadcastTitle('');
       setBroadcastMessage('');
-      setStatusMessage('📢 Comunicado pastoral emitido y visible para todos los facilitadores de células.');
+      setStatusMessage('Comunicado pastoral emitido y visible para todos los facilitadores de células.');
       const bcs = await fetchActivePastoralBroadcasts();
       setBroadcasts(bcs);
     } catch (e: any) {
@@ -372,6 +393,22 @@ export const PastorHud: React.FC = () => {
     } finally {
       setIsSubmittingBroadcast(false);
     }
+  };
+
+  // Generador de enlace WhatsApp fraterno contextual (GOLD-346 / Decisión 8-B)
+  const generateFraternalWhatsAppUrl = (group: PastorGroupRow) => {
+    const rawPhone = group.host_phone || '6181234567';
+    const cleanDigits = rawPhone.replace(/[^0-9]/g, '');
+    const phoneWithCountry = cleanDigits.startsWith('52') ? cleanDigits : `52${cleanDigits}`;
+    const leaderName = group.leader_name || 'hermano';
+
+    let message = `Hola ${leaderName}, un abrazo fraterno de parte del equipo pastoral de Amor y Gracia. Doy gracias a Dios por tu vida y tu servicio facilitando la célula "${group.nombre_publico}". Oramos por ustedes.`;
+
+    if (group.average_headcount !== null && group.average_headcount < 6) {
+      message = `Hola ${leaderName}, estuve orando por tu vida y la célula "${group.nombre_publico}" esta semana. ¿Cómo te has sentido y cómo podemos apoyarte desde el equipo pastoral para la reunión de este ciclo? Cuentas con nosotros.`;
+    }
+
+    return `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(message)}`;
   };
 
   // Guardar Configuración de Iglesia y Paleta Noble (GOLD-255 & GOLD-257 & Directiva Crecimiento Josh)
@@ -399,7 +436,7 @@ export const PastorHud: React.FC = () => {
       });
       document.documentElement.setAttribute('data-palette', cfgPaletteId);
       setShowConfigModal(false);
-      setStatusMessage('✓ Configuración eclesial, paleta noble y directivas de crecimiento actualizadas.');
+      setStatusMessage('Configuración eclesial, paleta noble y directivas de crecimiento actualizadas.');
       await loadData();
     } catch (e: any) {
       alert(e.message || 'Error guardando configuración');
@@ -486,15 +523,15 @@ export const PastorHud: React.FC = () => {
       prev.map((ldr) =>
         ldr.id === editingLeader.id
           ? {
-              ...ldr,
-              campus_name: editLeaderCampus,
-              assigned_group_name: editLeaderGroup || null,
-              status: editLeaderStatus,
-            }
+            ...ldr,
+            campus_name: editLeaderCampus,
+            assigned_group_name: editLeaderGroup || null,
+            status: editLeaderStatus,
+          }
           : ldr
       )
     );
-    setStatusMessage(`✓ Asignación y estatus pastoral del facilitador "${editingLeader.name}" actualizados.`);
+    setStatusMessage(`Asignación y estatus pastoral del facilitador "${editingLeader.name}" actualizados.`);
     setEditingLeader(null);
   };
 
@@ -522,15 +559,24 @@ export const PastorHud: React.FC = () => {
           g.affinity.toLowerCase().includes('matrimonio') ||
           g.affinity.toLowerCase().includes('familia')));
 
-    return matchesCampus && matchesFocus;
+    const q = searchQuery.toLowerCase().trim();
+    const matchesQuery =
+      !q ||
+      g.nombre_publico.toLowerCase().includes(q) ||
+      (g.leader_name && g.leader_name.toLowerCase().includes(q)) ||
+      g.zone.toLowerCase().includes(q) ||
+      g.affinity.toLowerCase().includes(q) ||
+      (g.meeting_day && g.meeting_day.toLowerCase().includes(q));
+
+    return matchesCampus && matchesFocus && matchesQuery;
   });
 
   const avgAttendance =
     groups.filter((g) => g.average_headcount !== null).length > 0
       ? (
-          groups.reduce((acc, g) => acc + (g.average_headcount || 0), 0) /
-          groups.filter((g) => g.average_headcount !== null).length
-        ).toFixed(1)
+        groups.reduce((acc, g) => acc + (g.average_headcount || 0), 0) /
+        groups.filter((g) => g.average_headcount !== null).length
+      ).toFixed(1)
       : '12.4';
 
   if (loading && !overview) {
@@ -541,9 +587,139 @@ export const PastorHud: React.FC = () => {
     );
   }
 
+  const isSovereigntyView = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('view') === 'sovereignty';
+
+  if (isSovereigntyView) {
+    return (
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 20px 80px 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+          <ChurchBrandLogo size="lg" variant="icon" paletteId={cfgPaletteId} />
+          <div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                color: 'var(--accent-olive, #2D3A2F)',
+                backgroundColor: 'rgba(45, 58, 47, 0.08)',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                padding: '4px 12px',
+                borderRadius: 'var(--radius-full)',
+                marginBottom: '8px',
+              }}
+            >
+              <Church size={15} />
+              <span>{overview?.church_name || 'Amor y Gracia Durango'} • Pastor Josh Gayosso</span>
+              <span style={{ color: 'var(--border-strong)' }}>•</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Soberanía Garantizada</span>
+            </div>
+            <h1
+              style={{
+                fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
+                margin: 0,
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-serif)',
+              }}
+            >
+              Soberanía y Portabilidad de Datos
+            </h1>
+            <p
+              style={{
+                color: 'var(--text-secondary)',
+                fontSize: '0.94rem',
+                maxWidth: '740px',
+                lineHeight: 1.4,
+                marginTop: '6px',
+              }}
+            >
+              Garantía Incondicional "No Strings Attached" • Los datos son de Dios y de la congregación local
+            </p>
+          </div>
+        </div>
+
+        {/* CÉDULA DE SOBERANÍA */}
+        <div
+          id="soberania-datos-section"
+          className="surface-card"
+          style={{
+            padding: '32px',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--border-subtle)',
+            backgroundColor: 'var(--bg-secondary)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px',
+            boxShadow: 'var(--shadow-card)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--accent-emerald)', fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                <HardDrive size={16} />
+                <span>Cero Dependencia Comercial</span>
+              </div>
+              <h3 style={{ fontSize: '1.45rem', margin: 0, color: 'var(--text-primary)' }}>
+                Exportación Directa en 1 Toque (.db + .csv)
+              </h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.94rem', maxWidth: '720px', lineHeight: 1.5, margin: '8px 0 0 0' }}>
+                Amor y Gracia Durango es dueño de su base de datos. Ninguna empresa de software puede retener, cobrar rescate ni bloquear el padrón de discípulos. Con 1 clic descargas el archivo completo.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              id="btn-export-sovereign-archive"
+              onClick={handleExportSovereignArchive}
+              disabled={isExportingArchive}
+              className="btn-primary"
+              style={{
+                minHeight: '48px',
+                padding: '12px 24px',
+                backgroundColor: 'var(--accent-amber)',
+                color: '#1a1400',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
+                borderRadius: 'var(--radius-md)',
+              }}
+            >
+              <Download size={20} />
+              <span>{isExportingArchive ? 'Descargando Archivo ZIP...' : 'Descargar Respaldo Soberano (.db + .csv)'}</span>
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', borderTop: '1px solid var(--border-subtle)', paddingTop: '20px' }}>
+            <div style={{ padding: '16px', backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Base de Datos Física</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '4px' }}>amorygracia.db</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Archivo relacional íntegro para montar</div>
+            </div>
+            <div style={{ padding: '16px', backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Directorio de Familias</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '4px' }}>miembros.csv</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Formato abierto universal (Excel / LibreOffice)</div>
+            </div>
+            <div style={{ padding: '16px', backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Catálogo de Células</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '4px' }}>celulas.csv</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Sedes, horarios, anfitriones y sectores</div>
+            </div>
+            <div style={{ padding: '16px', backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Manifiesto Eclesial</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '4px' }}>MANIFIESTO_SOBERANO.txt</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Compromiso firmado de custodia ética</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 20px 80px 20px' }}>
-      {/* HUD Header */}
+      {/* HUD Header (GOLD-342 / Decisión 1-B y 4-B) */}
       <div
         style={{
           display: 'flex',
@@ -562,18 +738,19 @@ export const PastorHud: React.FC = () => {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                color: 'var(--accent-indigo)',
-                backgroundColor: 'var(--accent-indigo-light)',
+                color: 'var(--accent-olive, #2D3A2F)',
+                backgroundColor: 'rgba(45, 58, 47, 0.08)',
                 fontSize: '0.82rem',
-                fontWeight: 800,
-                textTransform: 'uppercase',
+                fontWeight: 700,
                 padding: '4px 12px',
                 borderRadius: 'var(--radius-full)',
                 marginBottom: '8px',
               }}
             >
               <Church size={15} />
-              <span>Gobernanza Teocéntrica • {overview?.church_name || 'Amor y Gracia'}{churchConfig?.season_name ? ` (${churchConfig.season_name})` : ''} • Lead Pastor Josh García</span>
+              <span>{overview?.church_name || 'Amor y Gracia'} • {churchConfig?.season_name || 'Otoño 2026'}</span>
+              <span style={{ color: 'var(--border-strong)' }}>•</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Santuario Cifrado Eclesiástico</span>
             </div>
             <h1
               style={{
@@ -588,41 +765,44 @@ export const PastorHud: React.FC = () => {
             <p
               style={{
                 color: 'var(--text-secondary)',
-                fontSize: '0.98rem',
+                fontSize: '0.94rem',
                 maxWidth: '740px',
                 lineHeight: 1.4,
                 marginTop: '6px',
               }}
             >
-              Supervisión de células, itinerarios nómadas y acompañamiento personal a facilitadores. Sin intromisión en domicilios privados ni cajas negras de secretos.
+              Supervisión Fraterna de Redes Celulares
             </p>
           </div>
         </div>
 
-        {/* Toolbar de Acciones Pastorales de Alto Nivel */}
+        {/* Toolbar de Acciones Pastorales Operativas (Decisión 1-B) */}
         <div className="no-print" style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
           <button
             type="button"
+            id="btn-pastor-broadcast"
             onClick={() => setShowBroadcastModal(true)}
             className="btn-primary"
             style={{
               minHeight: '44px',
-              padding: '10px 16px',
+              padding: '10px 18px',
               fontSize: '0.88rem',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              backgroundColor: '#0F172A',
-              color: '#FEF3C7',
+              backgroundColor: '#1E293B',
+              color: '#FFFFFF',
+              fontWeight: 700,
             }}
           >
-            <Radio size={16} className="text-amber-400" />
+            <Radio size={16} />
             <span>Emitir Comunicado</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setShowConfigModal(true)}
+            id="btn-pastor-toggle-search"
+            onClick={() => setShowSearchInput((prev) => !prev)}
             className="btn-secondary"
             style={{
               minHeight: '44px',
@@ -633,69 +813,139 @@ export const PastorHud: React.FC = () => {
               gap: '8px',
             }}
           >
-            <Sliders size={16} />
-            <span>Nomenclatura y Paleta</span>
+            <span>Buscar y Filtrar</span>
+            {searchQuery && (
+              <span
+                style={{
+                  fontSize: '0.74rem',
+                  padding: '2px 8px',
+                  borderRadius: '9999px',
+                  backgroundColor: 'var(--accent-amber-light)',
+                  color: 'var(--text-primary)',
+                  fontWeight: 700,
+                }}
+              >
+                {displayedGroups.length}
+              </span>
+            )}
           </button>
 
-          <button
-            type="button"
-            onClick={() => setShowDisciplineModal(true)}
-            className="btn-secondary"
-            style={{
-              minHeight: '44px',
-              padding: '10px 16px',
-              fontSize: '0.88rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              color: '#EF4444',
-            }}
-          >
-            <Gavel size={16} />
-            <span>Disciplina Pastoral</span>
-          </button>
+          {/* Menú Secundario de Mantenimiento y Archivo */}
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              id="btn-pastor-maintenance-menu"
+              onClick={() => setShowMaintenanceMenu((prev) => !prev)}
+              className="btn-secondary"
+              style={{
+                minHeight: '44px',
+                padding: '10px 14px',
+                fontSize: '0.88rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+              title="Ajustes de marca, folios físicos y respaldo soberano"
+            >
+              <Sliders size={16} />
+              <span>Mantenimiento</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="btn-secondary"
-            style={{
-              minHeight: '44px',
-              padding: '10px 16px',
-              fontSize: '0.88rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-            title="Generar e imprimir folio físico de supervisión pastoral"
-          >
-            <Printer size={16} />
-            <span>Imprimir Folio</span>
-          </button>
+            {showMaintenanceMenu && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '6px',
+                  backgroundColor: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  boxShadow: 'var(--shadow-elevated)',
+                  minWidth: '220px',
+                  zIndex: 200,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '6px',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowConfigModal(true);
+                    setShowMaintenanceMenu(false);
+                  }}
+                  style={{
+                    padding: '10px 14px',
+                    textAlign: 'left',
+                    fontSize: '0.86rem',
+                    color: 'var(--text-primary)',
+                    borderRadius: 'var(--radius-sm)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    border: 'none',
+                    background: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Sliders size={15} />
+                  <span>Nomenclatura y Paleta</span>
+                </button>
 
-          <button
-            id="btn-export-sovereign-archive"
-            type="button"
-            onClick={handleExportSovereignArchive}
-            disabled={isExportingArchive}
-            className="btn-secondary"
-            style={{
-              minHeight: '44px',
-              padding: '10px 16px',
-              fontSize: '0.88rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--accent-teal)',
-              borderColor: 'var(--accent-teal)',
-              fontWeight: 600,
-            }}
-            title="Descargar base de datos física (.db) y hojas CSV en archivo ZIP (No strings attached)"
-          >
-            <Download size={16} />
-            <span>{isExportingArchive ? 'Descargando...' : 'Salida Soberana (ZIP)'}</span>
-          </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.print();
+                    setShowMaintenanceMenu(false);
+                  }}
+                  style={{
+                    padding: '10px 14px',
+                    textAlign: 'left',
+                    fontSize: '0.86rem',
+                    color: 'var(--text-primary)',
+                    borderRadius: 'var(--radius-sm)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    border: 'none',
+                    background: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Printer size={15} />
+                  <span>Imprimir Folio Físico</span>
+                </button>
+
+                <button
+                  type="button"
+                  id="btn-export-sovereign-archive"
+                  onClick={() => {
+                    handleExportSovereignArchive();
+                    setShowMaintenanceMenu(false);
+                  }}
+                  disabled={isExportingArchive}
+                  style={{
+                    padding: '10px 14px',
+                    textAlign: 'left',
+                    fontSize: '0.86rem',
+                    color: 'var(--accent-emerald)',
+                    borderRadius: 'var(--radius-sm)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontWeight: 600,
+                    border: 'none',
+                    background: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Download size={15} />
+                  <span>{isExportingArchive ? 'Descargando...' : 'Descargar Datos (ZIP)'}</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -814,6 +1064,27 @@ export const PastorHud: React.FC = () => {
           <Building size={17} />
           <span>Distribución Territorial ({campuses.length} Sedes)</span>
         </button>
+
+        <button
+          type="button"
+          id="tab-pastor-initiatives"
+          onClick={() => setActiveTab('initiatives')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: 'var(--radius-full)',
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            backgroundColor: activeTab === 'initiatives' ? 'var(--accent-indigo)' : 'transparent',
+            color: activeTab === 'initiatives' ? '#FFFFFF' : 'var(--text-secondary)',
+            border: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+        >
+          <span>Actividades y Sugerencias</span>
+        </button>
       </div>
 
       {/* Mensaje de Confirmación / Estado */}
@@ -839,8 +1110,194 @@ export const PastorHud: React.FC = () => {
       )}
 
       {/* VISTA 1: RADAR DE CÉLULAS E ITINERARIOS */}
+      {/* VISTA 1: RADAR DE CÉLULAS E ITINERARIOS (GOLD-340 A GOLD-347) */}
       {activeTab === 'radar' && (
         <>
+          {/* Barra de Búsqueda Predictiva en Tiempo Real (GOLD-344 / Decisión 6-B) */}
+          {showSearchInput && (
+            <div style={{ marginBottom: '20px' }}>
+              <input
+                type="text"
+                id="input-pastor-search-groups"
+                placeholder="Buscar por facilitador, colonia, día o enfoque..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 18px',
+                  backgroundColor: 'var(--bg-surface)',
+                  border: '1.5px solid var(--border-strong)',
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '0.94rem',
+                  color: 'var(--text-primary)',
+                  boxShadow: 'var(--shadow-sm)',
+                }}
+                autoFocus
+              />
+            </div>
+          )}
+
+          {/* Triaje de Atención por Excepción y Bandeja Cero (GOLD-341 / Decisión 3-B) */}
+          {(() => {
+            const fatigueAlerts = fatigueRadar.filter((f) => f.consecutive_seasons >= 2 && !f.is_on_sabbatical);
+            const lowAttendanceAlerts = groups.filter((g) => g.average_headcount !== null && g.average_headcount < 6);
+            const totalAnomalies = fatigueAlerts.length + lowAttendanceAlerts.length;
+
+            if (totalAnomalies > 0) {
+              return (
+                <div
+                  style={{
+                    marginBottom: '24px',
+                    padding: '18px 22px',
+                    borderRadius: 'var(--radius-lg)',
+                    backgroundColor: 'var(--bg-surface)',
+                    border: '1.5px solid var(--accent-clay, #C46849)',
+                    boxShadow: 'var(--shadow-card)',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-primary)', fontWeight: 800 }}>
+                        Requiere Atención Hoy ({totalAnomalies})
+                      </h3>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                        Casos prioritarios para llamada fraterna o acompañamiento pastoral en este ciclo
+                      </p>
+                    </div>
+                    <span
+                      style={{
+                        backgroundColor: 'rgba(196, 104, 73, 0.12)',
+                        color: 'var(--accent-clay, #C46849)',
+                        fontWeight: 700,
+                        fontSize: '0.76rem',
+                        padding: '4px 10px',
+                        borderRadius: 'var(--radius-full)',
+                      }}
+                    >
+                      Triaje Activo
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+                    {fatigueAlerts.map((f) => (
+                      <div
+                        key={`fatigue-${f.group_id}`}
+                        style={{
+                          padding: '14px',
+                          borderRadius: 'var(--radius-md)',
+                          backgroundColor: 'var(--bg-primary)',
+                          border: '1px solid var(--border-subtle)',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          gap: '10px',
+                        }}
+                      >
+                        <div>
+                          <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{f.host_name}</strong>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                            2 temporadas continuas de hospitalidad (Sabático sugerido)
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleAuthorizeHostSabbatical(f.group_id, f.host_name)}
+                          className="btn-secondary"
+                          style={{ padding: '6px 12px', fontSize: '0.78rem', minHeight: '34px', fontWeight: 700, whiteSpace: 'nowrap' }}
+                        >
+                          Conceder Sabático
+                        </button>
+                      </div>
+                    ))}
+
+                    {lowAttendanceAlerts.map((g) => (
+                      <div
+                        key={`low-${g.id}`}
+                        style={{
+                          padding: '14px',
+                          borderRadius: 'var(--radius-md)',
+                          backgroundColor: 'var(--bg-primary)',
+                          border: '1px solid var(--border-subtle)',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          gap: '10px',
+                        }}
+                      >
+                        <div>
+                          <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{g.nombre_publico}</strong>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                            Facilitador: {g.leader_name} • Asistencia media: {g.average_headcount} pers.
+                          </div>
+                        </div>
+                        <a
+                          href={generateFraternalWhatsAppUrl(g)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-primary"
+                          style={{
+                            padding: '6px 12px',
+                            fontSize: '0.78rem',
+                            minHeight: '34px',
+                            textDecoration: 'none',
+                            backgroundColor: '#25D366',
+                            color: '#FFFFFF',
+                            fontWeight: 700,
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          Animar por WhatsApp
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div
+                style={{
+                  marginBottom: '24px',
+                  padding: '16px 20px',
+                  borderRadius: 'var(--radius-lg)',
+                  backgroundColor: 'rgba(67, 94, 75, 0.08)',
+                  border: '1px solid rgba(67, 94, 75, 0.25)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '12px',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <CheckCircle size={20} style={{ color: 'var(--accent-emerald)' }} />
+                  <div>
+                    <strong style={{ fontSize: '0.95rem', color: 'var(--accent-emerald)' }}>
+                      Rebaño en Paz: Cero anomalías activas hoy
+                    </strong>
+                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                      Todas las células reportan asistencia estable y ningún facilitador presenta sobrecarga de temporadas.
+                    </div>
+                  </div>
+                </div>
+                <span
+                  style={{
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    color: 'var(--accent-emerald)',
+                    backgroundColor: '#FFFFFF',
+                    padding: '4px 12px',
+                    borderRadius: 'var(--radius-full)',
+                    border: '1px solid rgba(67, 94, 75, 0.2)',
+                  }}
+                >
+                  Bandeja Cero
+                </span>
+              </div>
+            );
+          })()}
+
           {/* Filtros: Campus y Tipo de Enfoque */}
           <div
             className="no-print"
@@ -892,7 +1349,7 @@ export const PastorHud: React.FC = () => {
               ))}
             </div>
 
-            {/* Filtro por Enfoque de Grupo (No sólo etapa de vida) */}
+            {/* Filtro por Enfoque de Grupo (Sin Emojis) */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                 Enfoque:
@@ -925,7 +1382,7 @@ export const PastorHud: React.FC = () => {
                   border: '1px solid var(--border-subtle)',
                 }}
               >
-                🎯 Interés Común (Viajeros, Tacos, Libros)
+                Interés Común (Viajeros, Diálogo, Lectura)
               </button>
               <button
                 type="button"
@@ -940,7 +1397,7 @@ export const PastorHud: React.FC = () => {
                   border: '1px solid var(--border-subtle)',
                 }}
               >
-                📘 Discipulado / Alfa / Mayordomía
+                Discipulado y Fundamentos
               </button>
             </div>
           </div>
@@ -1035,7 +1492,7 @@ export const PastorHud: React.FC = () => {
             </div>
           </div>
 
-          {/* Master Detail de Grupos */}
+          {/* Master Detail de Grupos (Split-Pane en Escritorio y Sheet en Móvil / GOLD-340) */}
           <div className="tablet-master-detail">
             {/* Lista Maestra */}
             <div className="surface-card" style={{ padding: '20px', marginBottom: '24px' }}>
@@ -1051,7 +1508,7 @@ export const PastorHud: React.FC = () => {
                   Grupos ({displayedGroups.length})
                 </h3>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  Supervisión Soberana
+                  Supervisión Pastoral
                 </span>
               </div>
 
@@ -1061,7 +1518,10 @@ export const PastorHud: React.FC = () => {
                   return (
                     <div
                       key={g.id}
-                      onClick={() => setSelectedGroup(g)}
+                      onClick={() => {
+                        setSelectedGroup(g);
+                        setShowMobileDetail(true);
+                      }}
                       style={{
                         padding: '14px',
                         borderRadius: 'var(--radius-md)',
@@ -1095,8 +1555,8 @@ export const PastorHud: React.FC = () => {
               </div>
             </div>
 
-            {/* Detalle Expandido del Grupo Seleccionado */}
-            <div>
+            {/* Detalle Expandido del Grupo Seleccionado (Split-Pane Escritorio) */}
+            <div className="desktop-detail-pane">
               {selectedGroup ? (
                 <div
                   className="surface-card"
@@ -1117,25 +1577,25 @@ export const PastorHud: React.FC = () => {
                         <span className="badge badge-emerald">{selectedGroup.affinity}</span>
                         <span className="badge badge-indigo">{selectedGroup.zone}</span>
                         {selectedGroup.focus_type === 'common_interest' || selectedGroup.affinity.toLowerCase().includes('viajer') || selectedGroup.affinity.toLowerCase().includes('café') ? (
-                          <span className="badge badge-amber">🎯 Interés Común</span>
+                          <span className="badge badge-amber">Interés Común</span>
                         ) : selectedGroup.focus_type === 'foundational' || selectedGroup.affinity.toLowerCase().includes('alfa') || selectedGroup.affinity.toLowerCase().includes('mayordom') ? (
-                          <span className="badge badge-emerald">📖 Discipulado</span>
+                          <span className="badge badge-emerald">Discipulado</span>
                         ) : (
-                          <span className="badge badge-indigo">👥 Etapa de Vida</span>
+                          <span className="badge badge-indigo">Etapa de Vida</span>
                         )}
                         {selectedGroup.affinity.toLowerCase().includes('mujer') && (
                           <span style={{ fontSize: '0.74rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: 'rgba(236, 72, 153, 0.12)', color: '#EC4899', border: '1px solid rgba(236, 72, 153, 0.3)' }}>
-                            🌸 Orientado a Mujeres
+                            Orientado a Mujeres
                           </span>
                         )}
                         {selectedGroup.affinity.toLowerCase().includes('hombre') && (
                           <span style={{ fontSize: '0.74rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3B82F6', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                            🛡️ Orientado a Hombres
+                            Orientado a Hombres
                           </span>
                         )}
                         {(selectedGroup.affinity.toLowerCase().includes('matrimonio') || selectedGroup.affinity.toLowerCase().includes('familia')) && (
                           <span style={{ fontSize: '0.74rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#10B981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                            🕊️ Parejas & Familias (Sin exclusión)
+                            Parejas y Familias (Sin exclusión)
                           </span>
                         )}
                       </div>
@@ -1147,8 +1607,30 @@ export const PastorHud: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Acciones Pastorales de Veto y Clonación */}
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    {/* Acciones Pastorales de Veto, Clonación y Contacto Directo */}
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <a
+                        href={generateFraternalWhatsAppUrl(selectedGroup)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-primary"
+                        style={{
+                          minHeight: '40px',
+                          padding: '8px 14px',
+                          fontSize: '0.82rem',
+                          textDecoration: 'none',
+                          backgroundColor: '#25D366',
+                          color: '#FFFFFF',
+                          fontWeight: 700,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                        }}
+                      >
+                        <Send size={14} />
+                        <span>Contactar por WhatsApp</span>
+                      </a>
+
                       <button
                         type="button"
                         onClick={() => setShowVetoModal(true)}
@@ -1189,7 +1671,7 @@ export const PastorHud: React.FC = () => {
                       borderRadius: 'var(--radius-md)',
                       backgroundColor: 'var(--bg-primary)',
                       border: '1px solid var(--border-subtle)',
-                      marginBottom: '24px',
+                      marginBottom: '20px',
                     }}
                   >
                     <div>
@@ -1257,27 +1739,33 @@ export const PastorHud: React.FC = () => {
                         {selectedGroup.venue_type === 'public_venue'
                           ? 'Ruta / Lugar Público'
                           : selectedGroup.venue_type === 'online_session'
-                          ? 'Virtual'
-                          : 'Casa Particular Rotativa'}
+                            ? 'Virtual'
+                            : 'Casa Particular Rotativa'}
                       </div>
                     </div>
                   </div>
 
-                  {/* Tacto Humano y Pastoral (Zero Algorithmic Cards) */}
+                  {/* Participación en Convocatorias Eclesiales (GOLD-347 / Decisión 10-B) */}
                   <div
                     style={{
                       padding: '16px 20px',
                       borderRadius: 'var(--radius-md)',
                       backgroundColor: 'var(--bg-primary)',
                       border: '1px solid var(--border-subtle)',
-                      fontSize: '0.88rem',
-                      color: 'var(--text-secondary)',
-                      lineHeight: 1.5,
+                      marginBottom: '20px',
                     }}
                   >
-                    <strong style={{ color: 'var(--text-primary)' }}>Acompañamiento en Gracia: </strong>
-                    El pastoreo de este grupo reposa en la relación fraternal con el facilitador{' '}
-                    <strong>{selectedGroup.leader_name}</strong>. Sin sugerencias de inteligencia artificial ni paternalismo de software; el pastor discierne personalmente con sabiduría y oración.
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <strong style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                        Participación en Convocatorias Eclesiales
+                      </strong>
+                      <span className="badge-pill" style={{ backgroundColor: 'rgba(67, 94, 75, 0.1)', color: 'var(--accent-emerald)', fontSize: '0.74rem' }}>
+                        Integración Confirmada
+                      </span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                      Esta célula está enlazada al ciclo congregacional de convivencia fraternal (Carne Asada Inter-Células y jornadas de servicio comunitario).
+                    </p>
                   </div>
 
                   <div style={{ marginTop: '16px' }}>
@@ -1306,6 +1794,92 @@ export const PastorHud: React.FC = () => {
               ) : null}
             </div>
           </div>
+
+          {/* Hoja Deslizante Táctil para Móviles (Bottom Sheet - GOLD-340 / Decisión 2-B) */}
+          {showMobileDetail && selectedGroup && (
+            <div
+              className="pastoral-sheet-backdrop"
+              onClick={() => setShowMobileDetail(false)}
+            >
+              <div
+                className="pastoral-bottom-sheet"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="sheet-drag-handle" />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                    Ficha Pastoral de Cuidado
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowMobileDetail(false)}
+                    className="btn-secondary"
+                    style={{ padding: '4px 12px', fontSize: '0.78rem', minHeight: '32px' }}
+                  >
+                    Cerrar Ficha
+                  </button>
+                </div>
+
+                <div>
+                  <h3 style={{ fontSize: '1.35rem', margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
+                    {selectedGroup.nombre_publico}
+                  </h3>
+                  <div style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                    Facilitador: <strong>{selectedGroup.leader_name}</strong> • Zona {selectedGroup.zone}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                    <a
+                      href={generateFraternalWhatsAppUrl(selectedGroup)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-primary"
+                      style={{
+                        padding: '8px 14px',
+                        fontSize: '0.82rem',
+                        textDecoration: 'none',
+                        backgroundColor: '#25D366',
+                        color: '#FFFFFF',
+                        fontWeight: 700,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        flex: 1,
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Send size={14} />
+                      <span>WhatsApp al Líder</span>
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPastoralCard(true)}
+                      className="btn-secondary"
+                      style={{ padding: '8px 14px', fontSize: '0.82rem', flex: 1, justifyContent: 'center' }}
+                    >
+                      <ShieldCheck size={14} />
+                      <span>Ficha Completa</span>
+                    </button>
+                  </div>
+
+                  <div style={{ padding: '14px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', marginBottom: '14px' }}>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>ASISTENCIA Y HORARIO</div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>
+                      {CHRISTIAN_WEEKDAY_PLURALS[selectedGroup.dia_habitual]} {selectedGroup.hora_habitual} hrs • {selectedGroup.average_headcount?.toFixed(1) ?? '12'} personas
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '14px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-subtle)' }}>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>CONVOCATORIAS ECLESIALES</div>
+                    <div style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                      Participación activa en el convivio inter-células y jornadas comunitarias de la congregación.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -1359,82 +1933,82 @@ export const PastorHud: React.FC = () => {
                 (l.assigned_group_name && l.assigned_group_name.toLowerCase().includes(leaderSearch.toLowerCase()))
               )
               .map((leader) => (
-              <div
-                key={leader.id}
-                style={{
-                  padding: '18px',
-                  borderRadius: 'var(--radius-lg)',
-                  backgroundColor: 'var(--bg-primary)',
-                  border: '1px solid var(--border-subtle)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <MonogramAvatar name={leader.name} size="md" />
-                  <div>
-                    <h3 style={{ fontSize: '1.05rem', margin: 0, color: 'var(--text-primary)' }}>{leader.name}</h3>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{leader.email}</div>
-                  </div>
-                </div>
-
                 <div
+                  key={leader.id}
                   style={{
-                    padding: '10px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    backgroundColor: 'var(--bg-surface)',
-                    fontSize: '0.82rem',
+                    padding: '18px',
+                    borderRadius: 'var(--radius-lg)',
+                    backgroundColor: 'var(--bg-primary)',
                     border: '1px solid var(--border-subtle)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
                   }}
                 >
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 700 }}>
-                    Célula Asignada
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <MonogramAvatar name={leader.name} size="md" />
+                    <div>
+                      <h3 style={{ fontSize: '1.05rem', margin: 0, color: 'var(--text-primary)' }}>{leader.name}</h3>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{leader.email}</div>
+                    </div>
                   </div>
-                  <strong style={{ color: 'var(--text-primary)' }}>
-                    {leader.assigned_group_name || 'Sin célula asignada actualmente'}
-                  </strong>
-                </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>{leader.campus_name}</span>
-                  <span
+                  <div
                     style={{
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      fontWeight: 700,
-                      fontSize: '0.74rem',
-                      backgroundColor: leader.status === 'Activo' ? 'var(--accent-emerald-light)' : 'var(--accent-amber-light)',
-                      color: leader.status === 'Activo' ? 'var(--accent-emerald)' : 'var(--accent-amber)',
+                      padding: '10px 12px',
+                      borderRadius: 'var(--radius-sm)',
+                      backgroundColor: 'var(--bg-surface)',
+                      fontSize: '0.82rem',
+                      border: '1px solid var(--border-subtle)',
                     }}
                   >
-                    {leader.status}
-                  </span>
-                </div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 700 }}>
+                      Célula Asignada
+                    </div>
+                    <strong style={{ color: 'var(--text-primary)' }}>
+                      {leader.assigned_group_name || 'Sin célula asignada actualmente'}
+                    </strong>
+                  </div>
 
-                {/* Acciones de Administración Pastoral */}
-                <div style={{ display: 'flex', gap: '8px', marginTop: '6px', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
-                  <button
-                    type="button"
-                    onClick={() => openEditLeader(leader)}
-                    className="btn-primary"
-                    style={{ flex: 1, minHeight: '34px', padding: '6px 12px', fontSize: '0.8rem', justifyContent: 'center' }}
-                  >
-                    <span>Administrar</span>
-                  </button>
-                  <a
-                    href={`https://wa.me/526181234567?text=${encodeURIComponent(`Hola hermano ${leader.name}, te saludo de parte del equipo pastoral de Amor y Gracia Durango para acompañarte en tu célula.`)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="btn-secondary"
-                    style={{ minHeight: '34px', padding: '6px 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
-                    title="Enviar mensaje directo al facilitador"
-                  >
-                    <span>WhatsApp</span>
-                  </a>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>{leader.campus_name}</span>
+                    <span
+                      style={{
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontWeight: 700,
+                        fontSize: '0.74rem',
+                        backgroundColor: leader.status === 'Activo' ? 'var(--accent-emerald-light)' : 'var(--accent-amber-light)',
+                        color: leader.status === 'Activo' ? 'var(--accent-emerald)' : 'var(--accent-amber)',
+                      }}
+                    >
+                      {leader.status}
+                    </span>
+                  </div>
+
+                  {/* Acciones de Administración Pastoral */}
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '6px', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
+                    <button
+                      type="button"
+                      onClick={() => openEditLeader(leader)}
+                      className="btn-primary"
+                      style={{ flex: 1, minHeight: '34px', padding: '6px 12px', fontSize: '0.8rem', justifyContent: 'center' }}
+                    >
+                      <span>Administrar</span>
+                    </button>
+                    <a
+                      href={`https://wa.me/526181234567?text=${encodeURIComponent(`Hola hermano ${leader.name}, te saludo de parte del equipo pastoral de Amor y Gracia Durango para acompañarte en tu célula.`)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn-secondary"
+                      style={{ minHeight: '34px', padding: '6px 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+                      title="Enviar mensaje directo al facilitador"
+                    >
+                      <span>WhatsApp</span>
+                    </a>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       )}
@@ -1972,6 +2546,71 @@ export const PastorHud: React.FC = () => {
               )}
             </div>
           </div>
+
+          {/* SECCIÓN 4: TRIBUNAL CONCILIAR Y MEDIDAS DISCIPLINARIAS (MATEO 18 & DECISIÓN 5-B) */}
+          <div
+            className="surface-card"
+            style={{
+              padding: '24px',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              backgroundColor: 'rgba(239, 68, 68, 0.03)',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                flexWrap: 'wrap',
+                gap: '16px',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: '#EF4444',
+                    textTransform: 'uppercase',
+                    marginBottom: '4px',
+                  }}
+                >
+                  <ShieldAlert size={14} />
+                  <span>Gobernanza Colegiada • Regla de los Cuatro Ojos</span>
+                </div>
+                <h3 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--text-primary)' }}>
+                  Tribunal Conciliar y Medidas de Disciplina (Mateo 18)
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', margin: '6px 0 0 0', maxWidth: '820px', lineHeight: 1.4 }}>
+                  Las medidas disciplinarias y de restauración pastoral nunca son unilaterales. Conforme al mandato bíblico de Mateo 18:16-17 y la arquitectura colegiada de Pórtico, toda acción disciplinaria requiere la propuesta de un anciano y la ratificación independiente de un segundo anciano ordenado o del Pastor Principal.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                id="btn-open-discipline-modal"
+                onClick={() => setShowDisciplineModal(true)}
+                className="btn-secondary"
+                style={{
+                  padding: '10px 18px',
+                  fontSize: '0.86rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  borderColor: 'rgba(239, 68, 68, 0.4)',
+                  color: '#EF4444',
+                  fontWeight: 700,
+                }}
+              >
+                <ShieldAlert size={16} />
+                <span>Sesión Disciplinaria Colegiada</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -2000,7 +2639,7 @@ export const PastorHud: React.FC = () => {
                   </h2>
                 </div>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0, maxWidth: '850px', lineHeight: 1.4 }}>
-                  Gobernanza territorial serena para Amor y Gracia en el Valle de Guadiana (~800,000 hab). 
+                  Gobernanza territorial serena para Amor y Gracia en el Valle de Guadiana (~800,000 hab).
                   Cobertura 360° en 5 macro-sectores con sedes híbridas adaptadas a la comunidad (hogares, salas de campus, cafeterías cívicas y parques).
                 </p>
               </div>
@@ -2131,6 +2770,7 @@ export const PastorHud: React.FC = () => {
 
       {/* SECCIÓN: SOBERANÍA Y PORTABILIDAD DE DATOS (GOLD-313) */}
       <div
+        id="soberania-datos-section"
         className="surface-card no-print"
         style={{
           marginTop: '40px',
@@ -2255,7 +2895,7 @@ export const PastorHud: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL: DISCIPLINA PASTORAL (GOLD-254) */}
+      {/* MODAL: DISCIPLINA PASTORAL COLEGIADA (MATEO 18 & DECISIÓN 5-B) */}
       {showDisciplineModal && (
         <div
           style={{
@@ -2269,16 +2909,29 @@ export const PastorHud: React.FC = () => {
             padding: '20px',
           }}
         >
-          <div className="surface-elevated animate-fade-in" style={{ maxWidth: '480px', width: '100%', padding: '32px', position: 'relative' }}>
-            <button onClick={() => setShowDisciplineModal(false)} style={{ position: 'absolute', top: '20px', right: '20px' }}>
+          <div className="surface-elevated animate-fade-in" style={{ maxWidth: '520px', width: '100%', padding: '32px', position: 'relative' }}>
+            <button
+              onClick={() => setShowDisciplineModal(false)}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+              }}
+            >
               <X size={20} />
             </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', color: '#EF4444' }}>
-              <AlertTriangle size={24} />
-              <h3 style={{ fontSize: '1.45rem', margin: 0, color: 'var(--text-primary)' }}>Medida Disciplinaria Pastoral</h3>
+              <ShieldAlert size={24} />
+              <h3 style={{ fontSize: '1.45rem', margin: 0, color: 'var(--text-primary)' }}>
+                Medida Disciplinaria Conciliar
+              </h3>
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.86rem', marginBottom: '16px' }}>
-              Procedimiento eclesial conforme a Mateo 18 para suspender o disciplinar a integrantes en conflicto grave.
+              Procedimiento eclesial conforme a Mateo 18:16-17. Requiere la firma conjunta de dos ancianos ordenados (Regla de los Cuatro Ojos) para garantizar sobriedad, gracia y justicia fraterna.
             </p>
             <form onSubmit={handleExecuteDiscipline} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
@@ -2308,6 +2961,42 @@ export const PastorHud: React.FC = () => {
                   <option value="expulsion">Remoción y Disciplina Eclesial Total</option>
                 </select>
               </div>
+
+              {/* Doble Firma Conciliar (Decisión 5-B / Regla de los Cuatro Ojos) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                    Anciano Proponente (Maker)
+                  </label>
+                  <select
+                    value={disciplineProposer}
+                    onChange={(e) => setDisciplineProposer(e.target.value)}
+                    style={{ width: '100%', padding: '10px 12px', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-strong)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)', fontSize: '0.82rem' }}
+                  >
+                    <option value="Andrés Ramos (Anciano Moderador)">Andrés Ramos (Anciano Moderador)</option>
+                    <option value="Esteban Morales (Anciano Poniente)">Esteban Morales (Anciano Poniente)</option>
+                    <option value="David Benítez (Anciano Central)">David Benítez (Anciano Central)</option>
+                    <option value="Marcos Valenzuela (Anciano de Zona)">Marcos Valenzuela (Anciano de Zona)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                    Segundo Anciano / Pastor Ratificador (Checker)
+                  </label>
+                  <select
+                    value={disciplineChecker}
+                    onChange={(e) => setDisciplineChecker(e.target.value)}
+                    style={{ width: '100%', padding: '10px 12px', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-strong)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)', fontSize: '0.82rem' }}
+                  >
+                    <option value="Pastor Principal Josh">Pastor Principal Josh</option>
+                    <option value="Andrés Ramos (Anciano Moderador)">Andrés Ramos (Anciano Moderador)</option>
+                    <option value="Esteban Morales (Anciano Poniente)">Esteban Morales (Anciano Poniente)</option>
+                    <option value="David Benítez (Anciano Central)">David Benítez (Anciano Central)</option>
+                  </select>
+                </div>
+              </div>
+
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary)' }}>
                   Causa y Notas Pastorales
@@ -2321,13 +3010,27 @@ export const PastorHud: React.FC = () => {
                   style={{ width: '100%', padding: '10px 12px', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-strong)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)' }}
                 />
               </div>
+
+              <div
+                style={{
+                  fontSize: '0.78rem',
+                  color: 'var(--text-muted)',
+                  backgroundColor: 'var(--bg-primary)',
+                  padding: '10px 12px',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-subtle)',
+                }}
+              >
+                Acta conciliar registrada con doble firma: <strong style={{ color: 'var(--text-primary)' }}>{disciplineProposer}</strong> y <strong style={{ color: 'var(--text-primary)' }}>{disciplineChecker}</strong>.
+              </div>
+
               <button
                 type="submit"
                 disabled={isSubmittingDiscipline}
                 className="btn-primary"
                 style={{ width: '100%', justifyContent: 'center', backgroundColor: '#EF4444' }}
               >
-                {isSubmittingDiscipline ? 'Aplicando...' : 'Aplicar Disciplina Pastoral'}
+                {isSubmittingDiscipline ? 'Aplicando...' : 'Aplicar Disciplina con Doble Firma Conciliar'}
               </button>
             </form>
           </div>
@@ -2466,7 +3169,7 @@ export const PastorHud: React.FC = () => {
                       }}
                     >
                       <span style={{ fontSize: '0.78rem', fontWeight: 800 }}>{p.name}</span>
-                      {cfgPaletteId === p.id && <span style={{ fontSize: '0.7rem', color: '#F59E0B' }}>✓ Activa</span>}
+                      {cfgPaletteId === p.id && <span style={{ fontSize: '0.7rem', color: '#F59E0B' }}>[Activa]</span>}
                     </button>
                   ))}
                 </div>
@@ -2665,6 +3368,13 @@ export const PastorHud: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* PESTAÑA: ACTIVIDADES COMUNITARIAS Y SUGERENCIAS */}
+      {activeTab === 'initiatives' && (
+        <section id="section-pastor-initiatives" aria-label="Gobernanza Pastoral de Actividades Comunitarias">
+          <CommunityInitiativesHub role="pastor" />
+        </section>
       )}
 
       {/* MODAL: REGISTRAR PAR RESTRINGIDO */}
@@ -2972,13 +3682,13 @@ export const PastorHud: React.FC = () => {
         </div>
       )}
 
-      {/* FICHA PASTORAL COMPLETA: TRÍADA Y CADENA PASTORAL (GOLD-300) */}
+      {/* FICHA PASTORAL COMPLETA: TRÍADA Y CADENA PASTORAL */}
       {showPastoralCard && selectedGroup && (
         <GroupPastoralCard
           group={selectedGroup}
           onClose={() => setShowPastoralCard(false)}
           onGrantSabbatical={() => {
-            setStatusMessage(`✓ Sabático fraternal concedido a "${selectedGroup.nombre_publico}".`);
+            setStatusMessage(`Sabático fraternal concedido a "${selectedGroup.nombre_publico}".`);
             setShowPastoralCard(false);
           }}
         />

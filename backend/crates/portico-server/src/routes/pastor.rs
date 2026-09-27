@@ -180,13 +180,42 @@ pub async fn list_groups_handler(
 
     let mut stmt = match tenant_conn.prepare(
         r#"
-        SELECT e.id, e.nombre_publico, m.nombre_visible, a.nombre_publico, z.label,
-               e.dia_habitual, e.hora_habitual, t.venue_type, e.cupo_orientativo
+        SELECT e.id,
+               e.nombre_publico,
+               coalesce(m.nombre_visible, 'Líder Asignado') as leader_name,
+               coalesce(a.nombre_publico, 'General') as affinity,
+               coalesce(z.label, 'Centro') as zone,
+               e.dia_habitual,
+               e.hora_habitual,
+               coalesce(t.venue_type, 'private_home') as venue_type,
+               e.cupo_orientativo,
+               coalesce(mem_counts.cnt, 0) as enrolled_count,
+               coalesce(jr_counts.cnt, 0) as pending_requests,
+               hc_stats.avg_headcount,
+               coalesce(hc_stats.meetings_cnt, 0) as meetings_reported
         FROM edition e
         LEFT JOIN member m ON e.responsible_member_id = m.id
         LEFT JOIN affinity a ON e.affinity_id = a.id
         LEFT JOIN meeting_template t ON e.id = t.edition_id
         LEFT JOIN zone z ON t.zone_id = z.id
+        LEFT JOIN (
+            SELECT edition_id, count(*) as cnt
+            FROM membership
+            WHERE status = 'activa'
+            GROUP BY edition_id
+        ) mem_counts ON e.id = mem_counts.edition_id
+        LEFT JOIN (
+            SELECT edition_id, count(*) as cnt
+            FROM join_request
+            WHERE status = 'solicitada'
+            GROUP BY edition_id
+        ) jr_counts ON e.id = jr_counts.edition_id
+        LEFT JOIN (
+            SELECT edition_id, AVG(attendee_count) as avg_headcount, COUNT(*) as meetings_cnt
+            FROM meeting_headcount
+            WHERE did_meet = 1
+            GROUP BY edition_id
+        ) hc_stats ON e.id = hc_stats.edition_id
         ORDER BY e.dia_habitual ASC, e.hora_habitual ASC
         "#,
     ) {
@@ -206,24 +235,10 @@ pub async fn list_groups_handler(
             let hora_habitual: String = row.get(6).unwrap_or_default();
             let venue_type: String = row.get(7).unwrap_or_else(|_| "private_home".to_string());
             let cupo_orientativo: i32 = row.get(8).unwrap_or(15);
-
-            // Member count
-            let enrolled_count: i64 = tenant_conn
-                .query_row(
-                    "SELECT count(*) FROM membership WHERE edition_id = ?1 AND status = 'activa'",
-                    params![id],
-                    |r| r.get(0),
-                )
-                .unwrap_or(0);
-
-            // Pending requests
-            let pending_requests: i64 = tenant_conn
-                .query_row(
-                    "SELECT count(*) FROM join_request WHERE edition_id = ?1 AND status = 'solicitada'",
-                    params![id],
-                    |r| r.get(0),
-                )
-                .unwrap_or(0);
+            let enrolled_count: i64 = row.get(9).unwrap_or(0);
+            let pending_requests: i64 = row.get(10).unwrap_or(0);
+            let avg_headcount: Option<f64> = row.get(11).ok();
+            let meetings_reported: i64 = row.get(12).unwrap_or(0);
 
             let health_status = if pending_requests > 0 {
                 "yellow".to_string()
@@ -232,14 +247,6 @@ pub async fn list_groups_handler(
             };
 
             let split_suggestion = enrolled_count >= 15 || enrolled_count >= cupo_orientativo as i64;
-
-            let (avg_headcount, meetings_reported): (Option<f64>, i64) = tenant_conn
-                .query_row(
-                    "SELECT AVG(attendee_count), COUNT(*) FROM meeting_headcount WHERE edition_id = ?1 AND did_meet = 1",
-                    params![id],
-                    |r| Ok((r.get(0)?, r.get(1)?)),
-                )
-                .unwrap_or((None, 0));
 
             groups.push(PastorGroupRow {
                 id,

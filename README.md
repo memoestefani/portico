@@ -81,7 +81,7 @@ Adoptadas del universo de investigación de GitHub (`DOSSIER-068` al `DOSSIER-07
 52: **52-C (`GOLD-293`) — Progressive Disclosure en HUD Pastoral:** Reestructuración en 5 vistas serenas (*Comunidades*, *Salud y Sabáticos*, *Diaconado*, *Consejo de Ancianos y Consejería*, *Distribución Territorial*) para escala orgánica de 100 a 10,000 discípulos.
 53: **53-C (`GOLD-294` a `GOLD-296`) — Gobernanza Distribuida de Consejería y Veto Pastoral:**
    * **Ancianos (`ElderDesk`):** Brindan consejería pastoral y gestionan directamente los ruteos anti-colisión de su sector en `/api/elder/restricted-pairings`, supervisando a 10-12 diáconos y honrando a los Servidores Veteranos.
-   * **Pastor Josh (`PastorHud`):** Vista consolidada de toda la red, con facultad activa de ratificación y **derecho a veto pastoral** (`handleVetoPairing`) para levantar restricciones en gracia.
+   * **Pastor Josh Gayosso (`PastorHud`):** Vista consolidada de toda la red, con facultad activa de ratificación y **derecho a veto pastoral** (`handleVetoPairing`) para levantar restricciones en gracia.
    * **Diáconos (`DeaconDesk`):** Atención ágil a fricciones urbanas ("Atención a Vecinos y Convivencia") resolviendo reportes vecinales en menos de 3 días sin burocracia.
 
 ### Ciclo 9 — Simbiosis de Vida Real, Casos de Estrés y Protección Comunitaria (GOLD-297 a GOLD-306)
@@ -108,16 +108,22 @@ Adoptadas del universo de investigación de GitHub (`DOSSIER-068` al `DOSSIER-07
 72. **72-C (`GOLD-315`) — Privacidad Polimórfica en Backend Rust y Anti-Scraping:** Serializador de Rust que omite físicamente direcciones particulares y teléfonos de anfitriones en endpoints públicos + script `tools/clean_debris.ps1` que certifica la frontera hermética del proyecto.
 73. **73-C (`GOLD-316`) — Radar Pastoral In-App y Despacho wa.me Nativo a Costo $0:** Disparadores de acompañamiento diaconal y pastoral a través de enlaces directos `https://wa.me/` sin contratar APIs de pago de Meta o Twilio.
 
-### Ciclo 11 — Dossier Pastoral Ejecutivo Automatizado y Motor Nativo PDF (GOLD-317 a GOLD-319)
-74. **74-C (`GOLD-317`) — Dossier Pastoral Ejecutivo en PDF (Letter Landscape):** Documento de 7 páginas en formato horizontal (`docs/dossier_pastoral.html` -> `docs/Dossier_Pastoral_Portico_Amor_y_Gracia.pdf`) bajo el estándar W3C Paged Media (`@page { size: letter landscape; margin: 0; }`). Cada vista incluye la captura real en alta resolución y la Tríada Pastoral de 3 preguntas humanas: *¿Quién usa esta pantalla?*, *¿Qué dolor de cabeza de WhatsApp elimina?*, y *¿Qué cuidado pastoral brinda a las personas?*.
-75. **75-C (`GOLD-318`) — Motor Nativo en PowerShell con Edge Headless (`tools/generar_dossier.ps1`):** Compilador local a costo y peso $0. Utiliza el motor nativo de Microsoft Edge preinstalado en Windows (`--headless=new --disable-gpu --no-pdf-header-footer --print-to-pdf`), sincronizado con `Start-Process -Wait`, generando un PDF limpio de ~1.1 MB listo para compartir por WhatsApp sin instalar librerías de Node.js de 300 MB.
-76. **76-C (`GOLD-319`) — Pipeline Automatizado de Capturas Limpias (`tools/capturar_pantallas.ps1`):** Script que automatiza la captura secuencial de las 6 superficies locales en resolución fija de `1280x780` sin barras de sistema operativo ni desbordamientos de scroll, almacenadas en `docs/assets/dossier/`.
+### Ciclo 16 — Radar de Cuidado y Pastoreo, Ergonomía Móvil y Libertad Litúrgica (GOLD-340 a GOLD-348)
+77. **77-B (`GOLD-340`) — Cabecera Limpia Despejada y Menú Secundario de Mantenimiento:** Reducción del HUD pastoral a dos acciones primarias ("Emitir Comunicado" + "Buscar y Filtrar") y confinamiento de configuración de marca, folios físicos y exportación ZIP al menú secundario.
+78. **78-B (`GOLD-341`) — Layout Adaptativo: Mobile Bottom Sheet & Desktop Split-Pane:** Hoja táctil deslizante inferior (`.pastoral-bottom-sheet`) en iPhone <768px y panel maestro-detalle persistente (`.tablet-master-detail`) en pantallas >=768px.
+79. **79-B (`GOLD-342`) — Triaje de Atención por Excepción y Reposo Pastoral:** Detección automática de anomalías prioritarias ("Requiere Atención Hoy") o confirmación de reposo eclesiástico ("Rebaño en Paz: Cero anomalías activas hoy").
+80. **80-B (`GOLD-343`) — Modo Santuario Silencioso y Ausencia de Manifiestos Defensivos:** Supresión absoluta de textos combativos anti-SaaS en UI pastoral, sustituidos por la sobriedad serena de "Santuario Cifrado Eclesiástico".
+81. **81-B (`GOLD-344`) — Tribunal Conciliar Colegiado bajo Regla de los Cuatro Ojos (Mateo 18):** Disciplina eclesiástica transferida al Consejo de Ancianos bajo el principio Maker-Checker (doble firma obligatoria de dos ancianos ordenados).
+82. **82-B (`GOLD-345`) — Búsqueda Predictiva Multi-Factor Indexada en Memoria (<16ms):** Búsqueda instantánea en cliente por facilitador, colonia/zona, día de reunión y afinidad sin latencia de red.
+83. **83-B (`GOLD-346`) — Paleta Noble "Santuario y Olivo":** Sustitución de colores estridentes por tonalidades de la naturaleza y cantera (Alabastro, Lino, Verde Olivo Maduro `#2D3A2F` y Arcilla Terracota `#C46849`).
+84. **84-B (`GOLD-347`) — Acompañamiento Fraterno Contextual 1-Toque vía WhatsApp:** Enlaces contextuales pre-redactados `wa.me` para aliento y cuidado según la salud de la célula, disponibles en escritorio y móvil.
+85. **85-B (`GOLD-348`) — Descentralización Litúrgica y Primacía de los 4 Elementos del Santuario:** Erradicación del currículo homogéneo forzado, preguntas con temporizador y videos centrales; primacía de los 4 elementos esenciales del santuario en casa (Mesa, Palabra, Oración, Bendición), respetando la libertad de los grupos de interés y el acuerdo relacional e informal para emprender estudios de libros bíblicos específicos (ej. Éxodo).
 
 ---
 
 ## 🧪 Verificación y Pruebas Automatizadas
 
-El proyecto cuenta con certificación automatizada continua del 100% en backend y frontend sin mockups ni placeholders (**218+ pruebas verdes en total**):
+El proyecto cuenta con certificación automatizada continua del 100% en backend y frontend sin mockups ni placeholders (**294+ pruebas verdes en total**):
 
 ### Backend (Rust Workspace)
 ```bash
@@ -132,7 +138,7 @@ cd frontend
 npm test
 npm run build
 ```
-* **198 pruebas pasando (0 fallas en 118 suites):** 
+* **284 pruebas pasando (0 fallas en 156 suites):** 
   * Ciclo 2 (Sobriedad y Rendimiento)
   * Ciclo 3 (Decisiones Canónicas)
   * Ciclo 4 (Gobernanza y Branding Noble)
@@ -146,7 +152,12 @@ npm run build
   * Ciclo 12 (Ergonomía Grado Apple, Eliminación de Ruido y Filtro Elena Ramos: GOLD-320 a GOLD-329)
   * Ciclo 13 (Identidad Noble Amor y Gracia Durango, Conmutador Multi-Grupo y Silencio de Santuario: GOLD-330 a GOLD-339)
   * Ciclo 14 (Landing Editorial Pastoral, Carta Fraternal y Caso Vivo de Amor y Gracia Durango: GOLD-340 a GOLD-349)
-* **Build de producción:** 0 errores, 0 advertencias de compilación (`tsc -b && vite build` sobre 1,906 módulos en ~1.2s en `dist/`).
+  * Ciclo 15 (Ergonomía 390px, Dock Adaptativo, Ruta Recursiva, Gobernanza Conciliar, Armonizador de Carne Asada y Separación Mi Perfil: GOLD-350 a GOLD-359)
+  * Ciclo 16 (Radar de Cuidado y Pastoreo, Calm Tech, Triaje Inbox Zero, Maker-Checker Conciliar y Libertad Litúrgica: GOLD-340 a GOLD-348)
+  * Ciclo 17 (Búsqueda de Miembros Acotada a la Célula y Asignación Fraterna de Roles: GOLD-349 a GOLD-351)
+  * Ciclo 18 (Logística Celular Agnóstica, Edición de Doble Puerta Exclusiva del Líder y Sedes Flexibles: GOLD-352 a GOLD-355)
+  * Ciclo 19 (Las 10 Decisiones Pastorales, Modo Claro Earthen Noble y Versionado Histórico del Dossier: GOLD-356 a GOLD-365)
+* **Build de producción:** 0 errores, 0 advertencias de compilación (`tsc -b && vite build` sobre 1,906 módulos en `dist/`).
 
 ---
 

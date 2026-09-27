@@ -83,6 +83,11 @@ pub struct CampusSummary {
     pub slug: String,
     pub nombre_publico: String,
     pub ciudad: String,
+    pub address: Option<String>,
+    pub macro_zone: Option<String>,
+    pub capacity_per_service: Option<u32>,
+    pub pastor_name: Option<String>,
+    pub atrium_welcome_lead: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -170,6 +175,11 @@ pub async fn get_config_handler(
             slug: c.slug,
             nombre_publico: c.nombre_publico,
             ciudad: c.ciudad,
+            address: c.address,
+            macro_zone: c.macro_zone,
+            capacity_per_service: c.capacity_per_service,
+            pastor_name: c.pastor_name,
+            atrium_welcome_lead: c.atrium_welcome_lead,
         })
         .collect();
 

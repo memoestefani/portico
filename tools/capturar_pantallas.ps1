@@ -57,36 +57,36 @@ if (-not (Test-Path $resolvedOutputDir)) {
 }
 Write-Host "[OK] Directorio de salida: $resolvedOutputDir" -ForegroundColor Green
 
-# 3. Definicion de las 6 superficies del Dossier
+# 3. Definicion de las 6 superficies del Dossier (Modo Claro Earthen Noble / Decision 1-B y 3-B)
 $vistas = @(
     @{
         Nombre = "01_portico_publico.png"
-        Url    = "$BaseUrl/?role=public"
+        Url    = "$BaseUrl/?role=public&theme=light"
         Titulo = "01 El Portico Publico (Catalogo Abierto)"
     },
     @{
         Nombre = "02_privacidad_hogar.png"
-        Url    = "$BaseUrl/?role=public&dev=true"
+        Url    = "$BaseUrl/?role=public&dev=true&theme=light"
         Titulo = "02 Privacidad del Hogar (Ficha Protegida)"
     },
     @{
         Nombre = "03_silo_miembro.png"
-        Url    = "$BaseUrl/?role=member&dev=true"
+        Url    = "$BaseUrl/?role=member&dev=true&theme=light"
         Titulo = "03 El Silo del Miembro y Facilitador"
     },
     @{
         Nombre = "04_mesa_diacono.png"
-        Url    = "$BaseUrl/?role=deacon&dev=true"
+        Url    = "$BaseUrl/?role=deacon&dev=true&theme=light"
         Titulo = "04 La Mesa Diaconal (Pases Fraternales)"
     },
     @{
         Nombre = "05_pastor_hud.png"
-        Url    = "$BaseUrl/?role=pastor&dev=true"
-        Titulo = "05 El Radar Pastoral de Josh"
+        Url    = "$BaseUrl/?role=pastor&dev=true&theme=light"
+        Titulo = "05 El Radar Pastoral de Pastor Josh Gayosso"
     },
     @{
         Nombre = "06_soberania_datos.png"
-        Url    = "$BaseUrl/?role=pastor&dev=true"
+        Url    = "$BaseUrl/?role=pastor&view=sovereignty&dev=true&theme=light"
         Titulo = "06 Soberania de Datos (Descarga 1-Clic)"
     }
 )
@@ -105,7 +105,9 @@ foreach ($v in $vistas) {
         "--headless=new",
         "--disable-gpu",
         "--hide-scrollbars",
+        "--force-prefers-color-scheme=light",
         "--window-size=$Width,$Height",
+        "--virtual-time-budget=2500",
         "--screenshot=$outPath",
         $v.Url
     )

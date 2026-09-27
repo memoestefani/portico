@@ -37,6 +37,7 @@ import {
   enrollEmeritusGuardian,
 } from '../api';
 import { MonogramAvatar } from './MonogramAvatar';
+import { CommunityInitiativesHub } from './CommunityInitiativesHub';
 
 export const ElderDesk: React.FC = () => {
   const [councils, setCouncils] = useState<EldershipCouncil[]>([]);
@@ -46,7 +47,7 @@ export const ElderDesk: React.FC = () => {
   const [deviations, setDeviations] = useState<PastoralDeviation[]>([]);
   const [pairings, setPairings] = useState<RestrictedPairingItem[]>([]);
   const [veterans, setVeterans] = useState<EmeritusGuardian[]>([]);
-  const [activeTab, setActiveTab] = useState<'supervision' | 'pairings' | 'veterans'>('supervision');
+  const [activeTab, setActiveTab] = useState<'supervision' | 'pairings' | 'veterans' | 'initiatives'>('supervision');
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -445,6 +446,27 @@ export const ElderDesk: React.FC = () => {
         >
           <Award size={16} />
           <span>Servidores Veteranos y Consejeros ({veterans.length})</span>
+        </button>
+
+        <button
+          type="button"
+          id="tab-elder-initiatives"
+          onClick={() => setActiveTab('initiatives')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: 'var(--radius-full)',
+            fontSize: '0.86rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            backgroundColor: activeTab === 'initiatives' ? 'var(--accent-indigo)' : 'var(--bg-surface)',
+            color: activeTab === 'initiatives' ? '#FFFFFF' : 'var(--text-secondary)',
+            border: activeTab === 'initiatives' ? '1px solid var(--accent-indigo)' : '1px solid var(--border-subtle)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+          }}
+        >
+          <span>Actividades y Sugerencias</span>
         </button>
       </div>
         
@@ -997,6 +1019,13 @@ export const ElderDesk: React.FC = () => {
             </div>
           )}
         </div>
+      )}
+
+      {/* VISTA 4: GOBERNANZA DE ACTIVIDADES COMUNITARIAS Y SUGERENCIAS */}
+      {activeTab === 'initiatives' && (
+        <section id="section-elder-initiatives" aria-label="Gobernanza de Actividades Comunitarias">
+          <CommunityInitiativesHub role="elder" />
+        </section>
       )}
 
       {/* Modal para Registrar Ruteo Anti-Colisión / Consejería */}

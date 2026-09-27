@@ -71,7 +71,7 @@ export const GroupPastoralCard: React.FC<GroupPastoralCardProps> = ({
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-amber, #fbbf24)', textTransform: 'uppercase', marginBottom: '6px' }}>
               <ShieldCheck size={14} />
-              <span>Ficha Pastoral & Trazabilidad de Cuidado (GOLD-300)</span>
+              <span>Ficha Pastoral & Trazabilidad de Cuidado</span>
             </div>
             <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#f8fafc', fontFamily: 'var(--font-serif)' }}>
               {group.nombre_publico}
@@ -153,7 +153,7 @@ export const GroupPastoralCard: React.FC<GroupPastoralCardProps> = ({
                 <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>Diácono de Apoyo (Cuidado Fraternal y Sabáticos):</div>
                 <div style={{ fontSize: '0.92rem', color: '#f8fafc', fontWeight: 700 }}>{pastoralChain.deaconName}</div>
                 <div style={{ fontSize: '0.76rem', color: '#34d399', marginTop: '2px' }}>
-                  ✓ Última visita diaconal: {pastoralChain.lastVisitDate} ({pastoralChain.visitAtmosphere})
+                  Última visita diaconal: {pastoralChain.lastVisitDate} ({pastoralChain.visitAtmosphere})
                 </div>
               </div>
               <a

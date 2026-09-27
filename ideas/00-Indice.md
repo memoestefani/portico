@@ -25,6 +25,10 @@
 | `19-portico-plan-accion-checklist-dossier-pastoral-automatizado-v3.5.md` | Plan táctico y checklist para Dossier Pastoral Ejecutivo Automatizado, motor nativo Edge Headless en Windows, capturas limpias y W3C Paged Media (GOLD-317 a GOLD-319) | Redefinir reglas de negocio |
 | `20-portico-plan-accion-checklist-ergonomia-apple-elena-v3.5.md` | Plan táctico y checklist para Ergonomía Apple, Filtro Elena Ramos, Doble Capa de Iniciativas, Escala 15k Proximidad y Santuario de Confianza (GOLD-320 a GOLD-329) | Redefinir reglas de negocio |
 | `21-portico-plan-accion-checklist-identidad-amorygracia-elena-v3.6.md` | Plan táctico y checklist para Identidad Vectorial Amor y Gracia, Conmutador Multi-Grupo Elena Ramos, Poda de Debris y Silencio de Santuario (GOLD-330 a GOLD-339) | Redefinir reglas de negocio |
+| `23-portico-plan-accion-checklist-10-decisiones-v3.7.md` | Plan táctico y checklist de las 10 decisiones de ergonomía, escala y simplificación ministerial | Redefinir reglas de negocio |
+| `24-portico-plan-accion-checklist-radar-cuidado-ergonomia-v3.8.md` | Plan táctico y checklist maestro para Radar de Cuidado y Pastoreo, Calm Tech, Triaje Inbox Zero, Maker-Checker Conciliar y Paleta Santuario y Olivo (GOLD-340 a GOLD-347) | Redefinir reglas de negocio |
+| `25-portico-plan-accion-checklist-busqueda-miembros-asignacion-v3.9.md` | Plan táctico y checklist de búsqueda de miembros acotada a la célula, Bottom Sheet táctil y asignación directa optimista (GOLD-349 a GOLD-351) | Redefinir reglas de negocio |
+| `26-portico-plan-accion-checklist-logistica-agnostica-sedes-v3.10.md` | Plan táctico y checklist maestro para logística celular agnóstica, edición de doble puerta exclusiva del líder, sedes flexibles y WhatsApp 1-tap (GOLD-352 a GOLD-355) | Redefinir reglas de negocio |
 | `DOSSIER-064` (`research`) | Benchmarks del universo de GitHub para las 10 decisiones de backend/dominio (GOLD-201 a GOLD-210) | Reemplazar arquitectura local |
 | `DOSSIER-066` (`research`) | Benchmarks del universo de GitHub para las 15 decisiones de UI/UX, ergonomía Apple y Triada (GOLD-215 a GOLD-229) | Reemplazar arquitectura local |
 | `DOSSIER-067` (`research`) | Benchmarks del universo de GitHub para sobriedad, sin jargon y calendario cristiano (GOLD-230 a GOLD-239) | Reemplazar arquitectura local |
@@ -37,6 +41,8 @@
 | `DOSSIER-074` (`research`) | Benchmarks del universo de GitHub para despliegue soberano a costo $0, Cloudflare Tunnels, Docker Compose, WebAuthn y Litestream R2 (GOLD-307 a GOLD-316) | Reemplazar arquitectura local |
 | `DOSSIER-075` (`research`) | Benchmarks del universo de GitHub para ergonomía Apple HIG, filtro Elena Ramos, doble capa en iniciativas, blindaje wa.me y escala 15k (GOLD-320 a GOLD-329) | Reemplazar arquitectura local |
 | `DOSSIER-076` (`research`) | Benchmarks del universo de GitHub para identidad vectorial Amor y Gracia, conmutador multi-grupo Elena, contraste WCAG AAA y silencio sagrado (GOLD-330 a GOLD-339) | Reemplazar arquitectura local |
+| `DOSSIER-077` (`research`) | Benchmarks del universo de GitHub para búsqueda de miembros acotada a la célula y asignación fraterna de roles (GOLD-349 a GOLD-351) | Reemplazar arquitectura local |
+| `DOSSIER-078` (`research`) | Benchmarks del universo de GitHub para logística celular agnóstica, edición de doble puerta y sedes flexibles (GOLD-352 a GOLD-355) | Reemplazar arquitectura local |
 
 ### Los 10 Principios y Decisiones Canónicas de Pórtico
 

@@ -15,7 +15,7 @@
 | **Backend & Servidor Web (Rust Axum)** | 🟢 Live | `http://127.0.0.1:3000` | Motor HTTP de alto rendimiento sirviendo API y frontend embebido `dist/`. |
 | **Persistencia Database-per-Tenant** | 🟢 Live | `backend/data/tenants/1fb2fd67-6b35-425c-967c-5405af97b401.db` | Base física SQLite aislada de Amor y Gracia Durango. |
 | **Salida Soberana Dual (.db + CSV)** | 🟢 Live | `/api/pastor/export-sovereign-archive` | Botón táctil en `PastorHud` y exportación pastoral en `ElderDesk` ("No Strings Attached"). |
-| **Pruebas Automatizadas** | 🟢 100% | **235+ tests verdes** (198 frontend, 37 backend) | Certificación continua de cero regresiones, cero mockups y cero variables rotas. |
+| **Pruebas Automatizadas** | 🟢 100% | **321 tests verdes** (284 frontend, 37 backend) | Certificación continua de cero regresiones, cero mockups y cero variables rotas. |
 
 ---
 

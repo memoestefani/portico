@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import type {
-  CuratedCurriculum,
   DiscipleshipTrack,
   DunbarFissionResult,
   GroupDetail,
@@ -22,7 +21,6 @@ import {
   deleteResourceLink,
   endorseDisciple,
   executeDunbarFission,
-  fetchActiveCurriculum,
   fetchActivePastoralBroadcasts,
   fetchDiscipleshipTrack,
   fetchGroupDetail,
@@ -65,15 +63,14 @@ import {
   Clock,
   HeartHandshake,
   ShieldAlert,
-  Timer,
   BookOpen,
   Radio,
   Baby,
   Home,
   GitBranch,
-  Video,
-  Play,
   Menu,
+  Edit3,
+  Search,
 } from 'lucide-react';
 import { MonogramAvatar, NOBLE_PALETTES } from './MonogramAvatar';
 import { ConnectionPassCard } from './ConnectionPassCard';
@@ -149,17 +146,30 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
   // Conmutador Multi-Grupo para Elena Ramos (GOLD-331)
   const [selectedGroupId, setSelectedGroupId] = useState<string>('');
 
-  // Itinerarios Nómadas y Sedes Rotativas (GOLD-261)
+  // Sedes y Rotación Semanal (GOLD-352 a GOLD-355 / Ciclo 18)
   const [sessionVenues, setSessionVenues] = useState<SessionVenueItem[]>([]);
-  const [showNomadicVenueModal, setShowNomadicVenueModal] = useState<boolean>(false);
-  const [nomadicWeek, setNomadicWeek] = useState<number>(1);
-  const [nomadicVenueName, setNomadicVenueName] = useState<string>('');
-  const [nomadicAddress, setNomadicAddress] = useState<string>('');
-  const [nomadicMapsUrl, setNomadicMapsUrl] = useState<string>('');
-  const [nomadicNotes, setNomadicNotes] = useState<string>('');
-  const [nomadicVenueType, setNomadicVenueType] = useState<string>('public_venue');
-  const [nomadicHostName, setNomadicHostName] = useState<string>('');
-  const [nomadicHostPhone, setNomadicHostPhone] = useState<string>('');
+  const [showVenueEditor, setShowVenueEditor] = useState<boolean>(false);
+  const [venueTargetWeek, setVenueTargetWeek] = useState<number>(1);
+  const [venueMode, setVenueMode] = useState<'hogar' | 'publico' | 'virtual' | 'foraneo'>('hogar');
+  const [venueCustomName, setVenueCustomName] = useState<string>('');
+  const [venueCustomAddress, setVenueCustomAddress] = useState<string>('');
+  const [venueArrivalHint, setVenueArrivalHint] = useState<string>('');
+  const [venueMapsUrl, setVenueMapsUrl] = useState<string>('');
+  const [venueTimeOverride, setVenueTimeOverride] = useState<string>('');
+  const [venueHostName, setVenueHostName] = useState<string>('');
+  const [venueIsSpecialEvent, setVenueIsSpecialEvent] = useState<boolean>(false);
+  const [venueIsJoint, setVenueIsJoint] = useState<boolean>(false);
+  const [venuePartnerGroupName, setVenuePartnerGroupName] = useState<string>('GP Centro Jóvenes');
+  const [venueIsRetreat, setVenueIsRetreat] = useState<boolean>(false);
+  const [venueRetreatDates, setVenueRetreatDates] = useState<string>('');
+  const [showWhatsAppDispatchBanner, setShowWhatsAppDispatchBanner] = useState<boolean>(false);
+  const [lastDispatchedWaUrl, setLastDispatchedWaUrl] = useState<string>('');
+  const [lastDispatchedMessage, setLastDispatchedMessage] = useState<string>('');
+
+  // Selector de Miembros en Bottom Sheet (GOLD-349 a GOLD-351 / Ciclo 17)
+  const [showMemberPicker, setShowMemberPicker] = useState<boolean>(false);
+  const [memberPickerRole, setMemberPickerRole] = useState<'apprentice' | 'host' | 'fission_leader'>('apprentice');
+  const [memberSearchQuery, setMemberSearchQuery] = useState<string>('');
 
   // Ajustes de Célula: Acento y Hospitalidad Infantil (GOLD-258)
   const [showCellSettingsModal, setShowCellSettingsModal] = useState<boolean>(false);
@@ -191,21 +201,9 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
   const [showMinorProtectionNotice, setShowMinorProtectionNotice] = useState<boolean>(false);
   const [protectedMinorName, setProtectedMinorName] = useState<string>('');
 
-  // Armonizador de Calendario Magno Litúrgico (GOLD-297)
+  // Armonizador de Calendario Magno Litúrgico (GOLD-297) & Integración a Convivios / Carne Asada
   const [showHarmonizerModal, setShowHarmonizerModal] = useState<boolean>(false);
-
-  // Temporizador de Dinámica en Parejas de 5 min (GOLD-245 / Decisión 6-C)
-  const [pairTimer, setPairTimer] = useState<number | null>(null);
-
-  useEffect(() => {
-    let interval: any = null;
-    if (pairTimer !== null && pairTimer > 0) {
-      interval = setInterval(() => {
-        setPairTimer((prev) => (prev !== null && prev > 0 ? prev - 1 : null));
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [pairTimer]);
+  const [leaderHarmonizedStatus, setLeaderHarmonizedStatus] = useState<string>('Asado Fraternal de Varones (Confirmado)');
 
   // Muro de Oración Estructurada (GOLD-241 / Decisión 2-C / Cero Secretos GOLD-253)
   const [showPrayerModal, setShowPrayerModal] = useState<boolean>(false);
@@ -243,9 +241,8 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
   // Ciclo 5: Ficha Social de Difusión (GOLD-272)
   const [showSocialModal, setShowSocialModal] = useState<boolean>(false);
 
-  // Estados Ciclo 6 (GOLD-275, GOLD-277, GOLD-279: Escala 25,000, Sabáticos y Fisión Dunbar)
+  // Estados Ciclo 6 (GOLD-275, GOLD-279: Escala 25,000, Sabáticos y Fisión Dunbar)
   const [hostSabbatical, setHostSabbatical] = useState<HostSabbatical | null>(null);
-  const [curatedCurriculum, setCuratedCurriculum] = useState<CuratedCurriculum | null>(null);
 
   // Fisión Celular Dunbar (GOLD-279)
   const [showFissionModal, setShowFissionModal] = useState<boolean>(false);
@@ -258,6 +255,10 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
   const [fissionNewTime, setFissionNewTime] = useState<string>('19:30');
   const [executingFission, setExecutingFission] = useState<boolean>(false);
   const [fissionResult, setFissionResult] = useState<DunbarFissionResult | null>(null);
+
+  // Confinamiento Estacional (Decisión 9-A: Semanas 10 a 12)
+  const [currentSeasonWeek] = useState<number>(4);
+  const [showSeasonClosureSection, setShowSeasonClosureSection] = useState<boolean>(false);
 
   const handleRsvp = async (status: 'attending' | 'declined') => {
     const nextVal = rsvpStatus === status ? null : status;
@@ -298,7 +299,7 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
       setPrayerPublicTag('');
       const updated = await fetchGroupDetail(selectedGroupDetail.id, sessionToken);
       setSelectedGroupDetail(updated);
-      setSiloToast('✓ Motivo de intercesión comunitaria registrado.');
+      setSiloToast('Motivo de intercesión comunitaria registrado.');
     } catch (err: any) {
       alert(err.message || 'Error registrando petición de oración');
     } finally {
@@ -306,35 +307,185 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
     }
   };
 
-  const handleCreateNomadicVenue = async (e: React.FormEvent) => {
+  // Handlers para Selección de Miembros (GOLD-349 a GOLD-351 / Ciclo 17)
+  const handleOpenMemberPicker = (role: 'apprentice' | 'host' | 'fission_leader') => {
+    if (!isLeader) return;
+    setMemberPickerRole(role);
+    setMemberSearchQuery('');
+    setShowMemberPicker(true);
+  };
+
+  const handleSelectMember = (memberName: string, memberId?: string) => {
+    if (!selectedGroupDetail) return;
+    if (memberPickerRole === 'apprentice') {
+      setSelectedGroupDetail((prev) => (prev ? { ...prev, apprentice_name: memberName } : null));
+      setSiloToast(`Aprendiz en Formación asignado: ${memberName}`);
+    } else if (memberPickerRole === 'host') {
+      setSelectedGroupDetail((prev) => (prev ? { ...prev, host_reference: memberName } : null));
+      setSiloToast(`Hogar Anfitrión actualizado: ${memberName}`);
+    } else if (memberPickerRole === 'fission_leader') {
+      setFissionApprenticeName(memberName);
+      setFissionApprenticeId(memberId || `mem-${memberName.toLowerCase().replace(/\s+/g, '_')}`);
+      setSiloToast(`Líder de la nueva célula seleccionado: ${memberName}`);
+    }
+    setShowMemberPicker(false);
+  };
+
+  const handleResetMemberRole = () => {
+    if (!selectedGroupDetail) return;
+    if (memberPickerRole === 'apprentice') {
+      setSelectedGroupDetail((prev) => (prev ? { ...prev, apprentice_name: null } : null));
+      setSiloToast('Rol de Aprendiz restablecido a "En formación".');
+    } else if (memberPickerRole === 'host') {
+      setSelectedGroupDetail((prev) => (prev ? { ...prev, host_reference: 'Hogar Sede' } : null));
+      setSiloToast('Anfitrión restablecido a "Hogar Sede".');
+    } else if (memberPickerRole === 'fission_leader') {
+      setFissionApprenticeName('');
+      setFissionApprenticeId('');
+    }
+    setShowMemberPicker(false);
+  };
+
+  // Handlers para Editor Logístico Agnóstico de Sedes (GOLD-352 a GOLD-355 / Ciclo 18)
+  const handleOpenVenueEditor = (weekNum: number = 1) => {
+    if (!isLeader) return;
+    setVenueTargetWeek(weekNum);
+    const existing = sessionVenues.find((v) => v.week_number === weekNum);
+    if (existing) {
+      if (existing.venue_type === 'virtual') setVenueMode('virtual');
+      else if (existing.venue_type === 'retreat' || existing.is_retreat) setVenueMode('foraneo');
+      else if (existing.venue_type === 'private_home') setVenueMode('hogar');
+      else setVenueMode('publico');
+      setVenueCustomName(existing.venue_name || '');
+      setVenueCustomAddress(existing.address || '');
+      setVenueArrivalHint(existing.arrival_notes || existing.notes || '');
+      setVenueMapsUrl(existing.maps_url || '');
+      setVenueTimeOverride(existing.time_override || '');
+      setVenueHostName(existing.host_name || '');
+      setVenueIsSpecialEvent(Boolean(existing.is_joint_meeting || existing.is_retreat));
+      setVenueIsJoint(Boolean(existing.is_joint_meeting));
+      setVenuePartnerGroupName(existing.partner_group_name || 'GP Centro Jóvenes');
+      setVenueIsRetreat(Boolean(existing.is_retreat));
+      setVenueRetreatDates(existing.retreat_date_range || '');
+    } else {
+      setVenueMode('hogar');
+      setVenueCustomName('');
+      setVenueCustomAddress(selectedGroupDetail?.full_venue_address || '');
+      setVenueArrivalHint('');
+      setVenueMapsUrl('');
+      setVenueTimeOverride('');
+      setVenueHostName(selectedGroupDetail?.host_reference || 'Carlos Mendoza');
+      setVenueIsSpecialEvent(false);
+      setVenueIsJoint(false);
+      setVenuePartnerGroupName('GP Centro Jóvenes');
+      setVenueIsRetreat(false);
+      setVenueRetreatDates('');
+    }
+    setShowVenueEditor(true);
+  };
+
+  const handleSaveVenueOverride = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedGroupDetail || !sessionToken) return;
-    try {
-      await createSessionVenue(
+    if (!selectedGroupDetail) return;
+    const finalVenueName =
+      venueMode === 'hogar'
+        ? venueHostName
+          ? `Hogar de ${venueHostName}`
+          : 'Hogar Anfitrión'
+        : venueMode === 'virtual'
+        ? 'Reunión Virtual'
+        : venueCustomName || 'Sede Especial';
+
+    const finalAddress =
+      venueMode === 'virtual'
+        ? venueCustomAddress || 'Enlace en línea'
+        : venueCustomAddress || 'Ubicación confirmada';
+
+    const finalTime = venueTimeOverride || selectedGroupDetail.hora_habitual || '19:30';
+
+    const newVenue: SessionVenueItem = {
+      week_number: venueTargetWeek,
+      venue_name: finalVenueName,
+      address: finalAddress,
+      maps_url:
+        venueMapsUrl ||
+        (venueMode !== 'virtual' && finalAddress ? `https://maps.google.com/?q=${encodeURIComponent(finalAddress)}` : null),
+      notes: venueArrivalHint || null,
+      venue_type:
+        venueMode === 'hogar'
+          ? 'private_home'
+          : venueMode === 'virtual'
+          ? 'virtual'
+          : venueMode === 'foraneo'
+          ? 'retreat'
+          : 'public_venue',
+      host_name: venueMode === 'hogar' ? venueHostName || null : null,
+      host_phone: null,
+      is_joint_meeting: venueIsSpecialEvent && venueIsJoint,
+      partner_group_name: venueIsSpecialEvent && venueIsJoint ? venuePartnerGroupName : null,
+      is_retreat: venueIsSpecialEvent && venueIsRetreat,
+      retreat_date_range: venueIsSpecialEvent && venueIsRetreat ? venueRetreatDates : null,
+      arrival_notes: venueArrivalHint || null,
+      time_override: venueTimeOverride || null,
+    };
+
+    // Actualización reactiva optimista instantánea
+    setSessionVenues((prev) => {
+      const filtered = prev.filter((v) => v.week_number !== venueTargetWeek);
+      return [...filtered, newVenue].sort((a, b) => a.week_number - b.week_number);
+    });
+
+    if (venueTargetWeek === 1) {
+      setSelectedGroupDetail((prev) =>
+        prev
+          ? {
+              ...prev,
+              full_venue_address: finalAddress,
+              host_reference: venueMode === 'hogar' ? venueHostName || prev.host_reference : finalVenueName,
+            }
+          : null
+      );
+    }
+
+    // Preparar mensaje determinista para WhatsApp
+    const placeDesc =
+      venueMode === 'hogar'
+        ? `en casa de ${venueHostName || 'anfitrión'}`
+        : venueMode === 'virtual'
+        ? 'en reunión virtual'
+        : `en ${finalVenueName}`;
+
+    const hintPart = venueArrivalHint ? ` Referencia de llegada: ${venueArrivalHint}.` : '';
+    const jointPart = venueIsSpecialEvent && venueIsJoint ? ` (Encuentro conjunto con ${venuePartnerGroupName})` : '';
+    const retreatPart =
+      venueIsSpecialEvent && venueIsRetreat
+        ? ` (Retiro especial de fin de temporada: ${venueRetreatDates || 'fechas por confirmar'})`
+        : '';
+    const mapLink = newVenue.maps_url || (venueMode !== 'virtual' ? `https://maps.google.com/?q=${encodeURIComponent(finalAddress)}` : '');
+    const mapPart = mapLink ? ` Ubicación en mapa: ${mapLink}` : '';
+
+    const waMsg = `Familia, aviso importante para nuestra reunión de la Semana ${venueTargetWeek}: Nos vemos ${placeDesc} a las ${finalTime} hrs.${jointPart}${retreatPart}${hintPart}${mapPart}`;
+    setLastDispatchedMessage(waMsg);
+    setLastDispatchedWaUrl(`https://wa.me/?text=${encodeURIComponent(waMsg)}`);
+    setShowWhatsAppDispatchBanner(true);
+    setShowVenueEditor(false);
+    setSiloToast(`Sede de la Semana ${venueTargetWeek} actualizada con éxito.`);
+
+    // Persistencia asíncrona hacia backend si hay sesión
+    if (sessionToken) {
+      createSessionVenue(
         selectedGroupDetail.id,
         {
-          week_number: Number(nomadicWeek),
-          venue_name: nomadicVenueName,
-          address: nomadicAddress,
-          maps_url: nomadicMapsUrl || undefined,
-          notes: nomadicNotes || undefined,
-          venue_type: nomadicVenueType,
-          host_name: nomadicHostName || undefined,
-          host_phone: nomadicHostPhone || undefined,
+          week_number: venueTargetWeek,
+          venue_name: finalVenueName,
+          address: finalAddress,
+          maps_url: newVenue.maps_url || undefined,
+          notes: newVenue.notes || undefined,
+          venue_type: newVenue.venue_type,
+          host_name: newVenue.host_name || undefined,
         },
         sessionToken
-      );
-      setShowNomadicVenueModal(false);
-      setNomadicVenueName('');
-      setNomadicAddress('');
-      setNomadicNotes('');
-      setNomadicHostName('');
-      setNomadicHostPhone('');
-      const vens = await fetchSessionVenues(selectedGroupDetail.id, sessionToken);
-      setSessionVenues(vens);
-      setSiloToast('✓ Sede de la semana programada exitosamente en el itinerario nómada.');
-    } catch (err: any) {
-      alert(err.message || 'Error programando sede semanal');
+      ).catch(() => {});
     }
   };
 
@@ -367,20 +518,18 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
         if (detail.audience_orientation) {
           setCellAudienceOrientation(detail.audience_orientation);
         }
-        const [vens, bcs, disc, closure, sabb, curr] = await Promise.all([
+        const [vens, bcs, disc, closure, sabb] = await Promise.all([
           fetchSessionVenues(me.active_groups[0].id, token).catch(() => []),
           fetchActivePastoralBroadcasts().catch(() => []),
           fetchDiscipleshipTrack(me.active_groups[0].id, token).catch(() => null),
           fetchSeasonClosure(me.active_groups[0].id, undefined, token).catch(() => null),
           fetchHostSabbatical(me.active_groups[0].id).catch(() => null),
-          fetchActiveCurriculum().catch(() => null),
         ]);
         setSessionVenues(vens);
         setActiveBroadcasts(bcs);
         setDiscipleshipTrack(disc);
         setSeasonClosure(closure);
         setHostSabbatical(sabb);
-        setCuratedCurriculum(curr);
       }
     } catch (e) {
       console.error(e);
@@ -464,7 +613,7 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
       const updated = await fetchDiscipleshipTrack(selectedGroupDetail.id, sessionToken);
       setDiscipleshipTrack(updated);
       setShowDiscipleModal(false);
-      setSiloToast('✓ Registro de discipulado intencional actualizado.');
+      setSiloToast('Registro de discipulado intencional actualizado.');
     } catch (err: any) {
       alert(err.message || 'Error al guardar discipulado');
     }
@@ -503,7 +652,7 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
       const updated = await fetchSeasonClosure(selectedGroupDetail.id, undefined, sessionToken);
       setSeasonClosure(updated);
       setShowClosureModal(false);
-      setSiloToast('✓ Pacto de cierre fraterno de temporada registrado.');
+      setSiloToast('Pacto de cierre fraterno de temporada registrado.');
     } catch (err: any) {
       alert(err.message || 'Error al registrar cierre de temporada');
     } finally {
@@ -782,7 +931,7 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
       );
       setShowHeadcountModal(false);
       setHcNotes('');
-      setSiloToast('✓ Asistencia y pulso de reunión registrados.');
+      setSiloToast('Asistencia y pulso de reunión registrados.');
       await loadProfile(sessionToken);
     } catch (err: any) {
       alert(err.message || 'Error registrando asistencia');
@@ -818,8 +967,9 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
   };
 
   const isLeader = isLeaderView || selectedGroupDetail?.is_responsible;
+  const week1CustomVenue = sessionVenues.find((v) => v.week_number === 1);
   const nextMeeting = selectedGroupDetail?.schedule?.[0];
-  const hasException = Boolean(nextMeeting?.note);
+  const hasException = Boolean(nextMeeting?.note || week1CustomVenue);
 
   // Comunidades activas para Elena Ramos (GOLD-331 / 2-A)
   const defaultElenaGroups: MemberGroupSummary[] = [
@@ -870,7 +1020,7 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
   }
 
   return (
-    <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 20px 80px 20px' }}>
+    <div style={{ width: '100%', maxWidth: '1280px', margin: '0 auto', padding: '24px 16px 80px 16px', boxSizing: 'border-box', overflowX: 'clip' }}>
       {/* Micro-Cápsula Editorial Plegable para Comunicado Pastoral (GOLD-337 / 8-A) */}
       {activeBroadcast && (
         <div
@@ -1058,7 +1208,6 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
             fontWeight: 600,
           }}
         >
-          <CheckCircle size={16} style={{ color: '#10B981' }} />
           <span>{siloToast}</span>
         </div>
       )}
@@ -1255,6 +1404,244 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
         </div>
       )}
 
+      {/* HUD Atómico de Reunión en Vivo para el Líder (Decisión 8-A) */}
+      {isLeader && selectedGroupDetail && (
+        <section
+          id="leader-live-meeting-hud"
+          aria-label="Panel de la reunión de esta semana"
+          style={{
+            backgroundColor: 'var(--bg-surface)',
+            border: '1.5px solid var(--accent-amber)',
+            borderRadius: 'var(--radius-lg)',
+            padding: '20px',
+            marginBottom: '24px',
+            boxShadow: 'var(--shadow-sm)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+            <div>
+              <span style={{
+                fontSize: '0.74rem',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                backgroundColor: 'var(--accent-amber-light)',
+                color: 'var(--accent-amber)',
+                padding: '3px 8px',
+                borderRadius: 'var(--radius-sm)',
+                display: 'inline-block',
+                marginBottom: '4px',
+              }}>
+                Reunión de Esta Semana
+              </span>
+              <h3 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--text-primary)' }}>
+                {selectedGroupDetail.nombre_publico}
+              </h3>
+            </div>
+            <div style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+              Horario: {selectedGroupDetail.hora_habitual || '20:00'} hrs
+            </div>
+          </div>
+
+          {/* Grid de Sede y Confirmados */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', marginBottom: '16px' }}>
+            {/* Tarjeta Sede */}
+            <div style={{
+              backgroundColor: 'var(--bg-primary)',
+              padding: '14px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-subtle)',
+            }}>
+              <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                Sede de Hoy
+              </div>
+              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2px' }}>
+                {selectedGroupDetail.venues?.[0]?.venue_name || selectedGroupDetail.host_reference || 'Casa de Anfitrión'}
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '10px' }}>
+                {selectedGroupDetail.full_venue_address || selectedGroupDetail.venues?.[0]?.address || 'Dirección registrada en el grupo'}
+              </div>
+              <a
+                id="btn-hud-open-maps"
+                href={selectedGroupDetail.venues?.[0]?.maps_url || (selectedGroupDetail.full_venue_address ? `https://maps.google.com/?q=${encodeURIComponent(selectedGroupDetail.full_venue_address)}` : '#')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary tap-target-44"
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '8px 14px', fontSize: '0.82rem', width: '100%', boxSizing: 'border-box' }}
+              >
+                Abrir en Maps o Waze
+              </a>
+            </div>
+
+            {/* Tarjeta Confirmados / RSVP */}
+            <div style={{
+              backgroundColor: 'var(--bg-primary)',
+              padding: '14px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-subtle)',
+            }}>
+              <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                Confirmados para Hoy
+              </div>
+              <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent-amber)', marginBottom: '2px' }}>
+                {selectedGroupDetail.catering_headcount_confirmed || 0} personas
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '10px' }}>
+                De un total de {selectedGroupDetail.members?.length || 1} integrantes del grupo
+              </div>
+              <a
+                id="btn-hud-remind-whatsapp"
+                href={selectedGroupDetail.whatsapp_chat_url || `https://wa.me/?text=${encodeURIComponent(`Hola comunidad, les recordamos la reunión de hoy en ${selectedGroupDetail.venues?.[0]?.venue_name || 'casa de anfitrión'} (${selectedGroupDetail.full_venue_address || ''}) a las ${selectedGroupDetail.hora_habitual}. Contamos con su asistencia.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary tap-target-44"
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '8px 14px', fontSize: '0.82rem', width: '100%', boxSizing: 'border-box' }}
+              >
+                Recordar por WhatsApp
+              </a>
+            </div>
+
+            {/* Tarjeta de Integración a Eventos o Convivio / Carne Asada */}
+            <div style={{
+              backgroundColor: 'var(--bg-primary)',
+              padding: '14px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-subtle)',
+            }}>
+              <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                Integración a Eventos / Convivio
+              </div>
+              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: leaderHarmonizedStatus ? 'var(--accent-amber)' : 'var(--text-primary)', marginBottom: '2px' }}>
+                {leaderHarmonizedStatus || 'Reunión en sede habitual'}
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '10px' }}>
+                Decidir si el grupo se suma al evento general o carne asada con otra célula
+              </div>
+              <button
+                type="button"
+                id="btn-hud-harmonizer"
+                onClick={() => setShowHarmonizerModal(true)}
+                className="btn-secondary tap-target-44"
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '8px 14px', fontSize: '0.82rem', width: '100%', boxSizing: 'border-box' }}
+              >
+                Integrar a Eventos o Convivio
+              </button>
+            </div>
+          </div>
+
+          {/* Registro Rápido de Asistencia en 2 Toques */}
+          <div style={{
+            backgroundColor: 'var(--bg-primary)',
+            padding: '14px',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border-subtle)',
+          }}>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+              Registro Rápido de Asistencia (Toca el rango y ánimo)
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginBottom: '10px' }}>
+              {[
+                { id: 'range_1_to_5', label: '1 a 5' },
+                { id: 'range_6_to_10', label: '6 a 10' },
+                { id: 'range_11_to_15', label: '11 a 15' },
+                { id: 'range_15_plus', label: '15 o más' },
+              ].map((bin) => (
+                <button
+                  key={bin.id}
+                  type="button"
+                  id={`btn-hud-range-${bin.id}`}
+                  onClick={() => setHcRangeBin(bin.id)}
+                  style={{
+                    padding: '8px 4px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: hcRangeBin === bin.id ? '2px solid var(--accent-amber)' : '1px solid var(--border-subtle)',
+                    backgroundColor: hcRangeBin === bin.id ? 'var(--accent-amber-light)' : 'var(--bg-surface)',
+                    color: hcRangeBin === bin.id ? 'var(--accent-amber)' : 'var(--text-secondary)',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                  }}
+                >
+                  {bin.label}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '12px' }}>
+              {[
+                { id: 'edifying', label: 'Edificante' },
+                { id: 'calm', label: 'Tranquilo' },
+                { id: 'challenging', label: 'Con Retos' },
+              ].map((mood) => (
+                <button
+                  key={mood.id}
+                  type="button"
+                  id={`btn-hud-mood-${mood.id}`}
+                  onClick={() => setHcMoodPulse(mood.id)}
+                  style={{
+                    padding: '8px 4px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: hcMoodPulse === mood.id ? '2px solid var(--accent-emerald)' : '1px solid var(--border-subtle)',
+                    backgroundColor: hcMoodPulse === mood.id ? 'var(--accent-emerald-light)' : 'var(--bg-surface)',
+                    color: hcMoodPulse === mood.id ? 'var(--accent-emerald)' : 'var(--text-secondary)',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                  }}
+                >
+                  {mood.label}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              id="btn-hud-quick-save-headcount"
+              onClick={async () => {
+                if (!selectedGroupDetail || !sessionToken) return;
+                const countMap: Record<string, number> = {
+                  range_1_to_5: 4,
+                  range_6_to_10: 8,
+                  range_11_to_15: 13,
+                  range_15_plus: 16,
+                };
+                try {
+                  await recordMeetingHeadcount(
+                    selectedGroupDetail.id,
+                    {
+                      meeting_date: new Date().toISOString().slice(0, 10),
+                      attendee_count: countMap[hcRangeBin] || 8,
+                      range_bin: hcRangeBin,
+                      mood_pulse: hcMoodPulse,
+                      did_meet: true,
+                    },
+                    sessionToken
+                  );
+                  setSiloToast('Asistencia y pulso guardados correctamente.');
+                  await loadProfile(sessionToken);
+                } catch (err: any) {
+                  alert(err.message || 'Error guardando asistencia');
+                }
+              }}
+              className="btn-primary tap-target-44"
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                backgroundColor: 'var(--accent-amber)',
+                color: '#161513',
+                fontWeight: 700,
+                fontSize: '0.88rem',
+              }}
+            >
+              Guardar Asistencia de Hoy
+            </button>
+          </div>
+        </section>
+      )}
+
       {/* Main Grid: Living Gathering Card y Directorio (Ergonomía Tableta y Móvil) */}
       <div className="silo-layout-grid" style={{ gap: '28px' }}>
         {/* Columna Izquierda: Pase Heroico y Próxima Reunión */}
@@ -1338,12 +1725,46 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>Facilitador</span>
                     <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{selectedGroupDetail.facilitator_name || 'Designado'}</strong>
                   </div>
-                  <div>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>Anfitrión</span>
+                  <div
+                    role={isLeader ? 'button' : undefined}
+                    tabIndex={isLeader ? 0 : undefined}
+                    id="btn-assign-host"
+                    onClick={isLeader ? () => handleOpenMemberPicker('host') : undefined}
+                    onKeyDown={isLeader ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenMemberPicker('host'); } } : undefined}
+                    style={{
+                      cursor: isLeader ? 'pointer' : 'default',
+                      padding: isLeader ? '4px 6px' : '0',
+                      borderRadius: 'var(--radius-sm)',
+                      backgroundColor: isLeader ? 'var(--bg-surface)' : 'transparent',
+                      border: isLeader ? '1px dashed var(--accent-amber)' : 'none',
+                    }}
+                    title={isLeader ? 'Toca para designar anfitrión entre los miembros del grupo' : undefined}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>Anfitrión</span>
+                      {isLeader && <span style={{ fontSize: '0.68rem', color: 'var(--accent-amber)', fontWeight: 700 }}>Cambiar</span>}
+                    </div>
                     <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{selectedGroupDetail.host_reference || 'Hogar Sede'}</strong>
                   </div>
-                  <div>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>Aprendiz</span>
+                  <div
+                    role={isLeader ? 'button' : undefined}
+                    tabIndex={isLeader ? 0 : undefined}
+                    id="btn-assign-apprentice"
+                    onClick={isLeader ? () => handleOpenMemberPicker('apprentice') : undefined}
+                    onKeyDown={isLeader ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenMemberPicker('apprentice'); } } : undefined}
+                    style={{
+                      cursor: isLeader ? 'pointer' : 'default',
+                      padding: isLeader ? '4px 6px' : '0',
+                      borderRadius: 'var(--radius-sm)',
+                      backgroundColor: isLeader ? 'var(--bg-surface)' : 'transparent',
+                      border: isLeader ? '1px dashed var(--accent-amber)' : 'none',
+                    }}
+                    title={isLeader ? 'Toca para asignar aprendiz en formación entre los miembros' : undefined}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>Aprendiz</span>
+                      {isLeader && <span style={{ fontSize: '0.68rem', color: 'var(--accent-amber)', fontWeight: 700 }}>Asignar</span>}
+                    </div>
                     <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{selectedGroupDetail.apprentice_name || 'En formación'}</strong>
                   </div>
                 </div>
@@ -1402,6 +1823,26 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                         <span>Ver Ruta en Maps / Waze</span>
                       </button>
 
+                      {isLeader && (
+                        <button
+                          type="button"
+                          id="btn-quick-adjust-venue"
+                          onClick={() => handleOpenVenueEditor(1)}
+                          className="btn-secondary"
+                          style={{
+                            minHeight: '44px',
+                            padding: '8px 14px',
+                            fontSize: '0.82rem',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                          }}
+                        >
+                          <Edit3 size={15} />
+                          <span>Ajustar Lugar u Horario</span>
+                        </button>
+                      )}
+
                       {selectedGroupDetail.host_reference && (
                         <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                           Anfitrión: <strong>{selectedGroupDetail.host_reference}</strong>
@@ -1409,108 +1850,153 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                       )}
                     </div>
 
-                    {/* Micro-RSVP de Confirmación Fraterna (La Prueba de Elena Ramos / GOLD-280) */}
-                    <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border-subtle)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
-                        <div>
-                          <span style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>
-                            ¿Quiénes vienen a cenar hoy?
-                          </span>
-                          <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
-                            Avisamos hasta {selectedGroupDetail.rsvp_cutoff_hours || 4} horas antes para cuidar los alimentos de la familia anfitriona.
-                          </span>
-                        </div>
-                        <div style={{
+                    {/* Despacho Asistido en 1 Toque a WhatsApp (GOLD-355 / 4-B) */}
+                    {isLeader && showWhatsAppDispatchBanner && lastDispatchedWaUrl && (
+                      <div
+                        id="whatsapp-dispatch-banner"
+                        style={{
+                          marginTop: '14px',
+                          padding: '12px 16px',
                           backgroundColor: 'var(--accent-emerald-light)',
-                          color: 'var(--accent-emerald)',
-                          padding: '3px 10px',
-                          borderRadius: 'var(--radius-full)',
-                          fontSize: '0.8rem',
-                          fontWeight: 700,
-                        }}>
-                          {selectedGroupDetail.catering_headcount_confirmed} confirmados
+                          border: '1px solid var(--accent-emerald-border)',
+                          borderRadius: 'var(--radius-md)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: '10px',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <CheckCircle size={18} style={{ color: 'var(--accent-emerald)', flexShrink: 0 }} />
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                            <strong>Aviso listo para el grupo:</strong>
+                            <p style={{ margin: '2px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.78rem' }}>
+                              {lastDispatchedMessage}
+                            </p>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <a
+                            id="btn-send-whatsapp-dispatch"
+                            href={lastDispatchedWaUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-primary"
+                            style={{
+                              backgroundColor: '#25D366',
+                              borderColor: '#25D366',
+                              color: '#FFFFFF',
+                              padding: '6px 14px',
+                              fontSize: '0.82rem',
+                              textDecoration: 'none',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                            }}
+                          >
+                            <MessageSquare size={15} />
+                            <span>Enviar por WhatsApp</span>
+                          </a>
+                          <button
+                            type="button"
+                            id="btn-dismiss-whatsapp-dispatch"
+                            onClick={() => setShowWhatsAppDispatchBanner(false)}
+                            className="btn-secondary"
+                            style={{ padding: '6px 10px', fontSize: '0.8rem' }}
+                          >
+                            Ocultar
+                          </button>
                         </div>
                       </div>
+                    )}
 
-                      <div className="rsvp-container">
-                        <button
-                          type="button"
-                          id="btn-rsvp-attending"
-                          onClick={() => handleRsvp('attending')}
-                          className={`rsvp-pill ${rsvpStatus === 'attending' ? 'is-attending' : ''}`}
-                        >
-                          <Check size={14} />
-                          <span>{rsvpStatus === 'attending' ? '✓ Sí voy a ir' : 'Sí voy a ir'}</span>
-                        </button>
-                        <button
-                          type="button"
-                          id="btn-rsvp-declined"
-                          onClick={() => handleRsvp('declined')}
-                          className={`rsvp-pill ${rsvpStatus === 'declined' ? 'is-declined' : ''}`}
-                        >
-                          <X size={14} />
-                          <span>{rsvpStatus === 'declined' ? 'No podré ir' : 'No podré ir'}</span>
-                        </button>
+                    {/* Micro-RSVP de Confirmación Personal (Exclusivo para vista de Miembro/Perfil Personal) */}
+                    {!isLeaderView && (
+                      <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border-subtle)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+                          <div>
+                            <span style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>
+                              ¿Quiénes vienen a cenar hoy?
+                            </span>
+                            <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                              Avisamos hasta {selectedGroupDetail.rsvp_cutoff_hours || 4} horas antes para cuidar los alimentos de la familia anfitriona.
+                            </span>
+                          </div>
+                          <div style={{
+                            backgroundColor: 'var(--accent-emerald-light)',
+                            color: 'var(--accent-emerald)',
+                            padding: '3px 10px',
+                            borderRadius: 'var(--radius-full)',
+                            fontSize: '0.8rem',
+                            fontWeight: 700,
+                          }}>
+                            {selectedGroupDetail.catering_headcount_confirmed} confirmados
+                          </div>
+                        </div>
+
+                        <div className="rsvp-container">
+                          <button
+                            type="button"
+                            id="btn-rsvp-attending"
+                            onClick={() => handleRsvp('attending')}
+                            className={`rsvp-pill ${rsvpStatus === 'attending' ? 'is-attending' : ''}`}
+                          >
+                            <span>Sí voy a ir</span>
+                          </button>
+                          <button
+                            type="button"
+                            id="btn-rsvp-declined"
+                            onClick={() => handleRsvp('declined')}
+                            className={`rsvp-pill ${rsvpStatus === 'declined' ? 'is-declined' : ''}`}
+                          >
+                            <span>No podré ir</span>
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Nuestra Guía de Reunión en 4 Momentos (GOLD-280 / GOLD-281) */}
+                {/* Nuestra Guía de Reunión: Los 4 Elementos del Santuario en el Hogar */}
                 <div style={{
                   backgroundColor: 'var(--bg-primary)',
                   borderRadius: 'var(--radius-md)',
-                  padding: '18px',
+                  padding: '20px',
                   marginBottom: '28px',
                   border: '1px solid var(--border-subtle)',
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
                     <h4 style={{ fontSize: '1.15rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
                       <BookOpen size={18} style={{ color: 'var(--accent-indigo)' }} />
-                      <span>Nuestra Guía de Reunión (4 Momentos)</span>
+                      <span>Ritmo del Encuentro • Los 4 Elementos del Santuario</span>
                     </h4>
-                    <button
-                      type="button"
-                      id="btn-pair-timer"
-                      onClick={() => setPairTimer(pairTimer !== null ? null : 300)}
-                      className={pairTimer !== null ? 'btn-primary' : 'btn-secondary'}
-                      style={{
-                        minHeight: '36px',
-                        padding: '4px 12px',
-                        fontSize: '0.78rem',
-                        backgroundColor: pairTimer !== null ? 'var(--accent-rose)' : undefined,
-                        borderColor: pairTimer !== null ? 'var(--accent-rose)' : undefined,
-                      }}
-                    >
-                      <Timer size={14} />
-                      <span>
-                        {pairTimer !== null
-                          ? `Parejas: ${Math.floor(pairTimer / 60)}:${(pairTimer % 60).toString().padStart(2, '0')}`
-                          : 'Plática en parejas (5 min)'}
-                      </span>
-                    </button>
                   </div>
 
+                  <p style={{ margin: '0 0 14px 0', fontSize: '0.84rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                    En Amor y Gracia no imponemos temas semanales ni currículos homogéneos entre sedes. Cada célula es un grupo de afinidad e interés con vida propia; basta vivir con libertad y sencillez los 4 momentos del santuario en casa. Si un grupo desea estudiar un libro bíblico específico (ej. Éxodo), se acuerda fraternalmente en diálogo informal con líderes o presbíteros.
+                  </p>
+
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
-                    <div style={{ padding: '10px', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--accent-amber)', fontWeight: 700, display: 'block' }}>1. BIENVENIDA</span>
+                    <div style={{ padding: '12px', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--accent-amber)', fontWeight: 700, display: 'block' }}>1. MESA Y BIENVENIDA</span>
                       <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Acción de gracias</strong>
-                      <p style={{ margin: '4px 0 0 0', fontSize: '0.76rem', color: 'var(--text-muted)' }}>Rompehielo informal libre.</p>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '0.76rem', color: 'var(--text-muted)' }}>Hospitalidad, pan, café y puesta al día sin prisas.</p>
                     </div>
-                    <div style={{ padding: '10px', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--accent-indigo)', fontWeight: 700, display: 'block' }}>2. PALABRA</span>
-                      <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Lectura bíblica</strong>
-                      <p style={{ margin: '4px 0 0 0', fontSize: '0.76rem', color: 'var(--text-muted)' }}>Lectura compartida en voz alta.</p>
+                    <div style={{ padding: '12px', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--accent-indigo)', fontWeight: 700, display: 'block' }}>2. LA PALABRA</span>
+                      <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Diálogo bíblico</strong>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '0.76rem', color: 'var(--text-muted)' }}>Conversación viva alrededor de las Escrituras según la afinidad del grupo.</p>
                     </div>
-                    <div style={{ padding: '10px', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                    <div style={{ padding: '12px', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                       <span style={{ fontSize: '0.72rem', color: 'var(--accent-emerald)', fontWeight: 700, display: 'block' }}>3. INTERCESIÓN</span>
-                      <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Oración mutua</strong>
-                      <p style={{ margin: '4px 0 0 0', fontSize: '0.76rem', color: 'var(--text-muted)' }}>Unos por otros en parejas.</p>
+                      <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Cuidado y oración</strong>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '0.76rem', color: 'var(--text-muted)' }}>Escucha atenta y cobertura mutua en gracia.</p>
                     </div>
-                    <div style={{ padding: '10px', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--accent-amber)', fontWeight: 700, display: 'block' }}>4. CONVIVENCIA</span>
-                      <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Compartir alimentos</strong>
-                      <p style={{ margin: '4px 0 0 0', fontSize: '0.76rem', color: 'var(--text-muted)' }}>Refrigerio y comunión fraternal.</p>
+                    <div style={{ padding: '12px', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--accent-amber)', fontWeight: 700, display: 'block' }}>4. BENDICIÓN</span>
+                      <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Paz y testimonio</strong>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '0.76rem', color: 'var(--text-muted)' }}>Despedida fraternal y testimonio de buen vecino en Durango.</p>
                     </div>
                   </div>
                 </div>
@@ -1884,104 +2370,6 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                   </div>
                 )}
 
-                {/* 📖 CURRÍCULO LITÚRGICO CURADO SEMANAL (GOLD-277) */}
-                <div style={{
-                  marginBottom: '28px',
-                  backgroundColor: 'var(--bg-primary)',
-                  border: '1.5px solid var(--accent-emerald)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '20px',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                    <h4 style={{ fontSize: '1.15rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                      <BookOpen size={18} style={{ color: 'var(--accent-emerald)' }} />
-                      <span>Guía y Temas Semanales • Amor y Gracia Durango</span>
-                    </h4>
-                    <span className="badge-pill" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10B981', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
-                      {curatedCurriculum ? `Semana ${curatedCurriculum.week_number}` : 'Currículo Activo'}
-                    </span>
-                  </div>
-
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.4 }}>
-                    Guía semanal homologada para todas las células de los 5 Macro-Campuses en Durango. El facilitador modera la conversación basada en las Escrituras sin crear doctrinas aisladas.
-                  </p>
-
-                  <div style={{
-                    backgroundColor: 'var(--bg-surface)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '18px',
-                    border: '1px solid var(--border-subtle)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '14px',
-                  }}>
-                    <div>
-                      <div style={{ fontSize: '0.74rem', textTransform: 'uppercase', color: 'var(--accent-emerald)', fontWeight: 800, letterSpacing: '0.05em' }}>
-                        {curatedCurriculum?.scripture_passage || '1 Tesalonicenses 4:11-12'}
-                      </div>
-                      <h5 style={{ fontSize: '1.2rem', margin: '4px 0 6px 0', color: 'var(--text-primary)' }}>
-                        {curatedCurriculum?.title || 'Vivir en Paz y Trabajar en Quietud (Testimonio Vecinal en Durango)'}
-                      </h5>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                        {curatedCurriculum?.pastoral_notes || 'El amor fraternal no es un sentimiento abstracto: se manifiesta en cómo nos conducimos con los vecinos de nuestra cuadra, cuidando los decibeles nocturnos y la cortesía ciudadana.'}
-                      </div>
-                    </div>
-
-                    {/* Pregunta para Dinámica en Parejas (5 min) */}
-                    <div style={{
-                      padding: '14px',
-                      borderRadius: 'var(--radius-sm)',
-                      backgroundColor: 'rgba(99, 102, 241, 0.05)',
-                      border: '1px solid rgba(99, 102, 241, 0.2)',
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--accent-indigo)' }}>
-                          Pregunta para la Dinámica en Parejas (5 Minutos)
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setPairTimer(300)}
-                          className="btn-secondary"
-                          style={{ minHeight: '28px', padding: '2px 10px', fontSize: '0.74rem' }}
-                        >
-                          <Timer size={12} />
-                          <span>{pairTimer !== null ? `${Math.floor(pairTimer / 60)}:${(pairTimer % 60).toString().padStart(2, '0')}` : 'Iniciar Timer 5 min'}</span>
-                        </button>
-                      </div>
-                      <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)', fontStyle: 'italic' }}>
-                        "{curatedCurriculum?.pair_share_question || '¿En qué área de tu vida cotidiana o vecinal te cuesta más trabajo mantener la paz y el buen testimonio con quienes no conocen a Dios?'}"
-                      </p>
-                    </div>
-
-                    {/* Video Prompt URL */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
-                        <Video size={16} style={{ color: 'var(--accent-amber)' }} />
-                        <span>Disparador en Video (Pastor Josh García • 3 min)</span>
-                      </div>
-                      <a
-                        href={curatedCurriculum?.video_prompt_url || 'https://amorygracia.mx/video-prompt-semana4'}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn-primary"
-                        style={{
-                          minHeight: '32px',
-                          padding: '4px 14px',
-                          fontSize: '0.8rem',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          backgroundColor: '#0F172A',
-                          color: '#FEF3C7',
-                        }}
-                      >
-                        <Play size={13} />
-                        <span>Ver Video Disparador</span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
                 {/* 🛌 RADAR DE FATIGA DEL ANFITRIÓN Y SABÁTICO SAGRADO (GOLD-275 / Confinado a Líder GOLD-334) */}
                 {isLeader && (
                   <div style={{
@@ -2053,171 +2441,207 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                   </div>
                 )}
 
-                {/* 🌱 FISIÓN CELULAR POR UMBRAL DE DUNBAR (GOLD-279 / Confinado a Líder GOLD-334) */}
-                {isLeader && (
+                {/* Confinamiento Estacional: Semanas 10 a 12 (Decisión 9-A) */}
+                {(currentSeasonWeek >= 10 || showSeasonClosureSection) ? (
+                  <>
+                    {/* Fisión Celular por Umbral de Dunbar */}
+                    {isLeader && (
+                      <div style={{
+                        marginBottom: '28px',
+                        backgroundColor: 'var(--bg-primary)',
+                        border: selectedGroupDetail.members.length >= 14 ? '1.5px solid #10B981' : '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '20px',
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                          <h4 style={{ fontSize: '1.15rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                            <GitBranch size={18} style={{ color: '#10B981' }} />
+                            <span>Fisión Celular con Núcleo Semilla (Umbral Dunbar N ≥ 14)</span>
+                          </h4>
+                          <span className="badge-pill" style={{
+                            backgroundColor: selectedGroupDetail.members.length >= 14 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                            color: selectedGroupDetail.members.length >= 14 ? '#10B981' : 'var(--text-muted)',
+                          }}>
+                            {selectedGroupDetail.members.length} Miembros Activos
+                          </span>
+                        </div>
+
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '14px', lineHeight: 1.4 }}>
+                          Al superar los 14 integrantes se activa la fisión celular planificada para preservar la intimidad relacional. La célula no se fragmenta al azar: el Aprendiz Facilitador sale con un <strong>Núcleo Semilla de 3 a 4 miembros</strong> para plantar una nueva comunidad en Durango.
+                        </p>
+
+                        {fissionResult ? (
+                          <div style={{
+                            padding: '14px 16px',
+                            backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                            border: '1px solid rgba(16, 185, 129, 0.25)',
+                            borderRadius: 'var(--radius-md)',
+                            color: '#10B981',
+                            fontSize: '0.88rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            fontWeight: 600,
+                          }}>
+                            <CheckCircle size={18} />
+                            <span>
+                              Fisión completada exitosamente. Célula hija plantada con {fissionResult.child_initial_count} miembros fundadores. Célula madre queda con {fissionResult.parent_remaining_count} miembros.
+                            </span>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                            <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+                              {selectedGroupDetail.members.length >= 14
+                                ? 'Umbral de 14 miembros: Tu grupo está preparado para planear la multiplicación fraternal en el Cierre de Temporada.'
+                                : 'Crecimiento natural hacia la bendición de multiplicación.'}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Cierre Fraterno de Temporada */}
+                    <div style={{
+                      marginBottom: '28px',
+                      backgroundColor: 'var(--bg-primary)',
+                      border: '1.5px solid var(--accent-indigo)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '20px',
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                        <h4 style={{ fontSize: '1.15rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                          <HeartHandshake size={18} style={{ color: 'var(--accent-indigo)' }} />
+                          <span>Cierre Fraterno de Temporada</span>
+                        </h4>
+                        {isLeader && (
+                          <button
+                            type="button"
+                            onClick={() => setShowClosureModal(true)}
+                            className="btn-secondary"
+                            style={{ minHeight: '32px', padding: '4px 12px', fontSize: '0.8rem' }}
+                          >
+                            <span>{seasonClosure ? 'Modificar Pacto' : 'Asentar Pacto de Cierre'}</span>
+                          </button>
+                        )}
+                      </div>
+
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '14px', lineHeight: 1.4 }}>
+                        Hacia las últimas semanas de la temporada, la comunidad conversa abiertamente para discernir si continuarán juntos, se multiplicarán fraternalmente o tomarán un descanso sabático.
+                      </p>
+
+                      {seasonClosure ? (
+                        <div style={{
+                          backgroundColor: 'var(--bg-surface)',
+                          padding: '14px 16px',
+                          borderRadius: 'var(--radius-md)',
+                          border: '1px solid var(--border-subtle)',
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                            <span className={`badge ${
+                              seasonClosure.closure_decision === 'multiply_with_disciple'
+                                ? 'badge-emerald'
+                                : seasonClosure.closure_decision === 'continue_same'
+                                ? 'badge-indigo'
+                                : 'badge-amber'
+                            }`}>
+                              {seasonClosure.closure_decision === 'multiply_with_disciple'
+                                ? 'Multiplicación con Discípulo'
+                                : seasonClosure.closure_decision === 'continue_same'
+                                ? 'Continuar Misma Célula'
+                                : 'Descanso Sabático Fraterno'}
+                            </span>
+                            <strong style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                              Pacto Acordado para la Próxima Temporada
+                            </strong>
+                          </div>
+                          {isLeader && (seasonClosure.closure_decision === 'multiply_with_disciple' || selectedGroupDetail.members.length >= 14) && (
+                            <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'flex-end' }}>
+                              <button
+                                type="button"
+                                id="btn-launch-fission-closure"
+                                onClick={() => {
+                                  setFissionApprenticeName(selectedGroupDetail.apprentice_name || '');
+                                  setFissionNewGroupName(`Célula ${selectedGroupDetail.nombre_publico} - Norte`);
+                                  setShowFissionModal(true);
+                                }}
+                                className="btn-primary"
+                                style={{
+                                  minHeight: '36px',
+                                  padding: '6px 14px',
+                                  fontSize: '0.82rem',
+                                  backgroundColor: '#10B981',
+                                  borderColor: '#10B981',
+                                }}
+                              >
+                                <GitBranch size={14} />
+                                <span>Iniciar Fisión Celular Dunbar con Núcleo Semilla</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div style={{
+                          padding: '14px 16px',
+                          backgroundColor: 'var(--bg-surface)',
+                          borderRadius: 'var(--radius-md)',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                          gap: '10px',
+                        }}>
+                          <span style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+                            {isLeader
+                              ? 'El pacto de cierre aún no ha sido asentado para esta temporada.'
+                              : 'Al acercarse el final del ciclo platicaremos juntos los siguientes pasos.'}
+                          </span>
+                          {isLeader && (
+                            <button
+                              type="button"
+                              onClick={() => setShowClosureModal(true)}
+                              className="btn-primary"
+                              style={{ minHeight: '34px', padding: '6px 14px', fontSize: '0.82rem' }}
+                            >
+                              <CheckCircle size={14} />
+                              <span>Asentar Decisión Comunitaria</span>
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
                   <div style={{
                     marginBottom: '28px',
                     backgroundColor: 'var(--bg-primary)',
-                    border: selectedGroupDetail.members.length >= 14 ? '1.5px solid #10B981' : '1px solid var(--border-subtle)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: 'var(--radius-md)',
-                    padding: '20px',
+                    padding: '16px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '12px',
                   }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                      <h4 style={{ fontSize: '1.15rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                        <GitBranch size={18} style={{ color: '#10B981' }} />
-                        <span>Fisión Celular con Núcleo Semilla (Umbral Dunbar N ≥ 14)</span>
-                      </h4>
-                      <span className="badge-pill" style={{
-                        backgroundColor: selectedGroupDetail.members.length >= 14 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                        color: selectedGroupDetail.members.length >= 14 ? '#10B981' : 'var(--text-muted)',
-                      }}>
-                        {selectedGroupDetail.members.length} Miembros Activos
-                      </span>
+                    <div>
+                      <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                        Cierre de Temporada y Multiplicación
+                      </strong>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        Programado para las semanas 10 a 12 de la temporada. Semana actual: {currentSeasonWeek} de 12.
+                      </p>
                     </div>
-
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '14px', lineHeight: 1.4 }}>
-                      Al superar los 14 integrantes se activa la fisión celular planificada para preservar la intimidad relacional. La célula no se fragmenta al azar: el Aprendiz Facilitador sale con un <strong>Núcleo Semilla de 3 a 4 miembros</strong> para plantar una nueva comunidad en Durango.
-                    </p>
-
-                    {fissionResult ? (
-                      <div style={{
-                        padding: '14px 16px',
-                        backgroundColor: 'rgba(16, 185, 129, 0.08)',
-                        border: '1px solid rgba(16, 185, 129, 0.25)',
-                        borderRadius: 'var(--radius-md)',
-                        color: '#10B981',
-                        fontSize: '0.88rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        fontWeight: 600,
-                      }}>
-                        <CheckCircle size={18} />
-                        <span>
-                          Fisión completada exitosamente. Célula hija plantada con {fissionResult.child_initial_count} miembros fundadores. Célula madre queda con {fissionResult.parent_remaining_count} miembros.
-                        </span>
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                        <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-                          {selectedGroupDetail.members.length >= 14
-                            ? 'Umbral de 14 miembros: Tu grupo está preparado para planear la multiplicación fraternal en el Cierre de Temporada.'
-                            : 'Crecimiento natural hacia la bendición de multiplicación.'}
-                        </div>
-                      </div>
-                    )}
+                    <button
+                      type="button"
+                      id="btn-show-seasonal-governance"
+                      onClick={() => setShowSeasonClosureSection(true)}
+                      className="btn-secondary"
+                      style={{ padding: '6px 14px', fontSize: '0.8rem' }}
+                    >
+                      Ver Gobernanza de Cierre
+                    </button>
                   </div>
                 )}
-
-                {/* 🤝 CIERRE FRATERNO DE TEMPORADA (GOLD-264) */}
-                <div style={{
-                  marginBottom: '28px',
-                  backgroundColor: 'var(--bg-primary)',
-                  border: '1.5px solid var(--accent-indigo)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '20px',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                    <h4 style={{ fontSize: '1.15rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                      <HeartHandshake size={18} style={{ color: 'var(--accent-indigo)' }} />
-                      <span>Cierre Fraterno de Temporada</span>
-                    </h4>
-                    {isLeader && (
-                      <button
-                        type="button"
-                        onClick={() => setShowClosureModal(true)}
-                        className="btn-secondary"
-                        style={{ minHeight: '32px', padding: '4px 12px', fontSize: '0.8rem' }}
-                      >
-                        <span>{seasonClosure ? 'Modificar Pacto' : 'Asentar Pacto de Cierre'}</span>
-                      </button>
-                    )}
-                  </div>
-
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '14px', lineHeight: 1.4 }}>
-                    Hacia las últimas semanas de la temporada, la comunidad conversa abiertamente para discernir si continuarán juntos, se multiplicarán fraternalmente o tomarán un descanso sabático.
-                  </p>
-
-                  {seasonClosure ? (
-                    <div style={{
-                      backgroundColor: 'var(--bg-surface)',
-                      padding: '14px 16px',
-                      borderRadius: 'var(--radius-md)',
-                      border: '1px solid var(--border-subtle)',
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                        <span className={`badge ${
-                          seasonClosure.closure_decision === 'multiply_with_disciple'
-                            ? 'badge-emerald'
-                            : seasonClosure.closure_decision === 'continue_same'
-                            ? 'badge-indigo'
-                            : 'badge-amber'
-                        }`}>
-                          {seasonClosure.closure_decision === 'multiply_with_disciple'
-                            ? 'Multiplicación con Discípulo'
-                            : seasonClosure.closure_decision === 'continue_same'
-                            ? 'Continuar Misma Célula'
-                            : 'Descanso Sabático Fraterno'}
-                        </span>
-                        <strong style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
-                          Pacto Acordado para la Próxima Temporada
-                        </strong>
-                      </div>
-                      {isLeader && (seasonClosure.closure_decision === 'multiply_with_disciple' || selectedGroupDetail.members.length >= 14) && (
-                        <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'flex-end' }}>
-                          <button
-                            type="button"
-                            id="btn-launch-fission-closure"
-                            onClick={() => {
-                              setFissionApprenticeName(selectedGroupDetail.apprentice_name || '');
-                              setFissionNewGroupName(`Célula ${selectedGroupDetail.nombre_publico} - Norte`);
-                              setShowFissionModal(true);
-                            }}
-                            className="btn-primary"
-                            style={{
-                              minHeight: '36px',
-                              padding: '6px 14px',
-                              fontSize: '0.82rem',
-                              backgroundColor: '#10B981',
-                              borderColor: '#10B981',
-                            }}
-                          >
-                            <GitBranch size={14} />
-                            <span>Iniciar Fisión Celular Dunbar con Núcleo Semilla</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div style={{
-                      padding: '14px 16px',
-                      backgroundColor: 'var(--bg-surface)',
-                      borderRadius: 'var(--radius-md)',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '10px',
-                    }}>
-                      <span style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-                        {isLeader
-                          ? 'El pacto de cierre aún no ha sido asentado para esta temporada.'
-                          : 'Al acercarse el final del ciclo platicaremos juntos los siguientes pasos.'}
-                      </span>
-                      {isLeader && (
-                        <button
-                          type="button"
-                          onClick={() => setShowClosureModal(true)}
-                          className="btn-primary"
-                          style={{ minHeight: '34px', padding: '6px 14px', fontSize: '0.82rem' }}
-                        >
-                          <CheckCircle size={14} />
-                          <span>Asentar Decisión Comunitaria</span>
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
 
                 {/* ITINERARIO NÓMADA Y SEDES SEMANALES (GOLD-261 / GOLD-269) */}
                 <div>
@@ -2242,7 +2666,8 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                       {isLeader && (
                         <button
                           type="button"
-                          onClick={() => setShowNomadicVenueModal(true)}
+                          id="btn-open-venue-editor-header"
+                          onClick={() => handleOpenVenueEditor(1)}
                           className="btn-primary"
                           style={{ minHeight: '34px', padding: '4px 12px', fontSize: '0.8rem' }}
                         >
@@ -2257,9 +2682,15 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                     {selectedGroupDetail.schedule.map((item, idx) => {
                       const weekNum = idx + 1;
                       const customVenue = sessionVenues.find((v) => v.week_number === weekNum);
+                      const displayTime = customVenue?.time_override || item.time;
                       return (
                         <div
                           key={idx}
+                          id={`btn-schedule-week-${weekNum}`}
+                          role={isLeader ? 'button' : undefined}
+                          tabIndex={isLeader ? 0 : undefined}
+                          onClick={isLeader ? () => handleOpenVenueEditor(weekNum) : undefined}
+                          onKeyDown={isLeader ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenVenueEditor(weekNum); } } : undefined}
                           style={{
                             padding: '12px 14px',
                             borderRadius: 'var(--radius-md)',
@@ -2277,31 +2708,73 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '4px',
+                            cursor: isLeader ? 'pointer' : 'default',
+                            transition: 'all 0.15s ease',
                           }}
                         >
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>
                               Semana {weekNum} • {item.date}
                             </span>
-                            <span style={{ color: 'var(--accent-emerald)', fontWeight: 700 }}>{item.time}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ color: customVenue?.time_override ? 'var(--accent-amber)' : 'var(--accent-emerald)', fontWeight: 700 }}>
+                                {displayTime}
+                              </span>
+                              {isLeader && (
+                                <span style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', fontWeight: 700 }}>
+                                  Ajustar
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           {customVenue ? (
                             <div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                                <span className={customVenue.venue_type === 'public_venue' ? 'badge badge-emerald' : 'badge badge-amber'}>
-                                  {customVenue.venue_type === 'public_venue' ? 'Taquería / Público' : 'Casa Rotativa'}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px', flexWrap: 'wrap' }}>
+                                <span className={customVenue.venue_type === 'public_venue' ? 'badge badge-emerald' : customVenue.venue_type === 'virtual' ? 'badge badge-indigo' : customVenue.venue_type === 'retreat' || customVenue.is_retreat ? 'badge badge-terracotta' : 'badge badge-amber'}>
+                                  {customVenue.venue_type === 'virtual'
+                                    ? 'Virtual'
+                                    : customVenue.venue_type === 'retreat' || customVenue.is_retreat
+                                    ? 'Retiro / Cabañas'
+                                    : customVenue.venue_type === 'public_venue'
+                                    ? 'Público / Misión'
+                                    : 'Hogar Particular'}
                                 </span>
                                 <strong style={{ color: 'var(--text-primary)' }}>{customVenue.venue_name}</strong>
                               </div>
+
+                              {customVenue.is_joint_meeting && (
+                                <div style={{ marginTop: '3px' }}>
+                                  <span className="badge badge-indigo" style={{ fontSize: '0.72rem' }}>
+                                    Encuentro Conjunto con {customVenue.partner_group_name || 'Célula Hermana'}
+                                  </span>
+                                </div>
+                              )}
+
+                              {customVenue.is_retreat && customVenue.retreat_date_range && (
+                                <div style={{ marginTop: '3px' }}>
+                                  <span className="badge badge-terracotta" style={{ fontSize: '0.72rem' }}>
+                                    Fechas: {customVenue.retreat_date_range}
+                                  </span>
+                                </div>
+                              )}
+
                               <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '2px' }}>
                                 {customVenue.address}
                               </div>
+
+                              {customVenue.arrival_notes && (
+                                <div style={{ fontSize: '0.78rem', color: 'var(--accent-amber)', marginTop: '2px' }}>
+                                  Llegada: {customVenue.arrival_notes}
+                                </div>
+                              )}
+
                               {customVenue.host_name && (
-                                <div style={{ fontSize: '0.78rem', color: 'var(--accent-amber)', marginTop: '2px', fontWeight: 600 }}>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px', fontWeight: 600 }}>
                                   Anfitrión: {customVenue.host_name} {customVenue.host_phone ? `(${customVenue.host_phone})` : ''}
                                 </div>
                               )}
+
                               {customVenue.notes && (
                                 <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '2px', fontStyle: 'italic' }}>
                                   Nota: {customVenue.notes}
@@ -2504,10 +2977,10 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
             )}
           </div>
 
-          {/* Sección: Vida de la Iglesia y Servicio Comunitario (Solo para miembros / Mi Grupo, omitido en vista del Líder para evitar redundancia) */}
+          {/* Sección: Vida de la Iglesia y Servicio Comunitario (Exclusivo para vista de Miembro/Perfil Personal) */}
           {!isLeaderView && (
             <div style={{ marginTop: '28px' }}>
-              <CommunityInitiativesHub publicShowcaseOnly={false} />
+              <CommunityInitiativesHub publicShowcaseOnly={false} role="member" />
             </div>
           )}
         </div>
@@ -3305,48 +3778,296 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
         />
       )}
 
-      {/* Modal: Programación de Sede / Hogar Rotativo en Itinerario Nómada (GOLD-261) */}
-      {showNomadicVenueModal && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.85)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1100,
-          padding: '20px',
-        }}>
-          <div className="surface-elevated animate-fade-in" style={{ maxWidth: '580px', width: '100%', maxHeight: '90vh', overflowY: 'auto', padding: '32px', position: 'relative' }}>
-            <button onClick={() => setShowNomadicVenueModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', color: 'var(--text-muted)' }}>
+      {/* BOTTOM SHEET / MODAL: Selector de Miembros y Asignación Fraterna de Roles (GOLD-349 a GOLD-351 / Ciclo 17) */}
+      {showMemberPicker && selectedGroupDetail && (
+        <div
+          id="member-picker-backdrop"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowMemberPicker(false);
+          }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1100,
+            padding: '16px',
+          }}
+        >
+          <div
+            id="member-picker-modal"
+            className="surface-elevated animate-fade-in"
+            style={{
+              maxWidth: '520px',
+              width: '100%',
+              maxHeight: '85vh',
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '24px',
+              position: 'relative',
+              borderRadius: 'var(--radius-lg)',
+              boxSizing: 'border-box',
+            }}
+          >
+            <button
+              type="button"
+              id="btn-close-member-picker"
+              onClick={() => setShowMemberPicker(false)}
+              aria-label="Cerrar selector de miembros"
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                color: 'var(--text-muted)',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
               <X size={20} />
             </button>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <Home size={24} style={{ color: 'var(--accent-amber)' }} />
-              <h3 style={{ fontSize: '1.35rem', margin: 0, color: 'var(--text-primary)' }}>Itinerario Nómada: Asignar Sede Semanal</h3>
+              <Users size={22} style={{ color: 'var(--accent-amber)' }} />
+              <h3 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--text-primary)' }}>
+                {memberPickerRole === 'apprentice'
+                  ? 'Asignar Aprendiz en Formación'
+                  : memberPickerRole === 'host'
+                  ? 'Designar Hogar Anfitrión'
+                  : 'Designar Líder de Nueva Célula'}
+              </h3>
             </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.86rem', marginBottom: '20px', lineHeight: 1.4 }}>
-              Define la sede, taquería o casa anfitriona para una de las 12 semanas de la temporada. Los hogares rotativos son parte natural del diseño de la célula.
+
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', margin: '0 0 16px 0', lineHeight: 1.4 }}>
+              {memberPickerRole === 'apprentice'
+                ? 'El aprendiz camina junto al líder facilitando dinámicas y preparándose para el envío pastoral.'
+                : memberPickerRole === 'host'
+                ? 'Selecciona a un hermano del grupo cuyo hogar o servicio abre las puertas para la comunión.'
+                : 'Elige al hermano maduro que encabezará el grupo resultante tras la fisión comunitaria.'}
             </p>
 
-            <form onSubmit={handleCreateNomadicVenue} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            {/* Sabana Táctil con Búsqueda en Vivo insensible a acentos (Decisión 2-B / GOLD-350) */}
+            <div style={{ position: 'relative', marginBottom: '14px' }}>
+              <Search
+                size={16}
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--text-muted)',
+                }}
+              />
+              <input
+                type="text"
+                id="member-search-input"
+                autoFocus
+                placeholder="Buscar por nombre o apellido..."
+                value={memberSearchQuery}
+                onChange={(e) => setMemberSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px 10px 36px',
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border-strong)',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.88rem',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            {/* Lista Filtrada de Miembros */}
+            <div
+              id="member-picker-list"
+              style={{
+                overflowY: 'auto',
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                maxHeight: '360px',
+                paddingRight: '4px',
+              }}
+            >
+              {(() => {
+                const normQuery = memberSearchQuery.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                const members = (selectedGroupDetail.members || []).filter((m) => {
+                  if (!normQuery) return true;
+                  const normName = m.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                  return normName.includes(normQuery);
+                });
+
+                if (members.length === 0) {
+                  return (
+                    <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)', fontSize: '0.86rem' }}>
+                      No se encontraron miembros con "{memberSearchQuery}".
+                    </div>
+                  );
+                }
+
+                return members.map((m) => {
+                  const mId = m.id || m.name.toLowerCase().replace(/\s+/g, '_');
+                  const isCurrent =
+                    (memberPickerRole === 'apprentice' && selectedGroupDetail.apprentice_name === m.name) ||
+                    (memberPickerRole === 'host' && selectedGroupDetail.host_reference === m.name);
+
+                  return (
+                    <button
+                      key={mId}
+                      type="button"
+                      id={`btn-pick-member-${mId}`}
+                      onClick={() => handleSelectMember(m.name, m.id)}
+                      className="tap-target-48"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 14px',
+                        backgroundColor: isCurrent ? 'var(--accent-amber-light)' : 'var(--bg-primary)',
+                        border: isCurrent ? '1.5px solid var(--accent-amber)' : '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-md)',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <MonogramAvatar name={m.name} size="sm" />
+                        <div>
+                          <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>
+                            {m.name}
+                          </span>
+                          <span style={{ fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
+                            {m.is_responsible ? 'Facilitador del Grupo' : 'Miembro de la Célula'}
+                          </span>
+                        </div>
+                      </div>
+                      {isCurrent ? (
+                        <span className="badge badge-amber" style={{ fontSize: '0.72rem' }}>
+                          Actual
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '0.78rem', color: 'var(--accent-amber)', fontWeight: 600 }}>
+                          Asignar
+                        </span>
+                      )}
+                    </button>
+                  );
+                });
+              })()}
+            </div>
+
+            {/* Pie con botón de Restablecer (Asignación Fraterna / GOLD-351) */}
+            <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button
+                type="button"
+                id="btn-reset-member-role"
+                onClick={handleResetMemberRole}
+                className="btn-secondary"
+                style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+              >
+                Restablecer Asignación
+              </button>
+              <button
+                type="button"
+                id="btn-cancel-member-picker"
+                onClick={() => setShowMemberPicker(false)}
+                className="btn-secondary"
+                style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BOTTOM SHEET / MODAL: Editor Logístico Agnóstico de Sedes (GOLD-352 a GOLD-355 / Ciclo 18) */}
+      {showVenueEditor && selectedGroupDetail && (
+        <div
+          id="venue-editor-backdrop"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowVenueEditor(false);
+          }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1100,
+            padding: '16px',
+          }}
+        >
+          <div
+            id="venue-editor-modal"
+            className="surface-elevated animate-fade-in"
+            style={{
+              maxWidth: '580px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              padding: '28px',
+              position: 'relative',
+              borderRadius: 'var(--radius-lg)',
+              boxSizing: 'border-box',
+            }}
+          >
+            <button
+              type="button"
+              id="btn-close-venue-editor"
+              onClick={() => setShowVenueEditor(false)}
+              aria-label="Cerrar editor de sede"
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                color: 'var(--text-muted)',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <Home size={22} style={{ color: 'var(--accent-amber)' }} />
+              <h3 style={{ fontSize: '1.3rem', margin: 0, color: 'var(--text-primary)' }}>
+                Ajustar Lugar y Horario • Semana {venueTargetWeek}
+              </h3>
+            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', margin: '0 0 16px 0', lineHeight: 1.4 }}>
+              Configura la sede para esta reunión. Soporta hogares con privacidad blindada, espacios públicos como taquerías o misiones en hospitales, reuniones virtuales o retiros en cabañas.
+            </p>
+
+            <form onSubmit={handleSaveVenueOverride} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {/* Selector de Semana y Horario Especial */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                    Semana de la Temporada
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                    Semana a Ajustar
                   </label>
                   <select
-                    value={nomadicWeek}
-                    onChange={(e) => setNomadicWeek(Number(e.target.value))}
+                    id="venue-target-week-select"
+                    value={venueTargetWeek}
+                    onChange={(e) => {
+                      const w = Number(e.target.value);
+                      handleOpenVenueEditor(w);
+                    }}
                     style={{
                       width: '100%',
-                      padding: '10px 12px',
+                      padding: '8px 10px',
                       backgroundColor: 'var(--bg-primary)',
                       border: '1px solid var(--border-strong)',
                       borderRadius: 'var(--radius-md)',
                       color: 'var(--text-primary)',
-                      fontSize: '0.88rem',
+                      fontSize: '0.86rem',
                     }}
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((w) => (
@@ -3356,174 +4077,406 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                    Tipo de Sede
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                    Horario Especial (Opcional)
                   </label>
-                  <select
-                    value={nomadicVenueType}
-                    onChange={(e) => setNomadicVenueType(e.target.value)}
+                  <input
+                    type="text"
+                    id="venue-time-override-input"
+                    placeholder={`Habitual: ${selectedGroupDetail.hora_habitual || '20:00'}`}
+                    value={venueTimeOverride}
+                    onChange={(e) => setVenueTimeOverride(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '10px 12px',
+                      padding: '8px 10px',
                       backgroundColor: 'var(--bg-primary)',
                       border: '1px solid var(--border-strong)',
                       borderRadius: 'var(--radius-md)',
                       color: 'var(--text-primary)',
-                      fontSize: '0.88rem',
+                      fontSize: '0.86rem',
                     }}
-                  >
-                    <option value="private_home">Hogar Particular (Hogar Anfitrión)</option>
-                    <option value="campus_room">Sala / Auditorio de Macro-Campus</option>
-                    <option value="civic_cafe">Cafetería Cívica / Espacio Cultural</option>
-                    <option value="public_park">Parque Público / Espacio Abierto</option>
-                  </select>
+                  />
                 </div>
               </div>
 
+              {/* Selector de Modalidad Agnóstica (Decisión 2-B Agnóstica / GOLD-353) */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                  Nombre del Lugar o Referencia
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                  Modalidad de Reunión
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+                  {[
+                    { id: 'hogar', label: 'Hogar' },
+                    { id: 'publico', label: 'Público/Misión' },
+                    { id: 'virtual', label: 'Virtual' },
+                    { id: 'foraneo', label: 'Cabañas/Viaje' },
+                  ].map((mode) => (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      id={`btn-venue-mode-${mode.id}`}
+                      onClick={() => setVenueMode(mode.id as any)}
+                      style={{
+                        padding: '8px 4px',
+                        borderRadius: 'var(--radius-sm)',
+                        border: venueMode === mode.id ? '2px solid var(--accent-amber)' : '1px solid var(--border-subtle)',
+                        backgroundColor: venueMode === mode.id ? 'var(--accent-amber-light)' : 'var(--bg-primary)',
+                        color: venueMode === mode.id ? 'var(--accent-amber)' : 'var(--text-secondary)',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                      }}
+                    >
+                      {mode.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Campos dinámicos según modalidad */}
+              {venueMode === 'hogar' && (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                        Familia o Anfitrión
+                      </label>
+                      <input
+                        type="text"
+                        id="venue-host-name-input"
+                        placeholder="Ej. Casa de Doña Martha"
+                        value={venueHostName}
+                        onChange={(e) => setVenueHostName(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          backgroundColor: 'var(--bg-primary)',
+                          border: '1px solid var(--border-strong)',
+                          borderRadius: 'var(--radius-md)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.86rem',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                        Dirección del Hogar
+                      </label>
+                      <input
+                        type="text"
+                        id="venue-custom-address-input"
+                        placeholder="Calle, Número, Colonia"
+                        value={venueCustomAddress}
+                        onChange={(e) => setVenueCustomAddress(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          backgroundColor: 'var(--bg-primary)',
+                          border: '1px solid var(--border-strong)',
+                          borderRadius: 'var(--radius-md)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.86rem',
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: 'var(--accent-emerald)', marginTop: '-4px' }}>
+                    Sellado LFPDPPP: La dirección de hogares familiares se enmascara para visitantes no confirmados.
+                  </div>
+                </>
+              )}
+
+              {venueMode === 'publico' && (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                        Lugar o Institución
+                      </label>
+                      <input
+                        type="text"
+                        id="venue-custom-name-input"
+                        placeholder="Ej. CRESO, Hospital 450, Taquería"
+                        value={venueCustomName}
+                        onChange={(e) => setVenueCustomName(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          backgroundColor: 'var(--bg-primary)',
+                          border: '1px solid var(--border-strong)',
+                          borderRadius: 'var(--radius-md)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.86rem',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                        Ubicación o Punto de Reunión
+                      </label>
+                      <input
+                        type="text"
+                        id="venue-custom-address-input"
+                        placeholder="Ej. Sala de espera / Sucursal Centro"
+                        value={venueCustomAddress}
+                        onChange={(e) => setVenueCustomAddress(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          backgroundColor: 'var(--bg-primary)',
+                          border: '1px solid var(--border-strong)',
+                          borderRadius: 'var(--radius-md)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.86rem',
+                        }}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {venueMode === 'virtual' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                    Enlace de Videollamada (Meet / Zoom)
+                  </label>
+                  <input
+                    type="url"
+                    id="venue-custom-address-input"
+                    placeholder="https://meet.google.com/..."
+                    value={venueCustomAddress}
+                    onChange={(e) => setVenueCustomAddress(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      backgroundColor: 'var(--bg-primary)',
+                      border: '1px solid var(--border-strong)',
+                      borderRadius: 'var(--radius-md)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.86rem',
+                    }}
+                  />
+                </div>
+              )}
+
+              {venueMode === 'foraneo' && (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                        Nombre del Campamento o Cabañas
+                      </label>
+                      <input
+                        type="text"
+                        id="venue-custom-name-input"
+                        placeholder="Ej. Cabañas El Saltito, Sierra de Durango"
+                        value={venueCustomName}
+                        onChange={(e) => setVenueCustomName(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          backgroundColor: 'var(--bg-primary)',
+                          border: '1px solid var(--border-strong)',
+                          borderRadius: 'var(--radius-md)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.86rem',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                        Rango de Fechas
+                      </label>
+                      <input
+                        type="text"
+                        id="venue-retreat-dates-input"
+                        placeholder="Ej. Viernes 14 a Domingo 16 Nov"
+                        value={venueRetreatDates}
+                        onChange={(e) => setVenueRetreatDates(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          backgroundColor: 'var(--bg-primary)',
+                          border: '1px solid var(--border-strong)',
+                          borderRadius: 'var(--radius-md)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.86rem',
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                      Dirección o Kilómetro de Carretera
+                    </label>
+                    <input
+                      type="text"
+                      id="venue-custom-address-input"
+                      placeholder="Carretera Durango-Mazatlán Km 45"
+                      value={venueCustomAddress}
+                      onChange={(e) => setVenueCustomAddress(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        backgroundColor: 'var(--bg-primary)',
+                        border: '1px solid var(--border-strong)',
+                        borderRadius: 'var(--radius-md)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.86rem',
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Referencia de Llegada (Agnóstica) */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                  Referencia de Llegada o Nota de Acceso
                 </label>
                 <input
                   type="text"
-                  required
-                  placeholder={nomadicVenueType === 'private_home' ? 'Ej. Casa Familia González / Hogar de Doña Martha' : 'Ej. Tacos El Pastor Suc. Centro / Café Victoria'}
-                  value={nomadicVenueName}
-                  onChange={(e) => setNomadicVenueName(e.target.value)}
+                  id="venue-arrival-hint-input"
+                  placeholder="Ej. Portón blanco, timbre a la derecha / Tocar interfono"
+                  value={venueArrivalHint}
+                  onChange={(e) => setVenueArrivalHint(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '10px 12px',
+                    padding: '8px 10px',
                     backgroundColor: 'var(--bg-primary)',
                     border: '1px solid var(--border-strong)',
                     borderRadius: 'var(--radius-md)',
                     color: 'var(--text-primary)',
-                    fontSize: '0.88rem',
+                    fontSize: '0.86rem',
                   }}
                 />
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                  Dirección Exacta
+              {/* Enlace Maps / Waze */}
+              {venueMode !== 'virtual' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                    Enlace de Maps o Waze (Opcional)
+                  </label>
+                  <input
+                    type="url"
+                    id="venue-maps-url-input"
+                    placeholder="https://maps.app.goo.gl/..."
+                    value={venueMapsUrl}
+                    onChange={(e) => setVenueMapsUrl(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      backgroundColor: 'var(--bg-primary)',
+                      border: '1px solid var(--border-strong)',
+                      borderRadius: 'var(--radius-md)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.86rem',
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Coordinador de Encuentros Especiales y Fusiones (Decisión 3-B / GOLD-354) */}
+              <div style={{
+                padding: '12px',
+                backgroundColor: 'var(--bg-primary)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+              }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.84rem' }}>
+                  <input
+                    type="checkbox"
+                    id="chk-venue-special-event"
+                    checked={venueIsSpecialEvent}
+                    onChange={(e) => {
+                      const chk = e.target.checked;
+                      setVenueIsSpecialEvent(chk);
+                      if (chk) {
+                        if (venueMode === 'foraneo') setVenueIsRetreat(true);
+                        else setVenueIsJoint(true);
+                      } else {
+                        setVenueIsJoint(false);
+                        setVenueIsRetreat(false);
+                      }
+                    }}
+                    style={{ width: '16px', height: '16px' }}
+                  />
+                  <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+                    Encuentro Especial o Fusión Temporal con otra Célula
+                  </span>
                 </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Calle, Número, Colonia, Durango"
-                  value={nomadicAddress}
-                  onChange={(e) => setNomadicAddress(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    backgroundColor: 'var(--bg-primary)',
-                    border: '1px solid var(--border-strong)',
-                    borderRadius: 'var(--radius-md)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.88rem',
-                  }}
-                />
-                {nomadicVenueType === 'private_home' && (
-                  <div style={{ fontSize: '0.74rem', color: 'var(--accent-emerald)', marginTop: '4px' }}>
-                    <strong>Privacidad Blindada:</strong> Al ser casa particular, la dirección y datos del anfitrión se enmascaran para visitantes públicos y sólo se revelan a miembros confirmados en su pase y calendario.
+
+                {venueIsSpecialEvent && (
+                  <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', cursor: 'pointer' }}>
+                        <input
+                          type="radio"
+                          name="special-event-type"
+                          checked={venueIsJoint}
+                          onChange={() => { setVenueIsJoint(true); setVenueIsRetreat(false); }}
+                        />
+                        <span>Fusión / Convivio con Célula Hermana</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', cursor: 'pointer' }}>
+                        <input
+                          type="radio"
+                          name="special-event-type"
+                          checked={venueIsRetreat}
+                          onChange={() => { setVenueIsRetreat(true); setVenueIsJoint(false); }}
+                        />
+                        <span>Retiro de Fin de Temporada</span>
+                      </label>
+                    </div>
+
+                    {venueIsJoint && (
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '3px' }}>
+                          Nombre de la Célula o Grupo Aliado
+                        </label>
+                        <input
+                          type="text"
+                          id="venue-partner-group-input"
+                          placeholder="Ej. Célula Jóvenes Centro / Varones El Refugio"
+                          value={venuePartnerGroupName}
+                          onChange={(e) => setVenuePartnerGroupName(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '8px 10px',
+                            backgroundColor: 'var(--bg-surface)',
+                            border: '1px solid var(--border-strong)',
+                            borderRadius: 'var(--radius-sm)',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.84rem',
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
 
-              {nomadicVenueType === 'private_home' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                      Nombre del Anfitrión
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ej. Hno. Roberto Gómez"
-                      value={nomadicHostName}
-                      onChange={(e) => setNomadicHostName(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        backgroundColor: 'var(--bg-primary)',
-                        border: '1px solid var(--border-strong)',
-                        borderRadius: 'var(--radius-md)',
-                        color: 'var(--text-primary)',
-                        fontSize: '0.88rem',
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                      Teléfono de Contacto
-                    </label>
-                    <input
-                      type="tel"
-                      placeholder="Ej. 618 123 4567"
-                      value={nomadicHostPhone}
-                      onChange={(e) => setNomadicHostPhone(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        backgroundColor: 'var(--bg-primary)',
-                        border: '1px solid var(--border-strong)',
-                        borderRadius: 'var(--radius-md)',
-                        color: 'var(--text-primary)',
-                        fontSize: '0.88rem',
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                  Enlace de Google Maps (Opcional)
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://maps.app.goo.gl/..."
-                  value={nomadicMapsUrl}
-                  onChange={(e) => setNomadicMapsUrl(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    backgroundColor: 'var(--bg-primary)',
-                    border: '1px solid var(--border-strong)',
-                    borderRadius: 'var(--radius-md)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.88rem',
-                  }}
-                />
+              <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                <button
+                  type="submit"
+                  id="btn-save-venue-override"
+                  className="btn-primary"
+                  style={{ flex: 1, justifyContent: 'center' }}
+                >
+                  Guardar Sede y Preparar WhatsApp
+                </button>
+                <button
+                  type="button"
+                  id="btn-cancel-venue-editor"
+                  onClick={() => setShowVenueEditor(false)}
+                  className="btn-secondary"
+                  style={{ padding: '8px 16px' }}
+                >
+                  Cancelar
+                </button>
               </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                  Notas de Logística o Bienvenida (Opcional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ej. Tocar timbre blanco / Estacionamiento disponible en la esquina"
-                  value={nomadicNotes}
-                  onChange={(e) => setNomadicNotes(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    backgroundColor: 'var(--bg-primary)',
-                    border: '1px solid var(--border-strong)',
-                    borderRadius: 'var(--radius-md)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.88rem',
-                  }}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="btn-primary"
-                style={{ width: '100%', justifyContent: 'center', marginTop: '8px' }}
-              >
-                Guardar Sede en el Itinerario Nómada
-              </button>
             </form>
           </div>
         </div>
@@ -4148,25 +5101,36 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary)' }}>
                   Aprendiz Facilitador que Asume el Liderazgo
                 </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Nombre del aprendiz"
-                  value={fissionApprenticeName}
-                  onChange={(e) => {
-                    const name = e.target.value;
-                    setFissionApprenticeName(name);
-                    setFissionApprenticeId(`apprentice-${name.toLowerCase().trim().replace(/\s+/g, '_')}`);
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    backgroundColor: 'var(--bg-primary)',
-                    border: '1px solid var(--border-strong)',
-                    borderRadius: 'var(--radius-md)',
-                    color: 'var(--text-primary)',
-                  }}
-                />
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    required
+                    readOnly
+                    id="fission-apprentice-input"
+                    placeholder="Toca para seleccionar de los miembros del grupo..."
+                    value={fissionApprenticeName}
+                    style={{
+                      flex: 1,
+                      padding: '10px 12px',
+                      backgroundColor: 'var(--bg-primary)',
+                      border: '1px solid var(--border-strong)',
+                      borderRadius: 'var(--radius-md)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.88rem',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => handleOpenMemberPicker('fission_leader')}
+                  />
+                  <button
+                    type="button"
+                    id="btn-pick-fission-leader"
+                    onClick={() => handleOpenMemberPicker('fission_leader')}
+                    className="btn-secondary"
+                    style={{ padding: '10px 14px', fontSize: '0.82rem', whiteSpace: 'nowrap' }}
+                  >
+                    Seleccionar Miembro
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -4474,22 +5438,13 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
 
                     <button
                       type="button"
-                      onClick={() => { setShowActionDrawer(false); setShowNomadicVenueModal(true); }}
+                      id="btn-drawer-adjust-venue"
+                      onClick={() => { setShowActionDrawer(false); handleOpenVenueEditor(1); }}
                       className="btn-secondary tap-target-44"
                       style={{ justifyContent: 'flex-start', padding: '10px 14px', gap: '8px' }}
                     >
-                      <Home size={16} />
-                      <span style={{ fontSize: '0.84rem' }}>Sede de esta semana</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => { setShowActionDrawer(false); setShowExceptionModal(true); }}
-                      className="btn-secondary tap-target-44"
-                      style={{ justifyContent: 'flex-start', padding: '10px 14px', gap: '8px' }}
-                    >
-                      <Calendar size={16} />
-                      <span style={{ fontSize: '0.84rem' }}>Cambiar Sede esta Semana</span>
+                      <Home size={16} style={{ color: 'var(--accent-amber)' }} />
+                      <span style={{ fontSize: '0.84rem' }}>Ajustar Sede y Calendario</span>
                     </button>
 
                     <button
@@ -4527,6 +5482,20 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
                       <span style={{ fontSize: '0.84rem' }}>{uploadingPhoto ? 'Limpiando...' : 'Subir Foto del Grupo'}</span>
                       <input type="file" accept="image/*" onChange={(e) => { setShowActionDrawer(false); handlePhotoUpload(e); }} style={{ display: 'none' }} />
                     </label>
+
+                    <button
+                      type="button"
+                      id="btn-drawer-season-closure"
+                      onClick={() => {
+                        setShowActionDrawer(false);
+                        setShowSeasonClosureSection(true);
+                      }}
+                      className="btn-secondary tap-target-44"
+                      style={{ justifyContent: 'flex-start', padding: '10px 14px', gap: '8px' }}
+                    >
+                      <GitBranch size={16} style={{ color: '#10B981' }} />
+                      <span style={{ fontSize: '0.84rem' }}>Cierre de Ciclo y Multiplicación</span>
+                    </button>
                   </div>
                 </div>
               )}
@@ -4537,19 +5506,25 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
 
       {/* Modal: Armonizador Celular con Calendario Magno Litúrgico (GOLD-297) */}
       {showHarmonizerModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(15, 17, 21, 0.75)',
-          zIndex: 1000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px',
-        }}>
+        <div
+          id="harmonizer-modal-backdrop"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowHarmonizerModal(false);
+          }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 17, 21, 0.75)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+          }}
+        >
           <div className="surface-card animate-fade-in" style={{
             maxWidth: '650px',
             width: '100%',
@@ -4557,42 +5532,46 @@ export const MemberSilo: React.FC<Props> = ({ isLeaderView = false }) => {
             position: 'relative',
           }}>
             <button
+              type="button"
+              id="btn-close-harmonizer-modal"
               onClick={() => setShowHarmonizerModal(false)}
               style={{
                 position: 'absolute',
                 top: '16px',
                 right: '16px',
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-muted)',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '6px',
+                color: 'var(--text-secondary)',
                 cursor: 'pointer',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                padding: '6px 12px',
+                zIndex: 20,
               }}
               aria-label="Cerrar modal"
             >
-              <X size={20} />
+              Cerrar
             </button>
             <CellHarmonizer
               cellName={selectedGroupDetail?.nombre_publico || 'Nuestra Célula'}
+              cellWeekday={selectedGroupDetail?.dia_habitual ?? 4}
               cellDay="Jueves"
-              cellTime="19:30"
-              upcomingGeneralEvents={[
-                {
-                  id: 'event-lit-1',
-                  title: 'Congreso de Jóvenes y Familias 2026',
-                  date: '2026-10-15',
-                  time: '19:00',
-                  location: 'Sede Central Durango (Auditorio)',
-                  category: 'magno',
-                },
-                {
-                  id: 'event-lit-2',
-                  title: 'Retiro Fraternal Femenino (Tito 2)',
-                  date: '2026-11-06',
-                  time: '18:00',
-                  location: 'Campamento El Saltito',
-                  category: 'segmentado_mujeres',
-                },
-              ]}
+              cellTime={selectedGroupDetail?.hora_habitual || '19:30'}
+              onHarmonizationSelected={(decision) => {
+                const label = decision === 'join_general' ? 'Sumados en cuerpo al evento' : decision === 'offset_day' ? 'Reunión movida 24h' : 'Reunión regular en sede';
+                setLeaderHarmonizedStatus(label);
+                setSiloToast('Decisión de integración guardada para el grupo.');
+              }}
+              onJointDecisionChange={(isJoint, sisterGroup) => {
+                if (isJoint) {
+                  setLeaderHarmonizedStatus(`Carne Asada / Convivio con ${sisterGroup || 'Célula Hermana'}`);
+                  setSiloToast('Grupo integrado a Carne Asada / Convivio fraternal.');
+                } else {
+                  setLeaderHarmonizedStatus('Reunión regular en sede habitual');
+                  setSiloToast('Reunión regular mantenida en sede.');
+                }
+              }}
             />
           </div>
         </div>

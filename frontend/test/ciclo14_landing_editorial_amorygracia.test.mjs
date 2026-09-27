@@ -18,11 +18,11 @@ describe('Pórtico — Portal en Desarrollo: Software Ligero para Organizar Grup
   // Arquitectura Ultra-Simple y Monolito Vanilla (< 14 KB)
   // ==========================================================================
   describe('Arquitectura Ultra-Simple y Documento Fundacional', () => {
-    it('docs/index.html debe existir, ser legible y medir menos de 14 KB', () => {
+    it('docs/index.html debe existir, ser legible y medir menos de 18 KB', () => {
       assert.ok(fs.existsSync(indexPath), 'docs/index.html debe existir');
       const stat = fs.statSync(indexPath);
       assert.ok(stat.size > 1500, 'El archivo debe contener el marcado esencial');
-      assert.ok(stat.size < 14000, `El archivo pesa ${stat.size} bytes, debe ser ultra-ligero (< 14 KB)`);
+      assert.ok(stat.size < 18000, `El archivo pesa ${stat.size} bytes, debe ser ultra-ligero (< 18 KB con modal nativo)`);
     });
 
     it('debe estructurarse como una sola vista sin scripts externos ni trackers', () => {
@@ -49,9 +49,9 @@ describe('Pórtico — Portal en Desarrollo: Software Ligero para Organizar Grup
   });
 
   // ==========================================================================
-  // "Portal en desarrollo" y Cero "Portal en vivo"
+  // "Portal en desarrollo" y Enlace al Dossier Canónico
   // ==========================================================================
-  describe('Estado del Portal: "Portal en desarrollo" sin "Portal en vivo"', () => {
+  describe('Estado del Portal: "Portal en desarrollo" y Enlace al Dossier Canónico', () => {
     it('debe indicar claramente que es un portal en desarrollo', () => {
       assert.match(content, /portal en desarrollo/i, 'Debe indicar que es un portal en desarrollo');
     });
@@ -60,10 +60,11 @@ describe('Pórtico — Portal en Desarrollo: Software Ligero para Organizar Grup
       assert.doesNotMatch(content, /portal en vivo/i, 'No debe contener la frase "portal en vivo"');
     });
 
-    it('debe enlazar al entorno de pruebas en Cloudflare Tunnels', () => {
-      assert.match(content, /habitat-cleaning-benz-syndication\.trycloudflare\.com/, 'Debe enlazar al entorno de pruebas');
+    it('debe enlazar al Dossier Pastoral en PDF de 15 páginas y purgar enlaces muertos', () => {
+      assert.match(content, /href="Dossier_Pastoral_Portico\.pdf"/, 'Debe enlazar al dossier PDF canónico');
       assert.match(content, /target="_blank"/, 'Debe abrir en nueva pestaña');
       assert.match(content, /rel="noopener noreferrer"/, 'Debe proteger la navegación externa');
+      assert.doesNotMatch(content, /trycloudflare\.com/, 'Cero enlaces muertos a túneles caídos de Cloudflare');
     });
   });
 
@@ -83,19 +84,33 @@ describe('Pórtico — Portal en Desarrollo: Software Ligero para Organizar Grup
   });
 
   // ==========================================================================
-  // Formulario Oficial de GitHub para Recibir Información
+  // Formulario de Contacto Nativo con Web3Forms y Salvaguardas Anti-Bot
   // ==========================================================================
-  describe('Formulario Oficial de GitHub para Recibir Información', () => {
-    it('debe existir la plantilla oficial de Issue Form en .github/ISSUE_TEMPLATE/solicitud.yml', () => {
-      assert.ok(fs.existsSync(issueFormPath), '.github/ISSUE_TEMPLATE/solicitud.yml debe existir');
-      const formContent = fs.readFileSync(issueFormPath, 'utf-8');
-      assert.match(formContent, /name:\s*Solicitar información/i, 'Debe tener nombre descriptivo');
-      assert.match(formContent, /ciudad/i, 'Debe capturar la ciudad');
-      assert.match(formContent, /contacto/i, 'Debe capturar medio de contacto');
+  describe('Formulario de Contacto Nativo con Web3Forms y Salvaguardas Anti-Bot', () => {
+    it('debe contener un modal nativo <dialog id="contactModal"> con botón de activación', () => {
+      assert.match(content, /<dialog\s+id="contactModal"/, 'Debe existir el modal dialog nativo');
+      assert.match(content, /id="openContactBtn"/, 'Debe existir el botón para abrir el modal');
+      assert.match(content, /openContactModal\(\)/, 'Debe tener la función para abrir el modal');
     });
 
-    it('debe enlazar directamente al formulario oficial de GitHub en la landing', () => {
-      assert.match(content, /github\.com\/memoestefani\/portico\/issues\/new\?template=solicitud\.yml/, 'Debe enlazar al formulario oficial');
+    it('debe enviar a Web3Forms mediante access_key oficial anónimo', () => {
+      assert.match(content, /action="https:\/\/api\.web3forms\.com\/submit"/, 'Endpoint oficial de Web3Forms');
+      assert.match(content, /name="access_key"\s+value="d173722b-932e-4f7f-ab53-db38c7abdaaa"/, 'Token anónimo oficial de Pórtico');
+      assert.doesNotMatch(content, /memo\.estefani@gmail\.com/i, 'Cero exposición del correo del usuario');
+    });
+
+    it('debe incluir trampa honeypot invisible anti-bot', () => {
+      assert.match(content, /name="botcheck"/, 'Debe existir el campo botcheck');
+      assert.match(content, /display:\s*none/, 'El campo honeypot debe ser invisible');
+    });
+
+    it('debe implementar time-gating anti-bot en el manejador asíncrono', () => {
+      assert.match(content, /modalOpenedAt/, 'Debe registrar la apertura del modal');
+      assert.match(content, /1500/, 'Debe filtrar envíos instantáneos menores a 1.5s');
+    });
+
+    it('no debe quedar redirección arcaica a GitHub Issues en la landing', () => {
+      assert.doesNotMatch(content, /solicitud\.yml/, 'La landing no debe enviar al usuario a llenar issues de GitHub');
     });
   });
 

@@ -47,11 +47,12 @@ describe('Pórtico OS v3.5 - Ciclo 11: Dossier Pastoral Ejecutivo Automatizado y
       assert.ok(protectionMatches && protectionMatches.length >= 13, 'Debe haber tarjetas de Salvaguarda Eclesial');
     });
 
-    it('debe honrar la identidad noble de Amor y Gracia Durango y el pastoreo de Josh sin emojis', () => {
+    it('debe ser un dossier pastoral universalizado sin referencias locales ni emojis', () => {
       const content = fs.readFileSync(htmlPath, 'utf-8');
-      assert.match(content, /Amor y Gracia/i, 'Debe incluir el nombre de la congregación');
-      assert.match(content, /Durango/i, 'Debe referenciar a Durango');
-      assert.match(content, /Pastor Josh/i, 'Debe estar dedicado al Pastor Josh');
+      assert.doesNotMatch(content, /Amor y Gracia/i, 'No debe incluir el nombre particular de la congregación');
+      assert.doesNotMatch(content, /\bJosh\b/i, 'No debe incluir nombres particulares');
+      assert.doesNotMatch(content, /Gayosso/i, 'No debe incluir apellidos de personas');
+      assert.match(content, /Pastor Principal/i, 'Debe referenciar al Pastor Principal de forma universal');
       assert.doesNotMatch(content, /Lorem ipsum/i, 'Cero placeholders o textos simulados');
       assert.doesNotMatch(content, /[\u{1F300}-\u{1F9FF}]/u, 'Cero emojis en la plantilla editorial');
     });

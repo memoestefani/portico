@@ -10,12 +10,13 @@
 
 | Componente | Estatus | URL / Endpoint | Función |
 | :--- | :---: | :--- | :--- |
-| **Landing Page Pública (GitHub Pages)** | 🟢 Live | [`https://memoestefani.github.io/portico/`](https://memoestefani.github.io/portico/) | Carta Pastoral Editorial (<12 KB Vanilla Single-Fold) con caso vivo de Amor y Gracia Durango y Pastor Josh. |
-| **Aplicación Operativa (Cloudflare Tunnel)** | 🟢 Live | `https://habitat-cleaning-benz-syndication.trycloudflare.com` | Acceso completo para Pastor Josh, diáconos y miembros en sus teléfonos. |
-| **Backend & Servidor Web (Rust Axum)** | 🟢 Live | `http://127.0.0.1:3000` | Motor HTTP de alto rendimiento sirviendo API y frontend embebido `dist/`. |
-| **Persistencia Database-per-Tenant** | 🟢 Live | `backend/data/tenants/1fb2fd67-6b35-425c-967c-5405af97b401.db` | Base física SQLite aislada de Amor y Gracia Durango. |
-| **Salida Soberana Dual (.db + CSV)** | 🟢 Live | `/api/pastor/export-sovereign-archive` | Botón táctil en `PastorHud` y exportación pastoral en `ElderDesk` ("No Strings Attached"). |
-| **Pruebas Automatizadas** | 🟢 100% | **321 tests verdes** (284 frontend, 37 backend) | Certificación continua de cero regresiones, cero mockups y cero variables rotas. |
+| **Landing Page Pública (GitHub Pages)** | 🟢 Live | [`https://memoestefani.github.io/portico/`](https://memoestefani.github.io/portico/) | Carta Pastoral Editorial con modal nativo de contacto y acceso a Dossier en PDF. |
+| **Dossier Pastoral Ejecutivo (PDF)** | 🟢 Live | [`docs/Dossier_Pastoral_Portico.pdf`](file:///c:/Users/52331/Documents/Proyectos/portico/docs/Dossier_Pastoral_Portico.pdf) | Dossier de 15 láminas con el modelo mental y arquitectura de escala. |
+| **Formulario de Contacto (Web3Forms)** | 🟢 Live | `https://api.web3forms.com/submit` | Envíos anónimos seguros vía token `d173722b-...` con honeypot y time-gating. |
+| **Backend & Servidor Web (Rust Axum)** | 🟢 Local | `http://127.0.0.1:3000` | Motor HTTP de alto rendimiento sirviendo API y frontend embebido `dist/`. |
+| **Persistencia Database-per-Tenant** | 🟢 Local | `backend/data/tenants/*.db` | Base física SQLite aislada por comunidad sin mezcla de datos. |
+| **Salida Soberana Dual (.db + CSV)** | 🟢 Live | `/api/pastor/export-sovereign-archive` | Exportación pastoral soberana completa sin dependencias de terceros. |
+| **Pruebas Automatizadas** | 🟢 100% | **324 tests verdes** (287 frontend, 37 backend) | Certificación continua de cero regresiones, cero mockups y cero debris. |
 
 ---
 
@@ -63,7 +64,7 @@ cargo test --manifest-path backend/Cargo.toml
 
 #### Paso 3: Reflejo en Vivo a través del Túnel
 * Dado que el frontend compilado se ubica en `frontend/dist/`, **el servidor Axum sirve los archivos nuevos inmediatamente**.
-* El Pastor Josh o tú solo requieren refrescar la página en su teléfono (`https://habitat-cleaning-benz-syndication.trycloudflare.com`) y el cambio estará visible al instante.
+* Al recargar la página en el navegador local (`http://127.0.0.1:3000`) o en la URL del túnel que levantes, el cambio estará visible al instante.
 * Si el cambio fue en el código compilado de Rust, simplemente reiniciamos el binario `portico-server.exe` (tarda menos de 1 segundo).
 
 #### Paso 4: Sanitización de Debris y Respaldo en GitHub
@@ -128,7 +129,7 @@ npm run dev
 
 ## 📄 5. Protocolo de Comunicación Pastoral y Generación del Dossier en PDF
 
-Para líderes que no tienen por qué lidiar con enlaces web ni servidores (como el Pastor Josh), Pórtico OS incluye herramientas nativas para generar en 2 segundos un **Dossier Pastoral Ejecutivo en PDF** de 7 páginas en formato horizontal (`Letter Landscape`), listo para enviar por WhatsApp o imprimir en papel físico.
+Pórtico incluye herramientas nativas para generar en 2 segundos un **Dossier Pastoral Ejecutivo en PDF** de **15 láminas** en formato vertical (`Letter Portrait`), listo para enviar por WhatsApp o imprimir en papel físico, explicando el modelo mental de escala bíblica (1 grupo = 10-12 personas; 1 diácono = 5-6 grupos; 1 anciano = 8-10 diáconos; escala de 300 a 25,000 en 5 macro-sedes).
 
 ### Generación en 2 Pasos (Cero Dependencias de Node.js):
 
@@ -137,21 +138,31 @@ Para líderes que no tienen por qué lidiar con enlaces web ni servidores (como 
 cd C:\Users\52331\Documents\Proyectos\portico
 powershell -ExecutionPolicy Bypass -File .\tools\capturar_pantallas.ps1
 ```
-*(Captura las 6 superficies locales en resolución fija de 1280x780 sin barras de navegador y las guarda en `docs/assets/dossier/`).*
+*(Captura las superficies locales en modo claro y las guarda en `docs/assets/dossier/`).*
 
-#### 2. Compilar el PDF editorial para Josh:
+#### 2. Compilar el PDF editorial:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\tools\generar_dossier.ps1
 ```
-*(Utiliza el motor nativo de Microsoft Edge Headless preinstalado en Windows y genera `docs/Dossier_Pastoral_Portico_Amor_y_Gracia.pdf` de ~1.1 MB listo para compartir por WhatsApp).*
+*(Utiliza el motor nativo de Microsoft Edge Headless preinstalado en Windows y genera la copia universal `docs/Dossier_Pastoral_Portico.pdf` y la copia de archivo histórico).*
 
 ---
 
-## 🚀 6. Próxima Etapa: Transición de Quick Tunnel a Dominio Fijo
+## 📬 6. Servicio de Contacto Soberano con Web3Forms
 
-Cuando tú y Josh decidan dar el paso a una URL permanente (por ejemplo `ayg-grupos.com` o el dominio que Josh recupere):
-1. Se compra o agrega el dominio en tu cuenta de Cloudflare.
-2. En Zero Trust se crea el túnel con nombre (`portico-amorygracia`).
-3. Se copia el `TUNNEL_TOKEN` al archivo `.env`.
-4. Se ejecuta `docker compose up -d` y el sistema queda corriendo como servicio desatendido 24/7 sin ventanas de terminal abiertas.
+Para permitir que líderes y comunidades interesadas se comuniquen sin exponer la dirección personal de correo electrónico en repositorios públicos:
+1. **Token Público Anónimo:** Se utiliza el token `d173722b-932e-4f7f-ab53-db38c7abdaaa` configurado en Web3Forms.
+2. **Privacidad Garantizada:** El correo receptor (`memo.estefani@gmail.com`) vive exclusivamente en los servidores de Web3Forms y nunca se escribe en el código, HTML ni en commits de Git.
+3. **Protección Anti-Bot Doble:** 
+   - Campo trampa Honeypot invisible (`name="botcheck"`).
+   - Barrera temporal por *time-gating* que descarta envíos mecánicos efectuados en menos de 1.5 segundos.
+
+---
+
+## 🚀 7. Transición a Dominio Fijo y Despliegue en Servidor
+
+Cuando se requiera levantar el túnel permanente o alojar en servidor propio:
+1. En Cloudflare Zero Trust se crea el túnel con nombre (`portico-produccion`).
+2. Se copia el `TUNNEL_TOKEN` al archivo `.env`.
+3. Se ejecuta `docker compose up -d` y el sistema queda corriendo 24/7 sin ventanas de terminal abiertas.
 

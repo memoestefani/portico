@@ -25,6 +25,7 @@ if (-not (Test-Path $dossiersDir)) {
 }
 
 $canonicalPdfPath = Join-Path $PSScriptRoot "..\docs\Dossier_Pastoral_Portico_Amor_y_Gracia.pdf"
+$canonicalUniversalPdfPath = Join-Path $PSScriptRoot "..\docs\Dossier_Pastoral_Portico.pdf"
 
 if ([string]::IsNullOrWhiteSpace($OutputPdf)) {
     $todayStr = (Get-Date).ToString("yyyy-MM-dd")
@@ -111,7 +112,7 @@ $argsList = @(
     $inputUri
 )
 
-$proc = Start-Process -FilePath $edgeExe -ArgumentList $argsList -Wait -PassThru -WindowStyle Hidden
+Start-Process -FilePath $edgeExe -ArgumentList $argsList -Wait -WindowStyle Hidden
 
 # Limpiar perfil temporal
 if (Test-Path $tempProfile) {
@@ -124,12 +125,14 @@ if (Test-Path $resolvedOutputPdf) {
     $sizeMb = [math]::Round($fileInfo.Length / 1MB, 2)
     
     Copy-Item -Path $resolvedOutputPdf -Destination $canonicalPdfPath -Force
+    Copy-Item -Path $resolvedOutputPdf -Destination $canonicalUniversalPdfPath -Force
     
     Write-Host ""
     Write-Host "============================================================" -ForegroundColor Green
     Write-Host " [EXITO] Dossier Pastoral generado correctamente!" -ForegroundColor Green
-    Write-Host " Archivo Historico: $resolvedOutputPdf" -ForegroundColor Green
-    Write-Host " Copia Canonica:    $canonicalPdfPath" -ForegroundColor Green
+    Write-Host " Archivo Historico:  $resolvedOutputPdf" -ForegroundColor Green
+    Write-Host " Copia Personalizada: $canonicalPdfPath" -ForegroundColor Green
+    Write-Host " Copia Universal:     $canonicalUniversalPdfPath" -ForegroundColor Green
     Write-Host " Peso: ${sizeKb} KB (${sizeMb} MB)" -ForegroundColor Green
     Write-Host "============================================================" -ForegroundColor Green
     Write-Host " Listo para adjuntar y enviar por WhatsApp a Pastor Josh Gayosso." -ForegroundColor Cyan

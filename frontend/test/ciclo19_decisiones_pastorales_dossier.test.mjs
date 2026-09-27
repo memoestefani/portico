@@ -39,7 +39,9 @@ describe('Pórtico OS - Ciclo 19: Las 10 Decisiones Pastorales, Modo Claro Edito
     it('dossier_pastoral.html debe usar la paleta editorial clara y estar libre de etiquetas arcaicas', () => {
       assert.ok(dossierHtmlCode.includes('--bg-cream: #FAF8F5;'), 'Falta paleta crema en dossier HTML');
       assert.ok(!dossierHtmlCode.startsWith('3'), 'No debe haber números residuales al inicio del documento');
-      assert.ok(dossierHtmlCode.includes('Pastor Josh Gayosso'), 'Debe identificar formalmente al Pastor Josh Gayosso');
+      assert.ok(!dossierHtmlCode.includes('Josh Gayosso'), 'El dossier universalizado no debe incluir Josh Gayosso');
+      assert.ok(!dossierHtmlCode.includes('Amor y Gracia'), 'El dossier universalizado no debe incluir Amor y Gracia');
+      assert.ok(dossierHtmlCode.includes('Pastor Principal') || dossierHtmlCode.includes('Pórtico'), 'Debe identificar formalmente el pastoreo de Pórtico');
     });
   });
 

@@ -138,7 +138,7 @@ cd frontend
 npm test
 npm run build
 ```
-* **284 pruebas pasando (0 fallas en 156 suites):** 
+* **287 pruebas pasando (0 fallas en 156 suites):** 
   * Ciclo 2 (Sobriedad y Rendimiento)
   * Ciclo 3 (Decisiones Canónicas)
   * Ciclo 4 (Gobernanza y Branding Noble)

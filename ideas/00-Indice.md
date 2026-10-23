@@ -29,6 +29,7 @@
 | `24-portico-plan-accion-checklist-radar-cuidado-ergonomia-v3.8.md` | Plan táctico y checklist maestro para Radar de Cuidado y Pastoreo, Calm Tech, Triaje Inbox Zero, Maker-Checker Conciliar y Paleta Santuario y Olivo (GOLD-340 a GOLD-347) | Redefinir reglas de negocio |
 | `25-portico-plan-accion-checklist-busqueda-miembros-asignacion-v3.9.md` | Plan táctico y checklist de búsqueda de miembros acotada a la célula, Bottom Sheet táctil y asignación directa optimista (GOLD-349 a GOLD-351) | Redefinir reglas de negocio |
 | `26-portico-plan-accion-checklist-logistica-agnostica-sedes-v3.10.md` | Plan táctico y checklist maestro para logística celular agnóstica, edición de doble puerta exclusiva del líder, sedes flexibles y WhatsApp 1-tap (GOLD-352 a GOLD-355) | Redefinir reglas de negocio |
+| `27-portico-analisis-moat-economia-tercer-espacio-cenas-comunidad.md` | Análisis estratégico Moat: economía del Tercer Espacio, cenas de 8, hospitalidad a recién llegados y la iglesia como antídoto a la soledad urbana | Reemplazar manual de doctrina |
 | `DOSSIER-064` (`research`) | Benchmarks del universo de GitHub para las 10 decisiones de backend/dominio (GOLD-201 a GOLD-210) | Reemplazar arquitectura local |
 | `DOSSIER-066` (`research`) | Benchmarks del universo de GitHub para las 15 decisiones de UI/UX, ergonomía Apple y Triada (GOLD-215 a GOLD-229) | Reemplazar arquitectura local |
 | `DOSSIER-067` (`research`) | Benchmarks del universo de GitHub para sobriedad, sin jargon y calendario cristiano (GOLD-230 a GOLD-239) | Reemplazar arquitectura local |

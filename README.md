@@ -199,3 +199,11 @@ Abra el navegador en `http://localhost:5173/` para explorar las superficies ecle
 4. **Consejo de Ancianos (`ElderDesk`):** Consejería pastoral, gestión de ruteos anti-colisión por sector y Servidores Veteranos.
 5. **HUD Pastoral (`PastorHud`):** 5 paneles serenos, consolidación pastoral con veto de ruteos y cobertura territorial de 100 a 10,000 miembros.
 6. **Consola HQ (`OperatorHq`):** Auditoría soberana con aislamiento físico de base de datos por congregación.
+
+---
+
+## ⚡ Pendientes para Futuras Iteraciones (Roadmap & Arbitraje Epistémico)
+
+1. **Calibración Contextual de Dunbar (Arbitraje Epistémico Lindenfors 2021, DOI: `10.1098/rsbl.2021.0158`):**
+   * *Hallazgo:* El reanálisis bayesiano demuestra que no existe un límite cognitivo universal rígido de 150 miembros (intervalo de confianza: 2 a 520).
+   * *Acción futura:* Sustituir el veto rígido de 150 miembros en fisión celular por un umbral blando calibrable según la densidad del diaconado y la carga relacional del campus, evitando rigideces innecesarias.

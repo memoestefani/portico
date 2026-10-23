@@ -1,0 +1,47 @@
+notas_entrevistas = [
+    "Entrevista anfitrión A: 'Si la gente tiene que crearse una cuenta con contraseña antes de saber a dónde ir, el 60% deserta en el camino.'",
+    "Entrevista pastor B: 'Las mejores conversaciones ocurren alrededor de la comida cuando la mesa tiene entre 6 y 8 personas; con más de 12 se arman grupitos aislados.'",
+]
+
+[[queja]]
+id = "SCUTTLE-COM-001"
+incumbente_id = "Meetup / Eventbrite"
+fuente = "Entrevistas a organizadores comunitarios y foros de usuarios"
+dolor_textual = "Comisiones extractivas de 10% por boleto y suscripción obligatoria al anfitrión aunque asistan pocas personas"
+contradiccion_marketing = "Se promocionan como facilitadores de comunidad pero penalizan financieramente las mesas pequeñas y reuniones recurrentes."
+severidad = "Alta"
+palabras_clave_mimetismo = [
+    "COMISION",
+    "COMISIÓN",
+    "SUSCRIPCION",
+    "BOLETO",
+    "PAGO_POR_EVENTO",
+]
+
+[[queja]]
+id = "SCUTTLE-COM-002"
+incumbente_id = "Timeleft / Cenas con Desconocidos"
+fuente = "Feedback de comensales urbanos"
+dolor_textual = "Alta tasa de cancelación de última hora (no-shows 40%) y frialdad transaccional en el emparejamiento con desconocidos"
+contradiccion_marketing = "Venden conexión profunda pero operan como una agencia de citas ciegas transaccional sin ritual de entrada cálido."
+severidad = "Fatal"
+palabras_clave_mimetismo = [
+    "NO_SHOW",
+    "MATCH_ALGORITMICO",
+    "MATCHING",
+    "DESCONOCIDOS",
+]
+
+[[queja]]
+id = "SCUTTLE-COM-003"
+incumbente_id = "Mobilizon / Nextcloud Circles"
+fuente = "Auditoría de usabilidad comunitaria"
+dolor_textual = "Inoperabilidad para usuarios no técnicos: exige gestión de servidores o llaves federadas complejas para confirmar asistencia"
+contradiccion_marketing = "Prometen soberanía digital pero imponen barreras cognitivas insalvables para la madre de familia o el pastor de barrio."
+severidad = "Media"
+palabras_clave_mimetismo = [
+    "FEDERACION",
+    "FEDERACIÓN",
+    "AUTOHOSPEDAJE",
+    "SYSADMIN",
+]
